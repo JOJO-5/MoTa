@@ -9,5 +9,10 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^1.4.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "jsdom": "^24.0.0"
   }
 }
