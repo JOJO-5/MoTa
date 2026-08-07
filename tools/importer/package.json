@@ -1,0 +1,21 @@
+{
+  "name": "@modern-mota/importer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "mota-import": "./src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "acorn": "^8.11.0"
+  },
+  "devDependencies": {
+    "@types/acorn": "^6.0.0",
+    "tsx": "^4.7.0",
+    "vitest": "^1.4.0"
+  }
+}

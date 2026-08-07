@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@modern-mota/data": ["../../packages/data/src"],
+      "@modern-mota/data/*": ["../../packages/data/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "../../packages/data/src/**/*.ts"]
+}
