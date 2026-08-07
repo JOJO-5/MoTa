@@ -1,0 +1,2516 @@
+{
+  "greenSlime": {
+    "name": "绿精灵",
+    "hp": 15,
+    "atk": 2,
+    "def": 0,
+    "money": 0,
+    "exp": 1,
+    "point": 0,
+    "special": 0
+  },
+  "redSlime": {
+    "name": "红色史莱姆",
+    "hp": 45,
+    "atk": 5,
+    "def": 1,
+    "money": 2,
+    "exp": 1,
+    "point": 0,
+    "special": [],
+    "value": null
+  },
+  "blackSlime": {
+    "name": "大史莱姆",
+    "hp": 90,
+    "atk": 25,
+    "def": 10,
+    "money": 7,
+    "exp": 1,
+    "point": 0,
+    "special": 0
+  },
+  "slimelord": {
+    "name": "史莱姆王",
+    "hp": 250,
+    "atk": 120,
+    "def": 55,
+    "money": 13,
+    "exp": 2,
+    "point": 0,
+    "special": []
+  },
+  "bat": {
+    "name": "蝙蝠",
+    "hp": 30,
+    "atk": 4,
+    "def": 0,
+    "money": 1,
+    "exp": 1,
+    "point": 0,
+    "special": []
+  },
+  "bigBat": {
+    "name": "大蝙蝠",
+    "hp": 65,
+    "atk": 40,
+    "def": 25,
+    "money": 6,
+    "exp": 1,
+    "point": 0,
+    "special": [
+      4
+    ]
+  },
+  "redBat": {
+    "name": "血蝙蝠",
+    "hp": 230,
+    "atk": 165,
+    "def": 90,
+    "money": 21,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      5
+    ]
+  },
+  "vampire": {
+    "name": "冥灵魔王",
+    "hp": 888,
+    "atk": 888,
+    "def": 888,
+    "money": 888,
+    "exp": 888,
+    "point": 0,
+    "special": [
+      6
+    ],
+    "n": 8
+  },
+  "skeleton": {
+    "name": "骷髅",
+    "hp": 50,
+    "atk": 70,
+    "def": 0,
+    "money": 6,
+    "exp": 1,
+    "point": 0,
+    "special": 0
+  },
+  "skeletonCaptain": {
+    "name": "骷髅队长",
+    "hp": 510,
+    "atk": 230,
+    "def": 10,
+    "money": 21,
+    "exp": 3,
+    "point": 0,
+    "special": 0
+  },
+  "zombie": {
+    "name": "丧尸",
+    "hp": 240,
+    "atk": 60,
+    "def": 15,
+    "money": 10,
+    "exp": 2,
+    "point": 0,
+    "special": 0
+  },
+  "zombieKnight": {
+    "name": "丧尸士兵",
+    "hp": 610,
+    "atk": 330,
+    "def": 110,
+    "money": 36,
+    "exp": 4,
+    "point": 0,
+    "special": 0
+  },
+  "rock": {
+    "name": "石怪",
+    "hp": 30,
+    "atk": 55,
+    "def": 0,
+    "money": 9,
+    "exp": 1,
+    "point": 0,
+    "special": [
+      3
+    ]
+  },
+  "bluePriest": {
+    "name": "水术师",
+    "hp": 100,
+    "atk": 10,
+    "def": 0,
+    "money": 5,
+    "exp": 1,
+    "point": 0,
+    "special": [
+      2
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "water",
+        "loc": "hero"
+      }
+    ]
+  },
+  "redPriest": {
+    "name": "炎术师",
+    "hp": 540,
+    "atk": 40,
+    "def": 110,
+    "money": 26,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      2,
+      18
+    ],
+    "repulse": 50,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "fire1"
+      }
+    ]
+  },
+  "brownWizard": {
+    "name": "风术师",
+    "hp": 910,
+    "atk": 100,
+    "def": 330,
+    "money": 55,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      2
+    ],
+    "value": null,
+    "range": 2,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "wind1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "redWizard": {
+    "name": "赤炎大法师",
+    "hp": 1145,
+    "atk": 120,
+    "def": 480,
+    "money": 65,
+    "exp": 7,
+    "point": 0,
+    "special": [
+      2,
+      18
+    ],
+    "value": null,
+    "zoneSquare": false,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "fire2",
+        "loc": "hero"
+      }
+    ],
+    "repulse": 100
+  },
+  "swordsman": {
+    "name": "剑兵",
+    "hp": 210,
+    "atk": 110,
+    "def": 50,
+    "money": 14,
+    "exp": 2,
+    "point": 0,
+    "special": [
+      4
+    ]
+  },
+  "soldier": {
+    "name": "不死骷髅兵",
+    "hp": 1210,
+    "atk": 1450,
+    "def": 600,
+    "money": 33,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      32
+    ],
+    "afterBattle": [
+      {
+        "type": "animate",
+        "name": "Recovery",
+        "async": true
+      },
+      {
+        "type": "sleep",
+        "time": 500,
+        "noSkip": true
+      },
+      {
+        "type": "setBlock",
+        "number": "ghostSoldier",
+        "time": 0
+      },
+      {
+        "type": "waitAsync",
+        "excludeAnimates": true
+      }
+    ]
+  },
+  "yellowKnight": {
+    "name": "骑士",
+    "hp": 180,
+    "atk": 35,
+    "def": 5,
+    "money": 8,
+    "exp": 1,
+    "point": 0,
+    "special": [
+      7
+    ]
+  },
+  "redKnight": {
+    "name": "近卫骑士",
+    "hp": 1130,
+    "atk": 750,
+    "def": 630,
+    "money": 66,
+    "exp": 7,
+    "point": 0,
+    "special": [
+      7,
+      28
+    ]
+  },
+  "darkKnight": {
+    "name": "灵武士",
+    "hp": 1100,
+    "atk": 1145,
+    "def": 910,
+    "money": 33,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      32
+    ],
+    "afterBattle": [
+      {
+        "type": "animate",
+        "name": "Recovery",
+        "async": true
+      },
+      {
+        "type": "sleep",
+        "time": 500,
+        "noSkip": true
+      },
+      {
+        "type": "setBlock",
+        "number": "soldier",
+        "time": 0
+      },
+      {
+        "type": "waitAsync",
+        "excludeAnimates": true
+      }
+    ]
+  },
+  "blueKnight": {
+    "name": "狂暴骑士",
+    "hp": 220,
+    "atk": 170,
+    "def": 120,
+    "money": 24,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      7
+    ]
+  },
+  "goldSlime": {
+    "name": "黄头怪",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "poisonSkeleton": {
+    "name": "邪气骷髅",
+    "hp": 740,
+    "atk": 410,
+    "def": 25,
+    "money": 33,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      13
+    ]
+  },
+  "poisonBat": {
+    "name": "毒蝙蝠",
+    "hp": 950,
+    "atk": 672,
+    "def": 554,
+    "money": 58,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      4,
+      12
+    ]
+  },
+  "skeletonPriest": {
+    "name": "骷髅术师",
+    "hp": 350,
+    "atk": 70,
+    "def": 15,
+    "money": 31,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      2,
+      31
+    ],
+    "value": 20,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "darkness1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "skeletonKing": {
+    "name": "骷髅王",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "evilHero": {
+    "name": "迷失勇者",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "demonPriest": {
+    "name": "魔神法师",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "goldHornSlime": {
+    "name": "金角怪",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "silverSlime": {
+    "name": "银头怪",
+    "hp": 100,
+    "atk": 120,
+    "def": 0,
+    "money": 15,
+    "exp": 0,
+    "point": 0,
+    "special": 14
+  },
+  "whiteHornSlime": {
+    "name": "尖角怪",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "redSwordsman": {
+    "name": "剑王",
+    "hp": 1090,
+    "atk": 1440,
+    "def": 650,
+    "money": 54,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      6
+    ],
+    "value": null,
+    "n": 4
+  },
+  "poisonZombie": {
+    "name": "毒丧尸",
+    "hp": 770,
+    "atk": 640,
+    "def": 205,
+    "money": 52,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      12
+    ]
+  },
+  "octopus": {
+    "name": "巨大八爪鱼",
+    "hp": 1920,
+    "atk": 2271,
+    "def": 600,
+    "money": 350,
+    "exp": 40,
+    "point": 0,
+    "special": 0,
+    "bigImage": "dragon_1.png",
+    "notBomb": true
+  },
+  "princessEnemy": {
+    "name": "假公主",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "angel": {
+    "name": "天使",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "elemental": {
+    "name": "元素生物",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "steelGuard": {
+    "name": "铁守卫",
+    "hp": 50,
+    "atk": 50,
+    "def": 50,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      18
+    ],
+    "value": 20
+  },
+  "evilBat": {
+    "name": "邪恶蝙蝠",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "silverSlimelord": {
+    "name": "银怪王",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "goldSlimelord": {
+    "name": "金怪王",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "skeletonWarrior": {
+    "name": "骷髅剑士",
+    "hp": 230,
+    "atk": 100,
+    "def": 5,
+    "money": 10,
+    "exp": 2,
+    "point": 0,
+    "special": 0
+  },
+  "whiteSlimeman": {
+    "name": "水银人",
+    "hp": 810,
+    "atk": 650,
+    "def": 510,
+    "money": 76,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      1,
+      9
+    ]
+  },
+  "slimeman": {
+    "name": "史莱姆人",
+    "hp": 90,
+    "atk": 77,
+    "def": 35,
+    "money": 10,
+    "exp": 2,
+    "point": 0,
+    "special": [],
+    "atkValue": 2,
+    "defValue": 3
+  },
+  "yellowGateKeeper": {
+    "name": "卫兵",
+    "hp": 50,
+    "atk": 20,
+    "def": 10,
+    "money": 5,
+    "exp": 1,
+    "point": 0,
+    "special": 0
+  },
+  "blueGateKeeper": {
+    "name": "中级卫兵",
+    "hp": 275,
+    "atk": 145,
+    "def": 125,
+    "money": 11,
+    "exp": 2,
+    "point": 0,
+    "special": 0
+  },
+  "redGateKeeper": {
+    "name": "高级卫兵",
+    "hp": 770,
+    "atk": 770,
+    "def": 510,
+    "money": 51,
+    "exp": 6,
+    "point": 0,
+    "special": 0
+  },
+  "magicMaster": {
+    "name": "暗黑大法师",
+    "hp": 2100,
+    "atk": 200,
+    "def": 620,
+    "money": 100,
+    "exp": 11,
+    "point": 0,
+    "special": [
+      2,
+      31
+    ],
+    "value": null,
+    "add": false,
+    "notBomb": false,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "darkness1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "devilWarrior": {
+    "name": "魔神武士",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "fairyEnemy": {
+    "name": "仙子",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "dragon": {
+    "name": "巨龙",
+    "hp": 2300,
+    "atk": 2100,
+    "def": 400,
+    "money": 150,
+    "exp": 20,
+    "point": 0,
+    "special": 0,
+    "bigImage": "dragon_0.png",
+    "notBomb": true
+  },
+  "skeletonKnight": {
+    "name": "骷髅武士",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "skeletonPresbyter": {
+    "name": "骷髅巫师",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "ironRock": {
+    "name": "铁怪",
+    "hp": 50,
+    "atk": 700,
+    "def": 680,
+    "money": 79,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      3
+    ],
+    "displayIdInBook": null
+  },
+  "grayRock": {
+    "name": "灰色石头人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "yellowPriest": {
+    "name": "雷术师",
+    "hp": 310,
+    "atk": 20,
+    "def": 20,
+    "money": 9,
+    "exp": 1,
+    "point": 0,
+    "special": [
+      2
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "thunderlight",
+        "loc": "hero"
+      }
+    ]
+  },
+  "evilPrincess": {
+    "name": "痛苦魔女",
+    "hp": 1000,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      10
+    ]
+  },
+  "blademaster": {
+    "name": "剑圣",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "evilFairy": {
+    "name": "黑暗仙子",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "greenKnight": {
+    "name": "强盾骑士",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "bowman": {
+    "name": "弓箭兵",
+    "hp": 550,
+    "atk": 0,
+    "def": 5,
+    "money": 8,
+    "exp": 1,
+    "point": 0,
+    "special": [
+      30
+    ],
+    "value": 10,
+    "beforeBattle": [
+      {
+        "type": "if",
+        "condition": "(status:direction===\"down\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow1",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"left\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow2",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"right\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow3",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"up\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow4",
+            "loc": "hero"
+          }
+        ]
+      }
+    ]
+  },
+  "watcherSlime": {
+    "name": "邪眼史莱姆",
+    "hp": 510,
+    "atk": 450,
+    "def": 302,
+    "money": 43,
+    "exp": 5,
+    "point": 0,
+    "special": [
+      15
+    ],
+    "zone": 100,
+    "zoneSquare": true
+  },
+  "devilKnight": {
+    "name": "恶灵骑士",
+    "hp": 150,
+    "atk": 100,
+    "def": 50,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      1,
+      5,
+      7,
+      8
+    ]
+  },
+  "grayPriest": {
+    "name": "血术师",
+    "hp": 900,
+    "atk": 250,
+    "def": 990,
+    "money": 115,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      2,
+      11
+    ],
+    "vampire": 0.25,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "darkness2",
+        "loc": "hero"
+      }
+    ]
+  },
+  "greenGateKeeper": {
+    "name": "卫兵队长",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "ghostSoldier": {
+    "name": "不死灵骷髅",
+    "hp": 1330,
+    "atk": 1850,
+    "def": 450,
+    "money": 41,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      1
+    ]
+  },
+  "frostBat": {
+    "name": "寒蝙蝠",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "blackKing": {
+    "name": "黑暗魔王",
+    "hp": 1273,
+    "atk": 700,
+    "def": 500,
+    "money": 51,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      2,
+      31
+    ],
+    "notBomb": true
+  },
+  "yellowKing": {
+    "name": "魔王",
+    "hp": 1000,
+    "atk": 450,
+    "def": 230,
+    "money": 42,
+    "exp": 6,
+    "point": 0,
+    "special": 0
+  },
+  "greenKing": {
+    "name": "魔法师元帅",
+    "hp": 840,
+    "atk": 90,
+    "def": 240,
+    "money": 51,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      2
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "windvx1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "redKing": {
+    "name": "赤炎魔王",
+    "hp": 2400,
+    "atk": 900,
+    "def": 550,
+    "money": 125,
+    "exp": 13,
+    "point": 0,
+    "special": [
+      2,
+      15,
+      31
+    ],
+    "zone": 200,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "fire1",
+        "loc": "hero"
+      }
+    ],
+    "zoneSquare": true
+  },
+  "blueKing": {
+    "name": "魔法师首领",
+    "hp": 770,
+    "atk": 70,
+    "def": 170,
+    "money": 35,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      2
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "icevx1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "keiskeiFairy": {
+    "name": "铃兰花妖",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "tulipFairy": {
+    "name": "郁金香花妖",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": 0
+  },
+  "purpleBowman": {
+    "name": "精锐弓箭兵",
+    "hp": 1030,
+    "atk": 0,
+    "def": 200,
+    "money": 26,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      30
+    ],
+    "value": 35,
+    "beforeBattle": [
+      {
+        "type": "if",
+        "condition": "(status:direction===\"down\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow1",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"left\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow2",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"right\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow3",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"up\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow4",
+            "loc": "hero"
+          }
+        ]
+      }
+    ]
+  },
+  "bearDown": {
+    "name": "熊出没",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "bearDown",
+      "left": "bearLeft",
+      "right": "bearRight",
+      "up": "bearUp"
+    },
+    "bigImage": "bear.png"
+  },
+  "bearLeft": {
+    "name": "熊出没",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "bearDown",
+      "left": "bearLeft",
+      "right": "bearRight",
+      "up": "bearUp"
+    }
+  },
+  "bearRight": {
+    "name": "熊出没",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "bearDown",
+      "left": "bearLeft",
+      "right": "bearRight",
+      "up": "bearUp"
+    }
+  },
+  "bearUp": {
+    "name": "熊出没",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "bearDown",
+      "left": "bearLeft",
+      "right": "bearRight",
+      "up": "bearUp"
+    }
+  },
+  "E331": {
+    "name": "紫精灵",
+    "hp": 20,
+    "atk": 3,
+    "def": 0,
+    "money": 1,
+    "exp": 1,
+    "point": 0,
+    "special": []
+  },
+  "E332": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E333": {
+    "name": "暗黑史莱姆",
+    "hp": 500,
+    "atk": 0,
+    "def": 0,
+    "money": 1000,
+    "exp": 500,
+    "point": 0,
+    "special": [
+      29
+    ],
+    "afterBattle": null,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "Bigexplosion",
+        "loc": "hero"
+      },
+      {
+        "type": "lose",
+        "reason": "你被炸死了"
+      }
+    ]
+  },
+  "E334": {
+    "name": "史莱姆魔王",
+    "hp": 1000,
+    "atk": 976,
+    "def": 100,
+    "money": 200,
+    "exp": 25,
+    "point": 0,
+    "special": [
+      20
+    ],
+    "notBomb": true
+  },
+  "E335": {
+    "name": "黑暗蝙蝠",
+    "hp": 210,
+    "atk": 45,
+    "def": 100,
+    "money": 21,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      2,
+      31
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "darkness1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "E336": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E337": {
+    "name": "史莱姆皇",
+    "hp": 2000,
+    "atk": 980,
+    "def": 150,
+    "money": 400,
+    "exp": 47,
+    "point": 0,
+    "special": [
+      20
+    ],
+    "notBomb": true
+  },
+  "E338": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E343": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E344": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E345": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E372": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E373": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E374": {
+    "name": "Elder 1级",
+    "hp": 720,
+    "atk": 350,
+    "def": 200,
+    "money": 32,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      20
+    ],
+    "faceIds": {
+      "down": "E374",
+      "left": "E375",
+      "right": "E376",
+      "up": "E377"
+    }
+  },
+  "E375": {
+    "name": "Elder 1级",
+    "hp": 720,
+    "atk": 350,
+    "def": 200,
+    "money": 32,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      20
+    ],
+    "faceIds": {
+      "down": "E374",
+      "left": "E375",
+      "right": "E376",
+      "up": "E377"
+    },
+    "displayIdInBook": null
+  },
+  "E376": {
+    "name": "Elder 1级",
+    "hp": 720,
+    "atk": 350,
+    "def": 200,
+    "money": 32,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      20
+    ],
+    "faceIds": {
+      "down": "E374",
+      "left": "E375",
+      "right": "E376",
+      "up": "E377"
+    },
+    "displayIdInBook": null
+  },
+  "E377": {
+    "name": "Elder 1级",
+    "hp": 720,
+    "atk": 350,
+    "def": 200,
+    "money": 32,
+    "exp": 4,
+    "point": 0,
+    "special": [
+      20
+    ],
+    "faceIds": {
+      "down": "E374",
+      "left": "E375",
+      "right": "E376",
+      "up": "E377"
+    },
+    "displayIdInBook": null
+  },
+  "E378": {
+    "name": "Elder 3级",
+    "hp": 1350,
+    "atk": 650,
+    "def": 500,
+    "money": 73,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      2,
+      4,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E378",
+      "left": "E379",
+      "right": "E380",
+      "up": "E381"
+    }
+  },
+  "E379": {
+    "name": "新敌人",
+    "hp": 1350,
+    "atk": 650,
+    "def": 500,
+    "money": 73,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      2,
+      4,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E378",
+      "left": "E379",
+      "right": "E380",
+      "up": "E381"
+    },
+    "displayIdInBook": null
+  },
+  "E380": {
+    "name": "新敌人",
+    "hp": 1350,
+    "atk": 650,
+    "def": 500,
+    "money": 73,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      2,
+      4,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E378",
+      "left": "E379",
+      "right": "E380",
+      "up": "E381"
+    },
+    "displayIdInBook": null
+  },
+  "E381": {
+    "name": "新敌人",
+    "hp": 1350,
+    "atk": 650,
+    "def": 500,
+    "money": 73,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      2,
+      4,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E378",
+      "left": "E379",
+      "right": "E380",
+      "up": "E381"
+    },
+    "displayIdInBook": null
+  },
+  "E382": {
+    "name": "Elder 2级",
+    "hp": 1040,
+    "atk": 450,
+    "def": 450,
+    "money": 57,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      2,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E382",
+      "left": "E383",
+      "right": "E384",
+      "up": "E385"
+    }
+  },
+  "E383": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E384": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E385": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E386": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E387": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E388": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E389": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E390": {
+    "name": "Elder 守卫",
+    "hp": 2300,
+    "atk": 990,
+    "def": 660,
+    "money": 115,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      2,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E390",
+      "left": "E391",
+      "right": "E392",
+      "up": "E393"
+    }
+  },
+  "E391": {
+    "name": "Elder 守卫",
+    "hp": 2300,
+    "atk": 990,
+    "def": 660,
+    "money": 115,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      2,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E390",
+      "left": "E391",
+      "right": "E392",
+      "up": "E393"
+    },
+    "displayIdInBook": null
+  },
+  "E392": {
+    "name": "Elder 守卫",
+    "hp": 2300,
+    "atk": 990,
+    "def": 660,
+    "money": 115,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      2,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E390",
+      "left": "E391",
+      "right": "E392",
+      "up": "E393"
+    },
+    "displayIdInBook": null
+  },
+  "E393": {
+    "name": "Elder 守卫",
+    "hp": 2300,
+    "atk": 990,
+    "def": 660,
+    "money": 115,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      2,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E390",
+      "left": "E391",
+      "right": "E392",
+      "up": "E393"
+    },
+    "displayIdInBook": null
+  },
+  "E394": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E395": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E396": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E397": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E398": {
+    "name": "Cardinal",
+    "hp": 45000,
+    "atk": 3250,
+    "def": 650,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      4
+    ],
+    "faceIds": {
+      "down": "E398",
+      "left": "E399",
+      "right": "E400",
+      "up": "E401"
+    },
+    "notBomb": true
+  },
+  "E399": {
+    "name": "新敌人",
+    "hp": 45000,
+    "atk": 3250,
+    "def": 650,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      4
+    ],
+    "faceIds": {
+      "down": "E398",
+      "left": "E399",
+      "right": "E400",
+      "up": "E401"
+    },
+    "displayIdInBook": null
+  },
+  "E400": {
+    "name": "新敌人",
+    "hp": 45000,
+    "atk": 3250,
+    "def": 650,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      4
+    ],
+    "faceIds": {
+      "down": "E398",
+      "left": "E399",
+      "right": "E400",
+      "up": "E401"
+    },
+    "displayIdInBook": null
+  },
+  "E401": {
+    "name": "新敌人",
+    "hp": 45000,
+    "atk": 3250,
+    "def": 650,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      4
+    ],
+    "faceIds": {
+      "down": "E398",
+      "left": "E399",
+      "right": "E400",
+      "up": "E401"
+    },
+    "displayIdInBook": null
+  },
+  "E402": {
+    "name": "Elder Cardinal",
+    "hp": 54000,
+    "atk": 3700,
+    "def": 700,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      4
+    ],
+    "faceIds": {
+      "down": "E402",
+      "left": "E403",
+      "right": "E404",
+      "up": "E405"
+    },
+    "notBomb": true
+  },
+  "E403": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "E402",
+      "left": "E403",
+      "right": "E404",
+      "up": "E405"
+    }
+  },
+  "E404": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "E402",
+      "left": "E403",
+      "right": "E404",
+      "up": "E405"
+    }
+  },
+  "E405": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "E402",
+      "left": "E403",
+      "right": "E404",
+      "up": "E405"
+    }
+  },
+  "E424": {
+    "name": "重甲卫士",
+    "hp": 40,
+    "atk": 250,
+    "def": 300,
+    "money": 29,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      3
+    ]
+  },
+  "E425": {
+    "name": "重甲枪兵",
+    "hp": 10,
+    "atk": 900,
+    "def": 0,
+    "money": 73,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      3,
+      30
+    ],
+    "value": 100
+  },
+  "E426": {
+    "name": "龙蝠",
+    "hp": 1350,
+    "atk": 1580,
+    "def": 910,
+    "money": 91,
+    "exp": 10,
+    "point": 0,
+    "special": [
+      4,
+      12,
+      30
+    ],
+    "value": 10
+  },
+  "E427": {
+    "name": "邪气灵",
+    "hp": 2450,
+    "atk": 850,
+    "def": 450,
+    "money": 131,
+    "exp": 14,
+    "point": 0,
+    "special": [
+      2,
+      9,
+      18,
+      31
+    ],
+    "repulse": 300,
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "wind1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "E428": {
+    "name": "混沌神",
+    "hp": 4150,
+    "atk": 1400,
+    "def": 1000,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      2,
+      31
+    ],
+    "notBomb": true
+  },
+  "E429": {
+    "name": "地狱马",
+    "hp": 1801,
+    "atk": 1770,
+    "def": 577,
+    "money": 118,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      9
+    ]
+  },
+  "E430": {
+    "name": "骑士首领",
+    "hp": 1747,
+    "atk": 1851,
+    "def": 771,
+    "money": 116,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      7
+    ]
+  },
+  "E431": {
+    "name": "Elder 机器人",
+    "hp": 1500,
+    "atk": 1600,
+    "def": 790,
+    "money": 133,
+    "exp": 14,
+    "point": 0,
+    "special": [
+      30
+    ],
+    "value": 200
+  },
+  "E432": {
+    "name": "触手植物",
+    "hp": 1073,
+    "atk": 1241,
+    "def": 824,
+    "money": 84,
+    "exp": 9,
+    "point": 0,
+    "special": [
+      6,
+      9
+    ],
+    "n": 6
+  },
+  "E433": {
+    "name": "剑皇",
+    "hp": 1450,
+    "atk": 1940,
+    "def": 910,
+    "money": 81,
+    "exp": 10,
+    "point": 0,
+    "special": [
+      6,
+      16
+    ],
+    "zone": null,
+    "displayIdInBook": null,
+    "value": null,
+    "n": 4
+  },
+  "E434": {
+    "name": "冷冻骷髅",
+    "hp": 1075,
+    "atk": 910,
+    "def": 105,
+    "money": 51,
+    "exp": 6,
+    "point": 0,
+    "special": []
+  },
+  "E435": {
+    "name": "触手魔物",
+    "hp": 1452,
+    "atk": 1996,
+    "def": 960,
+    "money": 91,
+    "exp": 10,
+    "point": 0,
+    "special": [
+      6,
+      9,
+      13
+    ],
+    "n": 6
+  },
+  "E436": {
+    "name": "黑暗剑魂",
+    "hp": 1770,
+    "atk": 2150,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [
+      4,
+      23
+    ]
+  },
+  "E437": {
+    "name": "魔眼",
+    "hp": 1155,
+    "atk": 0,
+    "def": 0,
+    "money": 89,
+    "exp": 9,
+    "point": 0,
+    "special": [
+      10,
+      15
+    ],
+    "zone": 400
+  },
+  "E438": {
+    "name": "赤炎丧尸",
+    "hp": 1050,
+    "atk": 990,
+    "def": 450,
+    "money": 74,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      15
+    ],
+    "zone": 100,
+    "zoneSquare": true
+  },
+  "E439": {
+    "name": "四手史莱姆人",
+    "hp": 510,
+    "atk": 232,
+    "def": 180,
+    "money": 24,
+    "exp": 3,
+    "point": 0,
+    "special": [
+      5
+    ]
+  },
+  "E440": {
+    "name": "血魔王",
+    "hp": 2000,
+    "atk": 500,
+    "def": 920,
+    "money": 300,
+    "exp": 35,
+    "point": 0,
+    "special": [
+      2,
+      4,
+      11,
+      31
+    ],
+    "notBomb": true,
+    "vampire": 0.25
+  },
+  "E441": {
+    "name": "死灵大法师",
+    "hp": 1650,
+    "atk": 600,
+    "def": 850,
+    "money": 119,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      2,
+      31
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "darkness1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "E442": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E443": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E444": {
+    "name": "皇家弓箭手",
+    "hp": 4500,
+    "atk": 0,
+    "def": 975,
+    "money": 96,
+    "exp": 10,
+    "point": 0,
+    "special": [
+      30
+    ],
+    "beforeBattle": [
+      {
+        "type": "if",
+        "condition": "(status:direction===\"down\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow1",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"left\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow2",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"right\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow3",
+            "loc": "hero"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(status:direction===\"up\")",
+        "true": [
+          {
+            "type": "animate",
+            "name": "bow4",
+            "loc": "hero"
+          }
+        ]
+      }
+    ],
+    "value": 150
+  },
+  "E445": {
+    "name": "结界王",
+    "hp": 1490,
+    "atk": 1690,
+    "def": 990,
+    "money": 102,
+    "exp": 11,
+    "point": 0,
+    "special": [
+      15
+    ],
+    "zone": 600,
+    "zoneSquare": true,
+    "range": 2
+  },
+  "E446": {
+    "name": "黄金龙",
+    "hp": 3200,
+    "atk": 2550,
+    "def": 800,
+    "money": 900,
+    "exp": 40,
+    "point": 0,
+    "special": [
+      15
+    ],
+    "zone": 100,
+    "bigImage": "golddragon_0.png",
+    "notBomb": true
+  },
+  "E447": {
+    "name": "闪光蝙蝠",
+    "hp": 310,
+    "atk": 402,
+    "def": 205,
+    "money": 42,
+    "exp": 5,
+    "point": 0,
+    "special": [
+      4,
+      13
+    ]
+  },
+  "E448": {
+    "name": "灵骷髅兵",
+    "hp": 610,
+    "atk": 540,
+    "def": 410,
+    "money": 18,
+    "exp": 2,
+    "point": 0,
+    "special": [
+      32
+    ],
+    "afterBattle": [
+      {
+        "type": "animate",
+        "name": "Recovery",
+        "async": true
+      },
+      {
+        "type": "sleep",
+        "time": 500
+      },
+      {
+        "type": "setBlock",
+        "number": "E449",
+        "time": 0
+      },
+      {
+        "type": "waitAsync",
+        "excludeAnimates": true
+      }
+    ]
+  },
+  "E449": {
+    "name": "再生灵骷髅",
+    "hp": 520,
+    "atk": 610,
+    "def": 350,
+    "money": 25,
+    "exp": 3,
+    "point": 0,
+    "special": []
+  },
+  "E450": {
+    "name": "灵骷髅",
+    "hp": 510,
+    "atk": 120,
+    "def": 55,
+    "money": 16,
+    "exp": 2,
+    "point": 0,
+    "special": []
+  },
+  "E462": {
+    "name": "八爪鱼",
+    "hp": 525,
+    "atk": 200,
+    "def": 120,
+    "money": 22,
+    "exp": 3,
+    "point": 0,
+    "special": []
+  },
+  "E463": {
+    "name": "毒八爪鱼",
+    "hp": 750,
+    "atk": 560,
+    "def": 280,
+    "money": 42,
+    "exp": 5,
+    "point": 0,
+    "special": [
+      12
+    ]
+  },
+  "E464": {
+    "name": "闪光八爪鱼",
+    "hp": 940,
+    "atk": 810,
+    "def": 600,
+    "money": 55,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      13
+    ]
+  },
+  "E466": {
+    "name": "血剑兵",
+    "hp": 1650,
+    "atk": 1750,
+    "def": 1050,
+    "money": 112,
+    "exp": 12,
+    "point": 0,
+    "special": [
+      7,
+      15
+    ],
+    "zone": 500,
+    "zoneSquare": true
+  },
+  "E467": {
+    "name": "战兵之魂",
+    "hp": 1000,
+    "atk": 975,
+    "def": 650,
+    "money": 73,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      5,
+      9
+    ]
+  },
+  "E468": {
+    "name": "血之神",
+    "hp": 750,
+    "atk": 1550,
+    "def": 880,
+    "money": 132,
+    "exp": 14,
+    "point": 0,
+    "special": [
+      6,
+      11
+    ],
+    "n": 4,
+    "vampire": 0.25
+  },
+  "E469": {
+    "name": "重甲王",
+    "hp": 50,
+    "atk": 1800,
+    "def": 900,
+    "money": 135,
+    "exp": 14,
+    "point": 0,
+    "special": [
+      3
+    ]
+  },
+  "E470": {
+    "name": "小魔王",
+    "hp": 1000,
+    "atk": 450,
+    "def": 230,
+    "money": 42,
+    "exp": 6,
+    "point": 0,
+    "special": 0,
+    "displayIdInBook": null,
+    "notBomb": true
+  },
+  "E471": {
+    "name": "铁怪",
+    "hp": 50,
+    "atk": 700,
+    "def": 680,
+    "money": 79,
+    "exp": 6,
+    "point": 0,
+    "special": [
+      3
+    ]
+  },
+  "E472": {
+    "name": "邪眼石",
+    "hp": 30,
+    "atk": 999,
+    "def": 999,
+    "money": 99,
+    "exp": 10,
+    "point": 0,
+    "special": [
+      3,
+      28
+    ],
+    "afterBattle": null,
+    "notBomb": true
+  },
+  "E477": {
+    "name": "极地大法师",
+    "hp": 1373,
+    "atk": 300,
+    "def": 450,
+    "money": 71,
+    "exp": 8,
+    "point": 0,
+    "special": [
+      2
+    ],
+    "beforeBattle": [
+      {
+        "type": "animate",
+        "name": "icevx1",
+        "loc": "hero"
+      }
+    ]
+  },
+  "E483": {
+    "name": "Elder 4级",
+    "hp": 2100,
+    "atk": 750,
+    "def": 550,
+    "money": 102,
+    "exp": 11,
+    "point": 0,
+    "special": [
+      2,
+      15,
+      20,
+      31
+    ],
+    "faceIds": {
+      "down": "E483",
+      "left": "E484",
+      "right": "E485",
+      "up": "E486"
+    },
+    "zone": 200,
+    "zoneSquare": true
+  },
+  "E484": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "E483",
+      "left": "E484",
+      "right": "E485",
+      "up": "E486"
+    }
+  },
+  "E485": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "E483",
+      "left": "E484",
+      "right": "E485",
+      "up": "E486"
+    }
+  },
+  "E486": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": [],
+    "faceIds": {
+      "down": "E483",
+      "left": "E484",
+      "right": "E485",
+      "up": "E486"
+    }
+  },
+  "E489": {
+    "name": "新敌人",
+    "hp": 0,
+    "atk": 0,
+    "def": 0,
+    "money": 0,
+    "exp": 0,
+    "point": 0,
+    "special": []
+  },
+  "E494": {
+    "name": "毒龙",
+    "hp": 2400,
+    "atk": 2350,
+    "def": 600,
+    "money": 350,
+    "exp": 40,
+    "point": 0,
+    "special": [
+      12
+    ],
+    "bigImage": "poisondragon_0.png",
+    "notBomb": true
+  }
+}
