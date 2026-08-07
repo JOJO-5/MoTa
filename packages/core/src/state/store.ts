@@ -98,3 +98,18 @@ function createStore() {
 export const gameStore = createStore()
 export const getState = gameStore.getState
 export const setState = gameStore.setState
+export const dispatch = (action: GameAction) => gameStore.getState().dispatch(action)
+export const State = new Proxy({} as GameState, {
+  get: (_target, prop) => (gameStore.getState().state as unknown as Record<string | symbol, unknown>)[prop as string],
+  has: (_target, prop) => prop in gameStore.getState().state,
+  ownKeys: () => Reflect.ownKeys(gameStore.getState().state),
+  getOwnPropertyDescriptor: (_target, prop) => {
+    const value = (gameStore.getState().state as unknown as Record<string | symbol, unknown>)[prop as string]
+    return {
+      configurable: true,
+      enumerable: true,
+      writable: false,
+      value,
+    }
+  },
+})
