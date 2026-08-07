@@ -1,0 +1,35 @@
+import { z } from 'zod'
+
+export const FlagsSchema = z.object({
+  enableFloor: z.boolean().default(true),
+  enableName: z.boolean().default(false),
+  enableLv: z.boolean().default(false),
+  enableHPMax: z.boolean().default(false),
+  enableMana: z.boolean().default(false),
+  enableMDef: z.boolean().default(true),
+  enableMoney: z.boolean().default(true),
+  enableExperience: z.boolean().default(false),
+  enableLevelUp: z.boolean().default(false),
+  enableKeys: z.boolean().default(true),
+  enablePZF: z.boolean().default(false),
+  enableDebuff: z.boolean().default(false),
+  enableSkill: z.boolean().default(false),
+  enableAddPoint: z.boolean().default(false),
+  flyNearStair: z.boolean().default(true),
+  flyRecordPosition: z.boolean().default(false),
+  pickaxeFourDirections: z.boolean().default(false),
+  bombFourDirections: z.boolean().default(false),
+  snowFourDirections: z.boolean().default(false),
+  bigKeyIsBox: z.boolean().default(false),
+  steelDoorWithoutKey: z.boolean().default(false),
+  itemFirstText: z.boolean().default(true),
+  equipment: z.boolean().default(false),
+  enableNegativeDamage: z.boolean().default(false),
+  hatredDecrease: z.boolean().default(true),
+  betweenAttackCeil: z.boolean().default(false),
+  betweenAttackMax: z.boolean().default(false),
+  useLoop: z.boolean().default(false),
+  animateSpeed: z.number().int().default(400),
+}).strict()
+
+export type Flags = z.infer<typeof FlagsSchema>
