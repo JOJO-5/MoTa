@@ -1,0 +1,16 @@
+node_modules
+dist
+.turbo
+.DS_Store
+*.log
+.env
+.env.local
+.vscode/*
+!.vscode/settings.json
+.idea
+coverage
+*.tsbuildinfo
+apps/web/dist
+apps/web/.vite
+content/mota-2014/art/originals
+tools/importer/.cache

@@ -1,0 +1,27 @@
+{
+  "name": "modern-mota",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Modern rebuild of the classic 20-floor Magic Tower game",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm --filter @modern-mota/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @modern-mota/web test:e2e",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "clean": "pnpm -r exec rm -rf dist node_modules .turbo"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
+  }
+}
