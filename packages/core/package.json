@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@modern-mota/data": "workspace:*",
     "zustand": "^4.5.0",
     "immer": "^10.0.0"
   },
