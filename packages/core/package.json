@@ -11,6 +11,10 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "dependencies": {
+    "zustand": "^4.5.0",
+    "immer": "^10.0.0"
+  },
   "devDependencies": {
     "vitest": "^1.4.0"
   }
