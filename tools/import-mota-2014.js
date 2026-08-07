@@ -1,152 +1,162 @@
 const fs = require('fs');
 const path = require('path');
-const acorn = require('acorn');
+const { execSync } = require('child_process');
 
 const sourceDir = path.join(__dirname, '..', 'Magictower2014', '魔塔2014', 'project');
 const outputDir = path.join(__dirname, '..', 'content', 'mota-2014');
 
-function evaluate(code) {
-  try {
-    return new Function(`return (${code})`)();
-  } catch {
-    return undefined;
+function readFileWithEncoding(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+    return buffer.toString('utf8');
   }
+  const utf8Buffer = Buffer.from(buffer.toString('latin1'), 'latin1');
+  return utf8Buffer.toString('utf8');
 }
 
-function generateCode(node) {
-  if (node.type === 'ObjectExpression') {
-    const pairs = (node.properties || [])
-      .filter(p => p.type === 'Property')
-      .map(prop => {
-        const key = prop.computed
-          ? `[${generateCode(prop.key)}]`
-          : prop.key.name || prop.key.value || JSON.stringify(prop.key);
-        const val = generateCode(prop.value);
-        return `${key}: ${val}`;
-      });
-    return `{ ${pairs.join(', ')} }`;
-  }
-  if (node.type === 'ArrayExpression') {
-    return `[${(node.elements || []).map(el => el ? generateCode(el) : '').join(', ')}]`;
-  }
-  if (node.type === 'Literal') return JSON.stringify(node.value);
-  if (node.type === 'Identifier') return node.name;
-  if (node.type === 'MemberExpression') {
-    return `${generateCode(node.object)}.${node.property.name || generateCode(node.property)}`;
-  }
-  if (node.type === 'ConditionalExpression') {
-    return `${generateCode(node.test)} ? ${generateCode(node.consequent)} : ${generateCode(node.alternate)}`;
-  }
-  return 'null';
-}
+function extractDataFromJS(code) {
+  const varPattern = /var\s+\w+\s*=\s*/;
+  const match = code.match(varPattern);
+  if (!match) return null;
 
-function findTopLevelAssignments(code, names) {
-  const result = new Map();
+  const startIndex = match.index + match[0].length;
+  const objStr = code.substring(startIndex).trim();
+
   try {
-    const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'module' });
-    for (const node of ast.body) {
-      if (node.type === 'VariableDeclaration') {
-        for (const decl of node.declarations) {
-          if (decl.id?.type === 'Identifier') {
-            const name = decl.id.name;
-            if (names.includes(name) && decl.init) {
-              const value = evaluate(generateCode(decl.init));
-              if (value !== undefined) {
-                result.set(name, value);
-              }
-            }
-          }
-        }
-      }
-      if (node.type === 'ExpressionStatement') {
-        const expr = node.expression;
-        if (expr?.type === 'AssignmentExpression' && expr.left?.type === 'MemberExpression') {
-          const objName = expr.left.object?.name;
-          const propName = expr.left.property?.name;
-          if (objName && propName && names.includes(objName)) {
-            const value = evaluate(generateCode(expr.right));
-            if (value !== undefined) {
-              result.set(propName, value);
-            }
-          }
-        }
-      }
-    }
+    return new Function('return ' + objStr)();
   } catch (e) {
     console.error('Parse error:', e.message);
+    return null;
   }
-  return result;
 }
 
-function extractDataObjects(code) {
-  return findTopLevelAssignments(code, ['data', 'enemys', 'maps', 'items', 'events']);
-}
+function extractFloorFromJS(code, floorId) {
+  const pattern = new RegExp('main\\.floors\\.' + floorId + '\\s*=\\s*');
+  const match = code.search(pattern);
+  if (match === -1) return null;
 
-function extractFloorObjects(code) {
-  const mainObj = findTopLevelAssignments(code, ['main']);
-  const main = mainObj.get('main');
-  const floors = main?.floors || {};
-  const result = new Map();
-  for (const [key, value] of Object.entries(floors)) {
-    result.set(key, value);
+  const startIndex = code.indexOf('{', match);
+  let depth = 0;
+  let endIndex = -1;
+
+  for (let i = startIndex; i < code.length; i++) {
+    const c = code[i];
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) {
+        endIndex = i;
+        break;
+      }
+    }
   }
-  return result;
+
+  if (endIndex === -1) return null;
+
+  const objStr = code.substring(startIndex, endIndex + 1);
+  try {
+    return new Function('return ' + objStr)();
+  } catch (e) {
+    console.error('Error parsing floor ' + floorId + ':', e.message);
+    return null;
+  }
 }
 
-function importDataFile(filename, outputName) {
+function cleanObject(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj !== 'object') return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(cleanObject);
+  }
+
+  const cleaned = {};
+  for (const key of Object.keys(obj)) {
+    const value = cleanObject(obj[key]);
+    if (value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned;
+}
+
+function importDataFile(filename, outputName, transform) {
   const srcPath = path.join(sourceDir, filename);
   if (!fs.existsSync(srcPath)) {
-    console.log(`Skipping ${filename} - not found`);
-    return;
+    console.log('Skipping ' + filename + ' - not found');
+    return null;
   }
-  const code = fs.readFileSync(srcPath, 'utf-8');
-  const objs = extractDataObjects(code);
-  const outData = {};
-  for (const [key, value] of objs) {
-    outData[key] = value;
+
+  const code = readFileWithEncoding(srcPath);
+  let data = extractDataFromJS(code);
+
+  if (data && transform) {
+    data = transform(data);
   }
-  fs.writeFileSync(path.join(outputDir, outputName), JSON.stringify(outData, null, 2));
-  console.log(`Created ${outputName}`);
+
+  if (data) {
+    const cleaned = cleanObject(data);
+    const outPath = path.join(outputDir, outputName);
+    fs.writeFileSync(outPath, JSON.stringify(cleaned, null, 2), 'utf8');
+    console.log('Created ' + outputName);
+    return data;
+  }
+  return null;
 }
 
-function importFloors(floorIds) {
-  const floorsDir = path.join(sourceDir, 'floors');
-  const outputFloorsDir = path.join(outputDir, 'floors');
-
-  if (!fs.existsSync(floorsDir)) {
-    console.log('floors dir not found');
-    return;
+function importFloor(floorId) {
+  const floorFile = path.join(sourceDir, 'floors', floorId + '.js');
+  if (!fs.existsSync(floorFile)) {
+    console.log('Floor file not found: ' + floorId + '.js');
+    return null;
   }
 
-  for (const floorId of floorIds) {
-    const floorFile = path.join(floorsDir, `${floorId}.js`);
-    if (!fs.existsSync(floorFile)) {
-      console.log(`Floor file not found: ${floorId}.js`);
-      continue;
-    }
-    const code = fs.readFileSync(floorFile, 'utf-8');
-    const objs = extractFloorObjects(code);
-    for (const [id, floorData] of objs) {
-      const outPath = path.join(outputFloorsDir, `${id}.json`);
-      fs.writeFileSync(outPath, JSON.stringify(floorData, null, 2));
-      console.log(`Created floors/${id}.json`);
-    }
+  const code = readFileWithEncoding(floorFile);
+  const floorData = extractFloorFromJS(code, floorId);
+
+  if (floorData) {
+    const cleaned = cleanObject(floorData);
+    const outPath = path.join(outputDir, 'floors', floorId + '.json');
+    fs.writeFileSync(outPath, JSON.stringify(cleaned, null, 2), 'utf8');
+    console.log('Created floors/' + floorId + '.json');
+    return floorData;
   }
+  return null;
 }
 
 const targetFloors = [];
 for (let i = 0; i <= 20; i++) {
-  targetFloors.push(`MT${i}`);
+  targetFloors.push('MT' + i);
 }
 
 fs.mkdirSync(path.join(outputDir, 'floors'), { recursive: true });
 
-importDataFile('data.js', 'data.json');
+console.log('Importing Magictower2014 MT0-MT20...\n');
+
+const data = importDataFile('data.js', 'data.json', function(d) {
+  if (d && d.main) {
+    const main = d.main;
+    if (main.floorIds) {
+      main.floorIds = main.floorIds.filter(function(id) {
+        return id.match(/^MT\d+$/) && parseInt(id.replace('MT', '')) <= 20;
+      });
+      main.floorIds.sort(function(a, b) {
+        return parseInt(a.replace('MT', '')) - parseInt(b.replace('MT', ''));
+      });
+    }
+    return main;
+  }
+  return d;
+});
+
 importDataFile('enemys.js', 'enemys.json');
 importDataFile('maps.js', 'maps.json');
 importDataFile('items.js', 'items.json');
 
-importFloors(targetFloors);
+console.log('\nImporting floors:');
+for (const floorId of targetFloors) {
+  importFloor(floorId);
+}
 
 const meta = {
   id: 'mota-2014',
@@ -155,7 +165,8 @@ const meta = {
   importedAt: new Date().toISOString(),
   note: 'First 21 floors (MT0-MT20) imported from Magictower2014'
 };
-fs.writeFileSync(path.join(outputDir, '_meta.json'), JSON.stringify(meta, null, 2));
-console.log('Created _meta.json');
+const metaPath = path.join(outputDir, '_meta.json');
+fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf8');
+console.log('\nCreated _meta.json');
 
 console.log('\nDone!');

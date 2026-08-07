@@ -6,7 +6,7 @@ import {
   MapBlockSchema,
   ItemSchema,
   FloorSchema,
-} from '@modern-mota/data/schema/index.js'
+} from '../../../../packages/data/src/schema'
 
 export interface SchemaResult {
   passed: boolean

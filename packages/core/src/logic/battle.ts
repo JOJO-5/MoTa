@@ -1,5 +1,6 @@
 import { dispatch, State } from '../state/store.js'
 import type { Enemy } from '@modern-mota/data'
+import { calcHeroDamage, calcEnemyDamage } from './battle-utils.js'
 
 export function calculateDamage(attackerAtk: number, defenderDef: number): number {
   return Math.max(0, attackerAtk - defenderDef)
@@ -7,8 +8,6 @@ export function calculateDamage(attackerAtk: number, defenderDef: number): numbe
 
 export function startBattle(enemy: Enemy): void {
   const { hero } = State
-  const heroDamagePerTurn = calculateDamage(hero.atk, enemy.def)
-  const enemyDamagePerTurn = calculateDamage(enemy.atk, hero.def)
 
   let currentHeroHp = hero.hp
   let currentEnemyHp = enemy.hp
@@ -16,8 +15,12 @@ export function startBattle(enemy: Enemy): void {
 
   while (currentHeroHp > 0 && currentEnemyHp > 0) {
     turns++
-    currentEnemyHp -= heroDamagePerTurn
-    currentHeroHp -= enemyDamagePerTurn
+    const heroDamage = calcHeroDamage(hero, enemy)
+    currentEnemyHp -= heroDamage
+    if (currentEnemyHp <= 0) break
+
+    const enemyDamage = calcEnemyDamage(hero, enemy)
+    currentHeroHp -= enemyDamage
   }
 
   dispatch({ type: 'SET_HERO', hero: { hp: currentHeroHp } })

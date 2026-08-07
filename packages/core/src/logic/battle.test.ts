@@ -40,9 +40,11 @@ describe('startBattle', () => {
     // Turn 1: Hero deals 10. Enemy HP = 90. Enemy deals 5. Hero HP = 95.
     // Turn 2: Hero deals 10. Enemy HP = 80. Enemy deals 5. Hero HP = 90.
     // ...
-    // Turn 10: Hero deals 10. Enemy HP = 0. Hero wins. Hero HP = 50.
+    // Turn 10: Hero deals 10. Enemy HP = 0. Hero wins.
+    // Hero does NOT take damage on the last turn if enemy is defeated first.
+    // Total damage taken: 9 turns * 5 damage = 45.
 
-    expect(State.hero.hp).toBe(50) // Hero loses 5 HP per turn, wins in 10 turns (10 * 5 = 50 HP lost)
+    expect(State.hero.hp).toBe(55) // 100 - 45 = 55
     expect(State.battle).not.toBeNull()
     expect(State.battle?.enemyId).toBe('greenSlime')
     expect(State.battle?.enemyHp).toBeLessThanOrEqual(0)

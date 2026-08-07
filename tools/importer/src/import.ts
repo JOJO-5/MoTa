@@ -12,18 +12,33 @@ export function importTower(options: ImportOptions): void {
   const { sourceDir, outputDir, floorIds } = options
   mkdirSync(join(outputDir, 'floors'), { recursive: true })
 
-  const files = ['data.js', 'enemys.js', 'maps.js', 'items.js', 'events.js']
+  const files = ['enemys.js', 'maps.js', 'items.js', 'events.js']
   for (const file of files) {
     const srcPath = join(sourceDir, file)
     if (!existsSync(srcPath)) continue
     const code = readFileSync(srcPath, 'utf-8')
     const objs = extractDataObjects(code)
     const outName = file.replace('.js', '.json')
-    const outData: Record<string, unknown> = {}
-    for (const [key, value] of objs) {
-      outData[key] = value
+    const value = objs.get(file.replace('.js', ''))
+    if (value === undefined) continue
+    writeFileSync(join(outputDir, outName), JSON.stringify(value, null, 2))
+  }
+
+  const dataSrc = join(sourceDir, 'data.js')
+  if (existsSync(dataSrc)) {
+    const code = readFileSync(dataSrc, 'utf-8')
+    const objs = extractDataObjects(code)
+    const data = objs.get('data') as Record<string, unknown> | undefined
+    if (data) {
+      const main = data.main as Record<string, unknown> | undefined
+      if (main && Array.isArray(main.floorIds) && floorIds) {
+        main.floorIds = [...floorIds]
+        if (typeof main.startFloorId !== 'string' && floorIds.length > 0) {
+          main.startFloorId = floorIds[0]
+        }
+      }
+      writeFileSync(join(outputDir, 'data.json'), JSON.stringify(data, null, 2))
     }
-    writeFileSync(join(outputDir, outName), JSON.stringify(outData, null, 2))
   }
 
   const floorsDir = join(sourceDir, 'floors')

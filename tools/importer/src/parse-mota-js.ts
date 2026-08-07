@@ -9,15 +9,23 @@ function evaluate(code: string): unknown {
   }
 }
 
+function matchesAnyName(name: string, names: string[]): string | null {
+  if (names.includes(name)) return name
+  for (const n of names) {
+    if (name === n || name.startsWith(`${n}_`)) return n
+  }
+  return null
+}
+
 function extractVarDeclarations(node: any, result: Map<string, unknown>, names: string[]): void {
   if (node?.type === 'VariableDeclaration') {
     for (const decl of node.declarations) {
       if (decl.id?.type === 'Identifier') {
-        const name = decl.id.name
-        if (names.includes(name) && decl.init) {
+        const matched = matchesAnyName(decl.id.name, names)
+        if (matched && decl.init) {
           const value = evaluate(generateCode(decl.init))
           if (value !== undefined) {
-            result.set(name, value)
+            result.set(matched, value)
           }
         }
       }
