@@ -1,0 +1,101 @@
+import jsep from 'jsep'
+import { State } from '../state/store.js'
+
+export type ExpressionContext = {
+  hero: {
+    hp: number
+    atk: number
+    def: number
+    mdef: number
+    money: number
+    exp: number
+    level: number
+  }
+  flags: Record<string, unknown>
+  values: Record<string, number>
+}
+
+export function getContext(): ExpressionContext {
+  const { hero, flags, values } = State
+  return {
+    hero: {
+      hp: hero.hp,
+      atk: hero.atk,
+      def: hero.def,
+      mdef: hero.mdef,
+      money: hero.money,
+      exp: hero.exp,
+      level: hero.level,
+    },
+    flags,
+    values,
+  }
+}
+
+type JsepNode = {
+  type: string
+  [key: string]: unknown
+}
+
+export function evaluate(expression: string): number | boolean | string | null {
+  const ctx = getContext()
+  const ast = jsep(expression) as JsepNode
+
+  function evalNode(node: JsepNode): unknown {
+    switch (node.type) {
+      case 'Literal':
+        return node.value
+      case 'Identifier': {
+        const name = node.name as string
+        if (name === 'hero') return ctx.hero
+        if (name in ctx.hero) return (ctx.hero as Record<string, unknown>)[name]
+        if (name in ctx.flags) return ctx.flags[name]
+        if (name in ctx.values) return ctx.values[name]
+        return null
+      }
+      case 'BinaryExpression': {
+        const left = evalNode(node.left as JsepNode)
+        const right = evalNode(node.right as JsepNode)
+        const op = node.operator as string
+        if (op === '&&') return Boolean(left) && Boolean(right)
+        if (op === '||') return Boolean(left) || Boolean(right)
+        if (typeof left === 'string' || typeof right === 'string') {
+          if (op === '+') return String(left) + String(right)
+          return null
+        }
+        if (op === '==') return left === right
+        if (op === '!=') return left !== right
+        if (op === '<') return (left as number) < (right as number)
+        if (op === '<=') return (left as number) <= (right as number)
+        if (op === '>') return (left as number) > (right as number)
+        if (op === '>=') return (left as number) >= (right as number)
+        if (op === '+') return (left as number) + (right as number)
+        if (op === '-') return (left as number) - (right as number)
+        if (op === '*') return (left as number) * (right as number)
+        if (op === '/') return right !== 0 ? Math.floor((left as number) / (right as number)) : 0
+        if (op === '%') return (left as number) % (right as number)
+        return null
+      }
+      case 'UnaryExpression': {
+        const op = node.operator as string
+        const arg = evalNode(node.argument as JsepNode)
+        if (op === '!') return !arg
+        if (op === '-') return -(arg as number)
+        return null
+      }
+      case 'MemberExpression': {
+        const object = evalNode(node.object as JsepNode) as Record<string, unknown> | null
+        const propertyNode = node.property as JsepNode
+        const property = propertyNode.name as string
+        if (object && typeof object === 'object' && property in object) {
+          return object[property]
+        }
+        return null
+      }
+      default:
+        return null
+    }
+  }
+
+  return evalNode(ast) as number | boolean | string | null
+}

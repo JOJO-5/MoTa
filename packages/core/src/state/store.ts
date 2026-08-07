@@ -7,6 +7,7 @@ const INITIAL_HERO: HeroSnapshot = {
   hpMax: 1000,
   atk: 10,
   def: 10,
+  mdef: 0,
   money: 0,
   exp: 0,
   level: 1,
@@ -29,6 +30,7 @@ export const createInitialState = (floorId: string, x: number, y: number): GameS
   actors: [],
   flags: {},
   values: {},
+  enemys: {},
   battle: null,
   ui: { ...INITIAL_UI },
 })

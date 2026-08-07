@@ -1,5 +1,7 @@
 export type Direction = 'up' | 'down' | 'left' | 'right'
 
+import type { Enemy } from '@modern-mota/data'
+
 export interface Position {
   x: number
   y: number
@@ -10,6 +12,7 @@ export interface HeroSnapshot {
   hpMax: number
   atk: number
   def: number
+  mdef: number
   money: number
   exp: number
   level: number
@@ -38,6 +41,7 @@ export interface GameState {
   actors: ActorSnapshot[]
   flags: Record<string, unknown>
   values: Record<string, number>
+  enemys: Record<string, Enemy>
   battle: BattleSnapshot | null
   ui: UiSnapshot
 }
