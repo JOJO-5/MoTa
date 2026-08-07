@@ -10,6 +10,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
+  "dependencies": {
+    "phaser": "^3.80.1",
+    "@modern-mota/data": "workspace:*"
+  },
   "devDependencies": {
     "vitest": "^1.4.0"
   }
