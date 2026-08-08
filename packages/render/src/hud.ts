@@ -26,16 +26,19 @@ export class Hud {
 
   update(hero: HeroSnapshot) {
     this.statsEl.innerHTML = `
-      ❤️ ${hero.hp}/${hero.hpMax}
-      ⚔️ ATK:${hero.atk}
-      🛡️ DEF:${hero.def}
-      💰 ${hero.money}
-      ⭐ LV${hero.level}
+      <div class="mota-hud__stat"><span>HP</span><strong>${hero.hp}/${hero.hpMax}</strong></div>
+      <div class="mota-hud__stat"><span>ATK</span><strong>${hero.atk}</strong></div>
+      <div class="mota-hud__stat"><span>DEF</span><strong>${hero.def}</strong></div>
+      <div class="mota-hud__stat"><span>GOLD</span><strong>${hero.money}</strong></div>
+      <div class="mota-hud__stat"><span>LV</span><strong>${hero.level}</strong></div>
     `
     this.keysEl.innerHTML = `
-      🔑 ${Object.entries(hero.keys).map(([k, v]) => `${k}:${v}`).join(' ')}
+      <span class="mota-hud__section-label">KEYS</span>
+      ${Object.entries(hero.keys)
+        .map(([k, v]) => `<span class="mota-hud__key"><i>${k.replace('Key', '')}</i>${v}</span>`)
+        .join('')}
     `
-    this.itemsEl.innerHTML = `道具: ${hero.items.slice(0, 6).join(', ')}`
+    this.itemsEl.innerHTML = `<span class="mota-hud__section-label">RELICS</span><span>${hero.items.length ? hero.items.slice(0, 6).join(' · ') : '暂无装备'}</span>`
   }
 
   destroy() {

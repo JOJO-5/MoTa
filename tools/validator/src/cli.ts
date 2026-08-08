@@ -6,7 +6,7 @@ import { validateReferences } from './checks/references.js'
 import { validateBalance } from './checks/balance.js'
 
 function exists(path: string): boolean {
-  try { require('node:fs').accessSync(path); return true } catch { return false }
+  return existsSync(path)
 }
 
 function main() {
@@ -20,7 +20,7 @@ function main() {
       dir = join(process.cwd(), 'content', args[0])
     } else if (exists(args[0])) {
       dir = args[0]
-      towerId = args[0].split('/').pop() ?? args[0]
+      towerId = args[0].split(/[\\/]/).pop() ?? args[0]
     }
   }
 

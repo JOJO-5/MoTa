@@ -1,0 +1,1117 @@
+{
+  "floorId": "Dark2",
+  "title": "黑暗地带",
+  "name": "黑暗地带",
+  "width": 15,
+  "height": 15,
+  "canFlyTo": false,
+  "canFlyFrom": false,
+  "canUseQuickShop": false,
+  "cannotViewMap": true,
+  "cannotMoveDirectly": false,
+  "images": [],
+  "ratio": 1,
+  "defaultGround": "X10025",
+  "bgm": "The_Swamp_Troll.mp3",
+  "firstArrive": [
+    {
+      "type": "tip",
+      "text": "这些暗黑史莱姆好像需要构成某种形状……"
+    }
+  ],
+  "eachArrive": [],
+  "parallelDo": "",
+  "events": {
+    "7,2": [
+      {
+        "type": "animate",
+        "name": "starwithmoon"
+      },
+      {
+        "type": "animate",
+        "name": "explosionVX",
+        "async": true
+      },
+      {
+        "type": "sleep",
+        "time": 400,
+        "noSkip": true
+      },
+      {
+        "type": "hide",
+        "remove": true
+      },
+      "\t[菲利安,hero]终于可以松口气了……",
+      {
+        "type": "sleep",
+        "time": 500
+      },
+      {
+        "type": "playBgm",
+        "name": "Eastern_Night.mp3",
+        "keep": true
+      },
+      {
+        "type": "setCurtain",
+        "color": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "time": 1000,
+        "keep": true
+      },
+      {
+        "type": "setText",
+        "position": "center",
+        "align": "center"
+      },
+      "神秘组织的计划，因为菲利安的阻挠而失败了。",
+      "这次的阻挠让神秘组织内部损害严重，\n恐怕很长一段时间，他们都不能再大规模活动了。",
+      "人类的潜在危机，就这样在大家毫无察觉的情况下被化解。",
+      "菲利安也终于难得的能够放松下来，\n因为复活远古生物并不是那么容易的事。",
+      "但菲利安知道，神秘组织的野心，\n不会随着黑暗大晶石的破碎而消失。\n因为黑暗的力量，并不会因此而彻底消失。",
+      "“下一次调查，又会是什么时候呢？”",
+      "作者：史莱姆魔皇\n使用样板：HTML魔塔样板2.10.3\n样板提供者：艾之葵\n技术支持：HTML5造塔技术交流群群员\n本次完整版本：1.52（HTML）",
+      "谢谢各位的支持，再见！",
+      {
+        "type": "playBgm",
+        "name": "ArcaneVictory.mp3",
+        "keep": true
+      },
+      {
+        "type": "if",
+        "condition": "(flag:pzf===1)",
+        "true": [
+          {
+            "type": "win",
+            "reason": "特殊模式挑战通关，成功破坏黑暗晶石"
+          }
+        ]
+      },
+      {
+        "type": "if",
+        "condition": "(flag:赤炎杖路线===1)",
+        "true": [
+          {
+            "type": "win",
+            "reason": "赤炎杖通关，成功破坏黑暗晶石"
+          }
+        ],
+        "false": [
+          {
+            "type": "if",
+            "condition": "(flag:寒冰杖路线===1)",
+            "true": [
+              {
+                "type": "win",
+                "reason": "寒冰杖通关，成功破坏黑暗晶石"
+              }
+            ],
+            "false": [
+              {
+                "type": "win",
+                "reason": "无杖通关，成功破坏黑暗晶石"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "changeFloor": {},
+  "beforeBattle": {},
+  "afterBattle": {
+    "2,2": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "3,2": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,2": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,3": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,4": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "3,4": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "2,4": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "2,5": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "2,6": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "3,6": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,6": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,2": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "11,2": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,2": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,3": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,4": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,5": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,6": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "11,6": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,6": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,5": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,4": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,3": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,9": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,10": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,11": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,12": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "4,8": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,8": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,9": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "10,10": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "11,10": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,8": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,9": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,10": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,11": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "12,12": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "-=",
+        "value": "10"
+      }
+    ],
+    "2,3": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "+=",
+        "value": "1"
+      }
+    ],
+    "10,11": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "+=",
+        "value": "1"
+      }
+    ],
+    "11,12": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "+=",
+        "value": "1"
+      }
+    ],
+    "10,12": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "+=",
+        "value": "1"
+      }
+    ],
+    "3,8": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "+=",
+        "value": "1"
+      }
+    ],
+    "2,8": [
+      {
+        "type": "setValue",
+        "name": "flag:黑暗地带谜题",
+        "operator": "+=",
+        "value": "1"
+      }
+    ]
+  },
+  "afterGetItem": {},
+  "afterOpenDoor": {},
+  "autoEvent": {
+    "0,0": {
+      "0": {
+        "condition": "flag:黑暗地带谜题>=6",
+        "currentFloor": true,
+        "priority": 0,
+        "delayExecute": false,
+        "multiExecute": false,
+        "data": [
+          "黑暗大晶石的封印，就此解开……",
+          {
+            "type": "animate",
+            "name": "swordskill1",
+            "loc": [
+              6,
+              3
+            ],
+            "async": true
+          },
+          {
+            "type": "setBlock",
+            "number": "null",
+            "loc": [
+              [
+                6,
+                3
+              ]
+            ],
+            "async": true
+          },
+          {
+            "type": "animate",
+            "name": "swordskill1",
+            "loc": [
+              8,
+              3
+            ],
+            "async": true
+          },
+          {
+            "type": "setBlock",
+            "number": "null",
+            "loc": [
+              [
+                8,
+                3
+              ]
+            ],
+            "async": true
+          },
+          {
+            "type": "animate",
+            "name": "swordskill1",
+            "loc": [
+              7,
+              4
+            ],
+            "async": true
+          },
+          {
+            "type": "setBlock",
+            "number": "null",
+            "loc": [
+              [
+                7,
+                4
+              ]
+            ],
+            "async": true
+          },
+          {
+            "type": "animate",
+            "name": "swordskill1",
+            "loc": [
+              6,
+              5
+            ],
+            "async": true
+          },
+          {
+            "type": "setBlock",
+            "number": "null",
+            "loc": [
+              [
+                6,
+                5
+              ]
+            ],
+            "async": true
+          },
+          {
+            "type": "animate",
+            "name": "swordskill1",
+            "loc": [
+              8,
+              5
+            ],
+            "async": true
+          },
+          {
+            "type": "setBlock",
+            "number": "null",
+            "loc": [
+              [
+                8,
+                5
+              ]
+            ],
+            "async": true
+          },
+          {
+            "type": "openDoor",
+            "loc": [
+              7,
+              6
+            ],
+            "async": true
+          },
+          {
+            "type": "waitAsync",
+            "excludeAnimates": true
+          }
+        ]
+      },
+      "1": null
+    }
+  },
+  "cannotMove": {},
+  "cannotMoveIn": {},
+  "map": [
+    [
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      0,
+      366,
+      366,
+      366,
+      366,
+      366,
+      0,
+      0,
+      0,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      333,
+      333,
+      333,
+      366,
+      366,
+      500,
+      366,
+      366,
+      333,
+      333,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      333,
+      0,
+      333,
+      366,
+      333,
+      11,
+      333,
+      366,
+      333,
+      0,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      333,
+      333,
+      333,
+      366,
+      11,
+      333,
+      11,
+      366,
+      333,
+      0,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      333,
+      0,
+      0,
+      366,
+      333,
+      11,
+      333,
+      366,
+      333,
+      0,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      333,
+      333,
+      333,
+      366,
+      366,
+      85,
+      366,
+      366,
+      333,
+      333,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      333,
+      333,
+      333,
+      0,
+      0,
+      0,
+      0,
+      0,
+      333,
+      0,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      333,
+      0,
+      49,
+      0,
+      49,
+      0,
+      333,
+      0,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      333,
+      0,
+      0,
+      49,
+      0,
+      0,
+      333,
+      333,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      333,
+      0,
+      49,
+      0,
+      49,
+      0,
+      333,
+      0,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      333,
+      0,
+      0,
+      0,
+      0,
+      0,
+      333,
+      333,
+      333,
+      0,
+      10030
+    ],
+    [
+      10030,
+      0,
+      0,
+      0,
+      0,
+      0,
+      366,
+      0,
+      366,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10030
+    ],
+    [
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030,
+      10030
+    ]
+  ],
+  "bgmap": [],
+  "fgmap": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      419,
+      0,
+      419,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      11102,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      11102
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ]
+}

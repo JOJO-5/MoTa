@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export interface ReferencesResult {
@@ -17,13 +17,10 @@ export function validateReferences(dir: string): ReferencesResult {
 
   const floorsDir = join(dir, 'floors')
   const floorFiles: string[] = []
-  try {
-    const { readdirSync } = require('node:fs')
-    for (const f of readdirSync(floorsDir).filter((f: string) => f.endsWith('.json'))) {
-      floorFiles.push(f.replace('.json', ''))
-      allFloorIds.add(f.replace('.json', ''))
-    }
-  } catch {}
+  for (const f of readdirSync(floorsDir).filter((f: string) => f.endsWith('.json'))) {
+    floorFiles.push(f.replace('.json', ''))
+    allFloorIds.add(f.replace('.json', ''))
+  }
 
   const usedEnemyIds = new Set<string>()
   const usedItemIds = new Set<string>()
@@ -38,6 +35,7 @@ export function validateReferences(dir: string): ReferencesResult {
     }
 
     for (const eventList of Object.values(floor.events ?? {}) as unknown[][]) {
+      if (!Array.isArray(eventList)) continue
       for (const event of eventList) {
         if ((event as any).type === 'battle') usedEnemyIds.add((event as any).id)
         if ((event as any).type === 'getItem') usedItemIds.add((event as any).id)
@@ -45,21 +43,27 @@ export function validateReferences(dir: string): ReferencesResult {
     }
   }
 
-  const definedEnemyIds = new Set(Object.keys(JSON.parse(readFileSync(join(dir, 'enemys.json'), 'utf-8'))))
+  const definedEnemyIds = new Set(
+    Object.keys(JSON.parse(readFileSync(join(dir, 'enemys.json'), 'utf-8')))
+  )
   for (const id of usedEnemyIds) {
     if (!definedEnemyIds.has(id)) {
       errors.push(`enemy "${id}" referenced but not defined`)
     }
   }
 
-  const definedItemIds = new Set(Object.keys(JSON.parse(readFileSync(join(dir, 'items.json'), 'utf-8'))))
+  const definedItemIds = new Set(
+    Object.keys(JSON.parse(readFileSync(join(dir, 'items.json'), 'utf-8')))
+  )
   for (const id of usedItemIds) {
     if (!definedItemIds.has(id)) {
       errors.push(`item "${id}" referenced but not defined`)
     }
   }
 
-  const definedMapIds = new Set(Object.keys(JSON.parse(readFileSync(join(dir, 'maps.json'), 'utf-8'))).map(Number))
+  const definedMapIds = new Set(
+    Object.keys(JSON.parse(readFileSync(join(dir, 'maps.json'), 'utf-8'))).map(Number)
+  )
   for (const id of usedMapBlockIds) {
     if (!definedMapIds.has(id)) {
       warnings.push(`map block ${id} used but not defined in maps.json`)

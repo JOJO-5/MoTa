@@ -11,7 +11,7 @@
   "packageManager": "pnpm@9.15.9",
   "scripts": {
     "dev": "pnpm --filter @modern-mota/web dev",
-    "build": "pnpm -r build",
+    "build": "corepack pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter @modern-mota/web test:e2e",

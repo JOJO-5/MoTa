@@ -13,6 +13,9 @@ export function App() {
   const [screen, setScreen] = useState<Screen>('menu')
   const [towerReady, setTowerReady] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const viteEnv = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env
+  const showDevTools =
+    Boolean(viteEnv?.DEV) && new URLSearchParams(window.location.search).has('dev')
 
   useEffect(() => {
     if (screen !== 'game' || towerReady || loadError) return undefined
@@ -41,31 +44,39 @@ export function App() {
   return (
     <div className="app">
       {screen === 'menu' && (
-        <MainMenu
-          onStart={() => setScreen('game')}
-          onSettings={() => setScreen('settings')}
-        />
+        <MainMenu onStart={() => setScreen('game')} onSettings={() => setScreen('settings')} />
       )}
-      {screen === 'settings' && (
-        <Settings onClose={() => setScreen('menu')} />
-      )}
-      {screen === 'game' && (
-        towerReady ? (
+      {screen === 'settings' && <Settings onClose={() => setScreen('menu')} />}
+      {screen === 'game' &&
+        (towerReady ? (
           <GameCanvas onBackToMenu={backToMenu} />
         ) : loadError ? (
-          <div className="game-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+          <div
+            className="game-screen"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 12,
+            }}
+          >
             <p style={{ color: '#ff6b6b' }}>数据加载失败</p>
-            <pre style={{ maxWidth: 360, fontSize: 12, color: '#999', whiteSpace: 'pre-wrap' }}>{loadError}</pre>
+            <pre style={{ maxWidth: 360, fontSize: 12, color: '#999', whiteSpace: 'pre-wrap' }}>
+              {loadError}
+            </pre>
             <button onClick={backToMenu}>返回菜单</button>
           </div>
         ) : (
-          <div className="game-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            className="game-screen"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
             <p>加载中…</p>
           </div>
-        )
-      )}
-      <DevTools />
-      <Demo />
+        ))}
+      {showDevTools && <DevTools />}
+      {showDevTools && <Demo />}
     </div>
   )
 }

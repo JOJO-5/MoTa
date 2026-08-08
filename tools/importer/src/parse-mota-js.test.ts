@@ -31,4 +31,12 @@ describe('extractFloorObjects', () => {
     expect(result.has('MT0')).toBe(true)
     expect((result.get('MT0') as any).floorId).toBe('MT0')
   })
+
+  it('extracts direct main.floors assignments', () => {
+    const code = `main.floors.MT21 = {"floorId": "MT21", "width": 15, "height": 15};`
+    const result = extractFloorObjects(code)
+    expect(result.has('MT21')).toBe(true)
+    expect((result.get('MT21') as any).floorId).toBe('MT21')
+    expect((result.get('MT21') as any).width).toBe(15)
+  })
 })

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   MainSchema,
@@ -58,7 +58,7 @@ export function validateSchema(dir: string): SchemaResult {
 
   const floorsDir = join(dir, 'floors')
   if (existsSync(floorsDir)) {
-    const floorFiles = readdirSync(floorsDir).filter(f => f.endsWith('.json'))
+    const floorFiles = readdirSync(floorsDir).filter((f) => f.endsWith('.json'))
     for (const file of floorFiles) {
       const floorId = file.replace('.json', '')
       try {
@@ -71,13 +71,4 @@ export function validateSchema(dir: string): SchemaResult {
   }
 
   return { passed: errors.length === 0, errors }
-}
-
-function existsSync(path: string): boolean {
-  try {
-    require('node:fs').accessSync(path)
-    return true
-  } catch {
-    return false
-  }
 }

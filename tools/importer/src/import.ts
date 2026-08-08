@@ -8,6 +8,28 @@ export interface ImportOptions {
   floorIds?: string[]
 }
 
+function toCurrentMain(
+  legacyData: Record<string, unknown>,
+  floorIds?: string[]
+): Record<string, unknown> | undefined {
+  const legacyMain = legacyData.main as Record<string, unknown> | undefined
+  if (!legacyMain || !Array.isArray(legacyMain.floorIds)) return undefined
+
+  const ids = floorIds ? [...floorIds] : ([...legacyMain.floorIds] as string[])
+  const firstData = legacyData.firstData as Record<string, unknown> | undefined
+  const startFloorId = typeof firstData?.floorId === 'string' ? firstData.floorId : ids[0]
+
+  return {
+    floorIds: ids,
+    startFloorId,
+    tilesets: Array.isArray(legacyMain.tilesets) ? legacyMain.tilesets : [],
+    animates: Array.isArray(legacyMain.animates) ? legacyMain.animates : [],
+    bgms: Array.isArray(legacyMain.bgms) ? legacyMain.bgms : [],
+    sounds: Array.isArray(legacyMain.sounds) ? legacyMain.sounds : [],
+    portraits: [],
+  }
+}
+
 export function importTower(options: ImportOptions): void {
   const { sourceDir, outputDir, floorIds } = options
   mkdirSync(join(outputDir, 'floors'), { recursive: true })
@@ -30,22 +52,16 @@ export function importTower(options: ImportOptions): void {
     const objs = extractDataObjects(code)
     const data = objs.get('data') as Record<string, unknown> | undefined
     if (data) {
-      const main = data.main as Record<string, unknown> | undefined
-      if (main && Array.isArray(main.floorIds) && floorIds) {
-        main.floorIds = [...floorIds]
-        if (typeof main.startFloorId !== 'string' && floorIds.length > 0) {
-          main.startFloorId = floorIds[0]
-        }
-      }
-      writeFileSync(join(outputDir, 'data.json'), JSON.stringify(data, null, 2))
+      const main = toCurrentMain(data, floorIds)
+      if (main) writeFileSync(join(outputDir, 'data.json'), JSON.stringify(main, null, 2))
     }
   }
 
   const floorsDir = join(sourceDir, 'floors')
   if (existsSync(floorsDir)) {
-    const allFloorFiles = readdirSync(floorsDir).filter(f => f.endsWith('.js'))
+    const allFloorFiles = readdirSync(floorsDir).filter((f) => f.endsWith('.js'))
     const targetFloors = floorIds
-      ? allFloorFiles.filter(f => {
+      ? allFloorFiles.filter((f) => {
           const name = f.replace('.js', '')
           return floorIds.includes(name)
         })

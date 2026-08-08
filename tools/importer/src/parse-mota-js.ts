@@ -9,6 +9,44 @@ function evaluate(code: string): unknown {
   }
 }
 
+function evaluateLiteralNode(node: any): unknown {
+  if (!node) return undefined
+  if (node.type === 'Literal') return node.value
+  if (node.type === 'UnaryExpression') {
+    const argument = evaluateLiteralNode(node.argument)
+    if (argument === undefined) return undefined
+    if (node.operator === '-') return -Number(argument)
+    if (node.operator === '+') return Number(argument)
+    if (node.operator === '!') return !argument
+    if (node.operator === '~') return ~Number(argument)
+    return undefined
+  }
+  if (node.type === 'ArrayExpression') {
+    const values: unknown[] = []
+    for (const element of node.elements ?? []) {
+      const value = evaluateLiteralNode(element)
+      if (value === undefined && element?.type !== 'Literal') return undefined
+      values.push(value)
+    }
+    return values
+  }
+  if (node.type === 'ObjectExpression') {
+    const result: Record<string, unknown> = {}
+    for (const property of node.properties ?? []) {
+      if (property.type !== 'Property' || property.kind !== 'init') return undefined
+      const key = property.computed
+        ? evaluateLiteralNode(property.key)
+        : (property.key?.name ?? property.key?.value)
+      if (typeof key !== 'string' && typeof key !== 'number') return undefined
+      const value = evaluateLiteralNode(property.value)
+      if (value === undefined && property.value?.type !== 'Literal') return undefined
+      result[String(key)] = value
+    }
+    return result
+  }
+  return undefined
+}
+
 function matchesAnyName(name: string, names: string[]): string | null {
   if (names.includes(name)) return name
   for (const n of names) {
@@ -17,13 +55,28 @@ function matchesAnyName(name: string, names: string[]): string | null {
   return null
 }
 
+function getMemberPath(node: any): string[] | null {
+  if (!node || node.type !== 'MemberExpression' || node.computed) return null
+
+  const property = node.property?.type === 'Identifier' ? node.property.name : null
+  if (!property) return null
+
+  if (node.object?.type === 'Identifier') {
+    return [node.object.name, property]
+  }
+
+  const parentPath = getMemberPath(node.object)
+  return parentPath ? [...parentPath, property] : null
+}
+
 function extractVarDeclarations(node: any, result: Map<string, unknown>, names: string[]): void {
   if (node?.type === 'VariableDeclaration') {
     for (const decl of node.declarations) {
       if (decl.id?.type === 'Identifier') {
         const matched = matchesAnyName(decl.id.name, names)
         if (matched && decl.init) {
-          const value = evaluate(generateCode(decl.init))
+          const literalValue = evaluateLiteralNode(decl.init)
+          const value = literalValue ?? evaluate(generateCode(decl.init))
           if (value !== undefined) {
             result.set(matched, value)
           }
@@ -48,7 +101,8 @@ function findTopLevelAssignments(code: string, names: string[]): Map<string, unk
           const objName = left.object?.name
           const propName = left.property?.name
           if (objName && propName && names.includes(objName)) {
-            const value = evaluate(generateCode(expr.right))
+            const literalValue = evaluateLiteralNode(expr.right)
+            const value = literalValue ?? evaluate(generateCode(expr.right))
             if (value !== undefined) {
               result.set(propName, value)
             }
@@ -73,15 +127,17 @@ function generateCode(node: Expression): string {
       .map((prop) => {
         const key = prop.computed
           ? `[${generateCode(prop.key as Expression)}]`
-          : (prop.key as any).name ?? (prop.key as any).value ?? JSON.stringify(prop.key)
+          : prop.key.type === 'Identifier'
+            ? prop.key.name
+            : JSON.stringify((prop.key as any).value)
         const val = generateCode(prop.value as Expression)
         return `${key}: ${val}`
       })
     return `{ ${pairs.join(', ')} }`
   }
   if (node.type === 'ArrayExpression') {
-    const arr = (node as any)
-    return `[${(arr.elements || []).map((el: Expression | null) => el ? generateCode(el) : '').join(', ')}]`
+    const arr = node as any
+    return `[${(arr.elements || []).map((el: Expression | null) => (el ? generateCode(el) : '')).join(', ')}]`
   }
   if (node.type === 'Literal') return JSON.stringify((node as any).value)
   if (node.type === 'Identifier') return (node as any).name
@@ -110,6 +166,26 @@ export function extractFloorObjects(code: string): Map<string, unknown> {
       result.set(key, value)
     }
   }
+
+  try {
+    const ast = parse(code, { ecmaVersion: 'latest', sourceType: 'module' }) as Program
+    for (const node of ast.body) {
+      if (node.type !== 'ExpressionStatement') continue
+      const expr = (node as any).expression
+      if (expr?.type !== 'AssignmentExpression') continue
+
+      const path = getMemberPath(expr.left)
+      if (!path || path[0] !== 'main' || path[1] !== 'floors' || !path[2]) continue
+
+      const value = evaluateLiteralNode(expr.right)
+      if (value !== undefined) {
+        result.set(path[2], value)
+      }
+    }
+  } catch {
+    // parse error
+  }
+
   return result
 }
 

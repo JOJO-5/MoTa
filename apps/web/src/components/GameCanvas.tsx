@@ -24,7 +24,9 @@ export function GameCanvas({ onBackToMenu }: Props) {
     <div className="game-screen">
       <div className="game-container" ref={containerRef} />
       <div className="game-hud-top">
-        <button className="back-btn" onClick={onBackToMenu}>≡</button>
+        <button className="back-btn" aria-label="返回主菜单" onClick={onBackToMenu}>
+          ←
+        </button>
       </div>
     </div>
   )
