@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import type { Direction } from '@modern-mota/core'
-import { GAME_WIDTH } from '../constants.js'
+import { CANVAS_HEIGHT } from '../constants.js'
 
 export class VirtualPad {
   private scene: Phaser.Scene
@@ -14,7 +14,9 @@ export class VirtualPad {
     this.scene = scene
     this.onMove = onMove
     this.onAction = onAction ?? null
-    this.dpadCenter = { x: 60, y: GAME_WIDTH - 60 }
+    // Keep the controls inside the fixed Phaser world. CSS scales the whole
+    // canvas on phones, so these coordinates remain crisp and proportional.
+    this.dpadCenter = { x: 74, y: CANVAS_HEIGHT - 76 }
     this.container = scene.add.container(0, 0)
     this.container.setScrollFactor(0)
     this.container.setDepth(400)
@@ -24,8 +26,8 @@ export class VirtualPad {
   private createDPad() {
     const cx = this.dpadCenter.x
     const cy = this.dpadCenter.y
-    const btnSize = 36
-    const gap = 4
+    const btnSize = 48
+    const gap = 6
 
     const dirs: { dir: Direction; dx: number; dy: number }[] = [
       { dir: 'up', dx: 0, dy: -1 },
@@ -55,12 +57,12 @@ export class VirtualPad {
     if (this.onAction) {
       const ag = this.scene.add.graphics()
       ag.fillStyle(0xffff00, 0.3)
-      ag.fillCircle(cx + 80, cy, 28)
+      ag.fillCircle(cx + 108, cy, 32)
       ag.lineStyle(2, 0xffff00, 0.8)
-      ag.strokeCircle(cx + 80, cy, 28)
+      ag.strokeCircle(cx + 108, cy, 32)
       this.container.add(ag)
 
-      const azone = this.scene.add.zone(cx + 80, cy, 56, 56)
+      const azone = this.scene.add.zone(cx + 108, cy, 64, 64)
       azone.setInteractive({ useHandCursor: true })
       azone.on('pointerdown', () => this.onAction?.())
       this.container.add(azone)

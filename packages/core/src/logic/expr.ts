@@ -13,10 +13,14 @@ export type ExpressionContext = {
   }
   flags: Record<string, unknown>
   values: Record<string, number>
+  items: Record<string, number>
+  status: Record<string, unknown>
 }
 
 export function getContext(): ExpressionContext {
   const { hero, flags, values } = State
+  const items: Record<string, number> = {}
+  for (const itemId of hero.items) items[itemId] = 1
   return {
     hero: {
       hp: hero.hp,
@@ -29,6 +33,8 @@ export function getContext(): ExpressionContext {
     },
     flags,
     values,
+    items,
+    status: { ...hero },
   }
 }
 
@@ -42,8 +48,10 @@ function preprocessExpression(expression: string): string {
   // flag:name -> flags.name
   // status:name -> status.name (resolved in context if available)
   return expression
-    .replace(/\bflag:(\w+)/g, 'flags.$1')
-    .replace(/\bstatus:(\w+)/g, 'status.$1')
+    .replace(/flag:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'flags.$1')
+    .replace(/switch:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'flags.$1')
+    .replace(/status:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'status.$1')
+    .replace(/item:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'items.$1')
 }
 
 export function evaluate(expression: string): number | boolean | string | null {
@@ -66,8 +74,9 @@ export function evaluate(expression: string): number | boolean | string | null {
         if (name === 'hero') return ctx.hero
         if (name in ctx.hero) return (ctx.hero as Record<string, unknown>)[name]
         if (name === 'flags') return ctx.flags
+        if (name === 'items') return ctx.items
+        if (name === 'status') return ctx.status
         if (name in ctx.flags) return ctx.flags[name]
-        if (name === 'status') return { hard: 1, floorId: '' }
         if (name in ctx.values) return ctx.values[name]
         return null
       }

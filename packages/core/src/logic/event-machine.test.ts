@@ -73,4 +73,38 @@ describe('eventMachine', () => {
     expect(State.flags.talked).toBe(true)
     expect(State.ui.modal).toBeNull()
   })
+
+  it('keeps legacy value operators and status/flag prefixes working', () => {
+    const events = [
+      { type: 'setValue', name: 'flag:ancientSwitch', value: '1' },
+      { type: 'setValue', name: 'flag:ancientSwitch', operator: '+=', value: '2' },
+      { type: 'setValue', name: 'status:atk', operator: '+=', value: '5' },
+      { type: 'setValue', name: 'item:oldKey', operator: '+=', value: '1' },
+    ] as Event[]
+
+    eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: events.length })
+
+    expect(State.flags.ancientSwitch).toBe(3)
+    expect(State.hero.atk).toBe(15)
+    expect(State.values['item:oldKey']).toBe(1)
+  })
+
+  it('runs a legacy choice branch selected by the mobile/keyboard action flow', () => {
+    const events = [{
+      type: 'choices',
+      text: '选择路线',
+      choices: [
+        { text: '左路', action: [{ type: 'setFlag', name: 'route', value: 'left' }] },
+        { text: '右路', action: [{ type: 'setFlag', name: 'route', value: 'right' }] },
+      ],
+    }] as Event[]
+
+    eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 1 })
+    expect(eventMachine.getState()).toBe('waiting')
+    eventMachine.moveChoice('down')
+    eventMachine.resume()
+
+    expect(State.flags.route).toBe('right')
+    expect(eventMachine.getState()).toBe('idle')
+  })
 })

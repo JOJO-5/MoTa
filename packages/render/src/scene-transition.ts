@@ -4,6 +4,7 @@ import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
 import { KeyboardInput } from './input/keyboard.js'
+import { VirtualPad } from './input/virtual-pad.js'
 import { gameStore, moveHero, eventMachine, dispatch, pickUpItem, battleEnemy } from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
 
@@ -12,6 +13,7 @@ export class GameScene extends Phaser.Scene {
   private cameraSystem!: CameraSystem
   private heroSprite!: HeroSprite
   private keyboardInput!: KeyboardInput
+  private virtualPad: VirtualPad | null = null
   private gameLoop: GameLoop | null = null
   private unsubscribers: (() => void)[] = []
   private currentFloor: Floor | null = null
@@ -26,7 +28,7 @@ export class GameScene extends Phaser.Scene {
     const loadFloorFromState = () => {
       const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
         floors: Record<string, Floor>
-        maps: Record<string, { cls: string; id: string; doorInfo?: unknown }>
+        maps: Record<string, { cls: string; id: string; trigger?: string; doorInfo?: unknown }>
       } | null
       console.log('[GameScene] towerData:', !!towerData)
       if (!towerData) return
@@ -78,6 +80,19 @@ export class GameScene extends Phaser.Scene {
       }
     )
 
+    // Phaser's touch input is enabled on mobile browsers, but it does not
+    // provide a game-specific movement UI. Mount the pixel-styled pad only
+    // for coarse/touch pointers so desktop play remains keyboard-first.
+    if (this.isTouchDevice()) {
+      this.virtualPad = new VirtualPad(
+        this,
+        (direction) => this.tryMove(direction),
+        () => {
+          if (eventMachine.getState() === 'waiting') eventMachine.resume()
+        }
+      )
+    }
+
     // Mount DOM UI layer (HP bar, floor name, messages) inside the game container
     const container = (this.game.canvas?.parentElement as HTMLElement | null) ?? document.body
     this.gameLoop = new GameLoop(this, container)
@@ -98,17 +113,67 @@ export class GameScene extends Phaser.Scene {
   }
 
   tryMove(direction: 'up' | 'down' | 'left' | 'right') {
+    if (eventMachine.getState() === 'waiting') {
+      eventMachine.moveChoice(direction)
+      return
+    }
     if (!this.currentFloor) return
     // Block movement while a modal dialog is open
-    if (eventMachine.getState() === 'waiting' || gameStore.getState().state.ui.modal) return
+    if (gameStore.getState().state.ui.modal) return
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
-      maps: Record<string, { cls: string; id: string; doorInfo?: unknown }>
+      maps: Record<string, { cls: string; id: string; trigger?: string; doorInfo?: unknown }>
     } | null
     const maps = towerData?.maps ?? {}
 
     const moved = moveHero(direction, this.currentFloor, maps)
     if (moved) {
       this.triggerEventsAtHero()
+    } else {
+      this.tryOpenDoor(direction, maps)
+    }
+  }
+
+  /** Open legacy mota-js doors when the player taps into them. */
+  private tryOpenDoor(
+    direction: 'up' | 'down' | 'left' | 'right',
+    maps: Record<string, { cls: string; id: string; trigger?: string; doorInfo?: unknown }>
+  ) {
+    if (!this.currentFloor) return
+    const { state } = gameStore.getState()
+    const next = { ...state.position }
+    if (direction === 'up') next.y--
+    if (direction === 'down') next.y++
+    if (direction === 'left') next.x--
+    if (direction === 'right') next.x++
+    const tileId = this.currentFloor.map[next.y]?.[next.x]
+    const entry = maps[String(tileId)]
+    const doorInfo = entry?.doorInfo as { keys?: Record<string, number> } | undefined
+    if (!entry || entry.trigger !== 'openDoor' || !doorInfo) return
+
+    const required = Object.entries(doorInfo.keys ?? {}).find(([, count]) => count > 0)
+    if (required && (state.hero.keys[required[0]] ?? 0) < required[1]) {
+      dispatch({ type: 'SET_UI', ui: { floorMsg: `需要${required[0]}×${required[1]}` } })
+      return
+    }
+    if (required) {
+      dispatch({
+        type: 'SET_HERO',
+        hero: { keys: { ...state.hero.keys, [required[0]]: (state.hero.keys[required[0]] ?? 0) - required[1] } },
+      })
+    }
+
+    this.currentFloor.map[next.y][next.x] = 0
+    dispatch({ type: 'SET_UI', ui: { floorMsg: `${entry.id} 已开启` } })
+    this.rerenderTiles()
+    const afterOpen = this.currentFloor.afterOpenDoor?.[`${next.x},${next.y}`]
+    if (afterOpen?.length) {
+      eventMachine.start(afterOpen, {
+        floorId: this.currentFloor.floorId,
+        x: next.x,
+        y: next.y,
+        eventIndex: 0,
+        eventCount: afterOpen.length,
+      })
     }
   }
 
@@ -242,8 +307,19 @@ export class GameScene extends Phaser.Scene {
     this.unsubscribers.forEach((unsub) => unsub())
     this.unsubscribers = []
     this.keyboardInput?.destroy()
+    this.virtualPad?.destroy()
+    this.virtualPad = null
     this.gameLoop?.stop()
     this.gameLoop = null
+  }
+
+  private isTouchDevice() {
+    if (typeof window === 'undefined') return false
+    return Boolean(
+      this.sys.game.device.input.touch ||
+      window.matchMedia?.('(pointer: coarse)').matches ||
+      'ontouchstart' in window
+    )
   }
 
   loadFloor(floor: Floor) {
