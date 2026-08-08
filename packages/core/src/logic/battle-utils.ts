@@ -3,7 +3,8 @@ import type { HeroSnapshot } from '../types.js'
 import type { Enemy } from '@modern-mota/data'
 
 export function hasSpecial(enemy: Enemy, specialName: string): boolean {
-  return enemy.special?.includes(specialName) ?? false
+  const special = enemy.special as unknown
+  return Array.isArray(special) && special.includes(specialName)
 }
 
 export function calcHeroDamage(hero: HeroSnapshot, enemy: Enemy): number {

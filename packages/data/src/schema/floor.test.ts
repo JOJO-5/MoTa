@@ -35,7 +35,7 @@ describe('FloorSchema', () => {
     expect(parsed.events['5,5'][0].type).toBe('battle')
   })
 
-  it('rejects unknown event types', () => {
+  it('accepts unknown event types (permissive schema)', () => {
     const floor = {
       floorId: 'MT1',
       title: '二层',
@@ -47,7 +47,9 @@ describe('FloorSchema', () => {
         '5,5': [{ type: 'unknownType', data: 'test' }],
       },
     }
-    expect(() => FloorSchema.parse(floor)).toThrow()
+    // 宽松 schema:未知事件类型被兜底接受,不阻断数据加载
+    const parsed = FloorSchema.parse(floor)
+    expect(parsed.events['5,5']).toHaveLength(1)
   })
 
   it('parses changeFloor data', () => {

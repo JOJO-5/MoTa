@@ -12,12 +12,31 @@ export type Screen = 'menu' | 'game' | 'settings' | 'save'
 export function App() {
   const [screen, setScreen] = useState<Screen>('menu')
   const [towerReady, setTowerReady] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (screen === 'game' && !towerReady) {
-      initTower('mota-2014').then(() => setTowerReady(true))
+    if (screen !== 'game' || towerReady || loadError) return undefined
+    let cancelled = false
+    initTower('mota-2014')
+      .then(() => {
+        if (!cancelled) setTowerReady(true)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          const msg = err instanceof Error ? err.message : String(err)
+          setLoadError(msg)
+        }
+      })
+    return () => {
+      cancelled = true
     }
-  }, [screen, towerReady])
+  }, [screen, towerReady, loadError])
+
+  const backToMenu = () => {
+    setTowerReady(false)
+    setLoadError(null)
+    setScreen('menu')
+  }
 
   return (
     <div className="app">
@@ -31,7 +50,19 @@ export function App() {
         <Settings onClose={() => setScreen('menu')} />
       )}
       {screen === 'game' && (
-        <GameCanvas onBackToMenu={() => { setTowerReady(false); setScreen('menu') }} />
+        towerReady ? (
+          <GameCanvas onBackToMenu={backToMenu} />
+        ) : loadError ? (
+          <div className="game-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+            <p style={{ color: '#ff6b6b' }}>数据加载失败</p>
+            <pre style={{ maxWidth: 360, fontSize: 12, color: '#999', whiteSpace: 'pre-wrap' }}>{loadError}</pre>
+            <button onClick={backToMenu}>返回菜单</button>
+          </div>
+        ) : (
+          <div className="game-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p>加载中…</p>
+          </div>
+        )
       )}
       <DevTools />
       <Demo />
