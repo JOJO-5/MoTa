@@ -49,7 +49,6 @@ export class VirtualPad {
       const zone = this.scene.add.zone(bx, by, btnSize, btnSize)
       zone.setInteractive({ useHandCursor: true })
       zone.on('pointerdown', () => this.onMove(dir))
-      zone.on('pointerover', () => this.onMove(dir))
       this.container.add(zone)
       this.buttons.set(dir, g)
     })
