@@ -1,5 +1,3 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { z } from 'zod'
 import {
   MainSchema,
@@ -10,11 +8,6 @@ import {
 } from './schema/index.js'
 import type { TowerContent, LoadOptions } from './types.js'
 export type { TowerContent, LoadOptions }
-
-async function readJson(path: string): Promise<unknown> {
-  const content = await readFile(path, 'utf-8')
-  return JSON.parse(content)
-}
 
 function deepFreeze<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') return obj
@@ -27,18 +20,24 @@ function deepFreeze<T>(obj: T): T {
   return obj
 }
 
+async function fetchJson(url: string): Promise<unknown> {
+  const resp = await fetch(url)
+  if (!resp.ok) throw new Error(`Failed to fetch ${url}: ${resp.status}`)
+  return resp.json()
+}
+
 export async function loadTowerContent(
-  root: string,
+  baseUrl: string,
   options: LoadOptions = {}
 ): Promise<TowerContent> {
   const { validate = true, freeze = true } = options
 
   const [mainRaw, enemysRaw, mapsRaw, itemsRaw, eventsRaw] = await Promise.all([
-    readJson(join(root, 'data.json')),
-    readJson(join(root, 'enemys.json')),
-    readJson(join(root, 'maps.json')),
-    readJson(join(root, 'items.json')),
-    readJson(join(root, 'events.json')).catch(() => ({})),
+    fetchJson(`${baseUrl}/data.json`),
+    fetchJson(`${baseUrl}/enemys.json`),
+    fetchJson(`${baseUrl}/maps.json`),
+    fetchJson(`${baseUrl}/items.json`),
+    fetchJson(`${baseUrl}/events.json`).catch(() => ({})),
   ])
 
   const main = validate
@@ -48,7 +47,7 @@ export async function loadTowerContent(
   const floorIds = main.floorIds
   const floorResults = await Promise.all(
     floorIds.map(async (floorId) => {
-      const floorRaw = await readJson(join(root, 'floors', `${floorId}.json`))
+      const floorRaw = await fetchJson(`${baseUrl}/floors/${floorId}.json`)
       const floor = validate
         ? FloorSchema.parse(floorRaw)
         : floorRaw as z.infer<typeof FloorSchema>
@@ -61,7 +60,7 @@ export async function loadTowerContent(
     floors[floorId] = freeze ? deepFreeze(floor) : floor
   }
 
-  let result: TowerContent = {
+  const result: TowerContent = {
     main: freeze ? deepFreeze(validate ? main : mainRaw as z.infer<typeof MainSchema>) : main,
     enemys: freeze ? deepFreeze(enemysRaw as Record<string, z.infer<typeof EnemySchema>>) : enemysRaw as Record<string, z.infer<typeof EnemySchema>>,
     maps: freeze ? deepFreeze(mapsRaw as Record<string, z.infer<typeof MapBlockSchema>>) : mapsRaw as Record<string, z.infer<typeof MapBlockSchema>>,
@@ -71,6 +70,5 @@ export async function loadTowerContent(
   }
 
   if (freeze) deepFreeze(result)
-
   return result
 }

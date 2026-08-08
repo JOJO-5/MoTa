@@ -1,6 +1,6 @@
 import { gameStore, dispatch } from '@modern-mota/core'
 import type { GameState } from '@modern-mota/core'
-import type { Floor } from '@modern-mota/data'
+import type { Floor, TowerContent } from '@modern-mota/data'
 import { loadTowerContent } from '@modern-mota/data'
 
 export type StateListener = (state: GameState) => void
@@ -11,7 +11,7 @@ export function subscribeState(listener: StateListener) {
   return () => listeners.delete(listener)
 }
 
-let towerData: Awaited<ReturnType<typeof loadTowerContent>> | null = null
+let towerData: TowerContent | null = null
 
 export async function initTower(gameId: string) {
   const root = `./content/${gameId}`

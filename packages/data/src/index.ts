@@ -1,3 +1,5 @@
 export * from './schema/index.js'
-export * from './loader.js'
+export * from './types.js'
+export { loadTowerContent } from './loader-browser.js'
+export type { TowerContent, LoadOptions } from './types.js'
 export const DATA_VERSION = '0.1.0'

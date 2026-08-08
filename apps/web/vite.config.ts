@@ -22,5 +22,11 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     target: 'es2022',
+    rollupOptions: {
+      external: [],
+    },
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
   },
 })

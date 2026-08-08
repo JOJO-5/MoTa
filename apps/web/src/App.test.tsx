@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { App } from './App'
+
+vi.mock('@modern-mota/render', () => ({
+  createGame: vi.fn(() => ({
+    destroy: vi.fn(),
+  })),
+}))
 
 describe('App', () => {
   it('renders the title', () => {
