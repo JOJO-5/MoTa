@@ -5,6 +5,7 @@ import type { Floor } from '@modern-mota/data'
 export type MapBlockInfo = {
   cls: string
   id: string
+  canPass?: boolean
   doorInfo?: unknown
 }
 
@@ -20,7 +21,8 @@ const BLOCKING_TERRAIN_IDS = new Set([
  *
  * Rules (matching original mota-js behaviour):
  * - 0 is always passable.
- * - Tileset ids (>= 10000) are blocking by default (used for walls).
+ * - Any tile with `canPass: true` is passable (e.g. stairs mapped as tileset tiles).
+ * - Tileset ids (>= 10000) are blocking by default (used for walls), unless canPass.
  * - Any tile with `doorInfo` is a wall/door and blocks.
  * - Specific terrain ids known to be walls block.
  * - Everything else (items, enemies, npcs, autotiles, stairs) is passable.
@@ -30,9 +32,11 @@ export function isBlocked(
   maps: Record<string, MapBlockInfo> | undefined | null
 ): boolean {
   if (tileId === 0) return false
-  if (tileId >= 10000) return true
 
   const entry = maps?.[String(tileId)]
+  if (entry?.canPass) return false
+
+  if (tileId >= 10000) return true
   if (!entry) return false
 
   if (entry.doorInfo != null) return true
@@ -58,7 +62,7 @@ function isCannotMove(
 
 export function moveHero(
   direction: Direction,
-  floor: Pick<Floor, 'map' | 'cannotMove'>,
+  floor: Pick<Floor, 'map' | 'cannotMove' | 'changeFloor'>,
   maps?: Record<string, MapBlockInfo> | null
 ): boolean {
   const { position } = State
@@ -85,9 +89,10 @@ export function moveHero(
     return false
   }
 
-  // Validate collision
+  // Validate collision (stairs listed in changeFloor are always passable)
+  const isStair = floor.changeFloor?.[`${nextPos.x},${nextPos.y}`] != null
   const targetTile = floorMap[nextPos.y][nextPos.x]
-  if (isBlocked(targetTile, maps)) {
+  if (!isStair && isBlocked(targetTile, maps)) {
     return false
   }
 

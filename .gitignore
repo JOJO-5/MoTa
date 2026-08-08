@@ -1,6 +1,7 @@
 node_modules
 dist
 .turbo
+.reasonix/
 .DS_Store
 *.log
 .env

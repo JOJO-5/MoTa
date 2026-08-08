@@ -4,13 +4,15 @@ import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
 import { KeyboardInput } from './input/keyboard.js'
-import { gameStore, moveHero, eventMachine } from '@modern-mota/core'
+import { gameStore, moveHero, eventMachine, dispatch, pickUpItem, battleEnemy } from '@modern-mota/core'
+import { GameLoop } from './game-loop.js'
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
   private cameraSystem!: CameraSystem
   private heroSprite!: HeroSprite
   private keyboardInput!: KeyboardInput
+  private gameLoop: GameLoop | null = null
   private unsubscribers: (() => void)[] = []
   private currentFloor: Floor | null = null
 
@@ -38,8 +40,10 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    // Zustand v4 subscribe listener signature is (state, previousState):
+    // first arg is the NEW state, second is the OLD one.
     this.unsubscribers.push(
-      gameStore.subscribe((_prev, next) => {
+      gameStore.subscribe((next, _prev) => {
         console.log('[GameScene] Zustand:', next.state.floorId)
         if (next.state.floorId && next.state.floorId !== this.currentFloor?.floorId) {
           loadFloorFromState()
@@ -49,7 +53,7 @@ export class GameScene extends Phaser.Scene {
 
     // Sync hero sprite with store position/direction
     this.unsubscribers.push(
-      gameStore.subscribe((prev, next) => {
+      gameStore.subscribe((next, prev) => {
         if (!this.heroSprite) return
         if (prev.state.position.x !== next.state.position.x || prev.state.position.y !== next.state.position.y) {
           this.heroSprite.setPosition(next.state.position.x, next.state.position.y)
@@ -65,9 +69,19 @@ export class GameScene extends Phaser.Scene {
       this.tryMove(direction)
     })
 
+    // Mount DOM UI layer (HP bar, floor name, messages) inside the game container
+    const container = (this.game.canvas?.parentElement as HTMLElement | null) ?? document.body
+    this.gameLoop = new GameLoop(this, container)
+
+    // Cleanup on scene shutdown
+    this.events.once('shutdown', () => {
+      this.shutdown()
+    })
+
     // Expose for automated end-to-end testing
     if (typeof window !== 'undefined') {
       ;(window as unknown as Record<string, unknown>).__gameScene = this
+      ;(window as unknown as Record<string, unknown>).__gameStore = gameStore
     }
 
     loadFloorFromState()
@@ -91,6 +105,11 @@ export class GameScene extends Phaser.Scene {
     const { state } = gameStore.getState()
     const pos = state.position
     const key = `${pos.x},${pos.y}`
+    const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      maps: Record<string, { cls: string; id: string; doorInfo?: unknown }>
+      items: Record<string, unknown>
+      enemys: Record<string, unknown>
+    } | null
 
     // Trigger changeFloor (stairs)
     const changeFloor = (this.currentFloor.changeFloor as Record<string, Record<string, unknown>> | undefined)?.[key]
@@ -117,6 +136,43 @@ export class GameScene extends Phaser.Scene {
         eventCount: tileEvents.length,
       })
     }
+
+    // Step-on interactions: pick up items, fight enemies
+    if (!towerData) return
+    const tileId = this.currentFloor.map[pos.y]?.[pos.x]
+    const entry = towerData.maps[String(tileId)]
+    if (!entry) return
+
+    let result: { message: string; consumed: boolean } | null = null
+    if (entry.cls === 'items') {
+      result = pickUpItem(entry.id, towerData.items as never)
+    } else if (entry.cls === 'enemys') {
+      result = battleEnemy(entry.id, towerData.enemys as never)
+    }
+
+    if (result) {
+      if (result.consumed) {
+        dispatch({ type: 'COLLECT_TILE', floorId: this.currentFloor.floorId, x: pos.x, y: pos.y })
+      }
+      dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
+      this.rerenderTiles()
+    }
+  }
+
+  /** Re-render the tile layer, skipping tiles that were picked up / cleared. */
+  private rerenderTiles() {
+    if (!this.currentFloor) return
+    const { state } = gameStore.getState()
+    const collected = state.collectedTiles[this.currentFloor.floorId] ?? []
+    this.tileMap.render(
+      this.currentFloor.map,
+      this.currentFloor.bgmap,
+      this.currentFloor.fgmap,
+      this.currentFloor.defaultGround || null,
+      collected
+    )
+    // Keep hero above freshly added tiles
+    this.heroSprite?.container.setDepth(10)
   }
 
   shutdown() {
@@ -124,6 +180,8 @@ export class GameScene extends Phaser.Scene {
     this.unsubscribers.forEach((unsub) => unsub())
     this.unsubscribers = []
     this.keyboardInput?.destroy()
+    this.gameLoop?.stop()
+    this.gameLoop = null
   }
 
   loadFloor(floor: Floor) {
@@ -138,7 +196,8 @@ export class GameScene extends Phaser.Scene {
     this.cameraSystem = new CameraSystem(this, w, h)
 
     this.tileMap = new TileMapLayer(this)
-    this.tileMap.render(floor.map, floor.bgmap, floor.fgmap, floor.defaultGround || null)
+    const collected = gameStore.getState().state.collectedTiles[floor.floorId] ?? []
+    this.tileMap.render(floor.map, floor.bgmap, floor.fgmap, floor.defaultGround || null, collected)
     console.log('[GameScene] TileMapLayer done, rows:', floor.map.length)
 
     const { state } = gameStore.getState()

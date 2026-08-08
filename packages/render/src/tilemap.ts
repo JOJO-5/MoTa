@@ -41,12 +41,14 @@ export class TileMapLayer {
     map: number[][],
     bgmap: number[][] | null,
     fgmap: number[][] | null,
-    defaultGround: string | null = null
+    defaultGround: string | null = null,
+    collectedTiles: string[] = []
   ) {
     this.destroy()
 
     const rows = map.length
     const cols = map[0]?.length ?? 0
+    const collected = new Set(collectedTiles)
 
     // Pass 1: default ground layer (fills the entire floor)
     const groundKey = defaultGround ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE) : DEFAULT_AUTOTILE
@@ -61,6 +63,7 @@ export class TileMapLayer {
     // Pass 2: background layer overrides (only non-zero entries)
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
+        if (collected.has(`${x},${y}`)) continue
         const bgId = bgmap?.[y]?.[x] ?? 0
         if (bgId !== 0) this.drawTile(bgId, x * TILE_SIZE, y * TILE_SIZE)
       }
@@ -69,6 +72,7 @@ export class TileMapLayer {
     // Pass 3: wall/object layer
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
+        if (collected.has(`${x},${y}`)) continue
         const wallId = map[y]?.[x] ?? 0
         if (wallId !== 0) this.drawTile(wallId, x * TILE_SIZE, y * TILE_SIZE)
       }
@@ -77,6 +81,7 @@ export class TileMapLayer {
     // Pass 4: foreground layer
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
+        if (collected.has(`${x},${y}`)) continue
         const fgId = fgmap?.[y]?.[x] ?? 0
         if (fgId !== 0) this.drawTile(fgId, x * TILE_SIZE, y * TILE_SIZE)
       }

@@ -4,7 +4,8 @@
 
 ## 状态
 
-**Phase 6 ✅ 构建完成** — 构建通过、类型检查全绿、55 个测试全部通过。
+**Phase 6 ✅ 核心可玩** — 构建通过、类型检查全绿、63 个测试全部通过。
+已打通核心闭环：移动（WASD/方向键）、拾取道具（钥匙/宝石/药水/装备）、踩怪战斗（含奖励与清格）、楼梯换层、HUD（HP 条/楼层名/状态栏/消息框）。
 
 路线图：
 - [x] Phase 1: 数据层（schema + importer + validator）
@@ -12,10 +13,18 @@
 - [x] Phase 3: 渲染层（Phaser 场景 + Tilemap + Autotile + 精灵 + UI + 摄像机 + 粒子 + 字体 + 存档 + 对话框 + 小地图 + 商店 + 天气 + HUD + 动画 + BGM/SFX）
 - [x] Phase 4: 输入系统（键盘 + 虚拟手柄 + 游戏手柄）
 - [x] Phase 5: Web 应用（React 主界面 + 游戏画布 + 状态桥接 + DevTools）
-- [x] Phase 6: 构建验证（pnpm build + typecheck + test）
+- [x] Phase 6: 核心可玩闭环（移动 / 拾取 / 战斗 / 换层 / HUD）
 - [ ] Phase 7: 文档
 - [ ] Phase 8: 演示
 - [ ] Phase 9: 发布准备
+
+### 已知限制（待办）
+
+- 门（`doorInfo`）目前只阻挡、没有开门消耗钥匙的逻辑
+- 战斗失败（HP=0）没有死亡/回城流程
+- NPC 对话、商店、`firstArrive` 等事件机能力已接入，但部分事件类型（`setBlock`/`choices`/`shop` 等）尚未实现
+- 存档（继续游戏）、设置（音量）尚未接入 UI
+- `data.json` 的 `values`/`flags` 未从原版导入（宝石/药水数值目前在 `tile-interactions.ts` 中硬编码，与原版 `data.js` 一致）
 
 ## 技术栈
 

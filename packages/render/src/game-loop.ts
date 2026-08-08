@@ -23,11 +23,18 @@ export class GameLoop {
 
   private update() {
     const { state } = gameStore.getState()
-    const { hero, ui } = state
+    const { hero, ui, floorId } = state
 
     this.uiLayer.updateHero(hero)
     this.uiLayer.updateStatus(hero)
     this.hud.update(hero)
+
+    // Show current floor name (e.g. 魔塔 0 层 / 第 1 层)
+    const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      floors: Record<string, { name?: string; title?: string }>
+    } | null
+    const floor = towerData?.floors?.[floorId]
+    this.uiLayer.updateFloorName(floor?.name || floorId)
 
     if (ui.floorMsg) {
       this.uiLayer.showMessage(ui.floorMsg)

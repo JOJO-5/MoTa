@@ -44,6 +44,8 @@ export interface GameState {
   enemys: Record<string, Enemy>
   battle: BattleSnapshot | null
   ui: UiSnapshot
+  /** Tiles picked up / cleared per floor: floorId -> ["x,y", ...] */
+  collectedTiles: Record<string, string[]>
 }
 
 export interface BattleSnapshot {
@@ -70,5 +72,7 @@ export type GameAction =
   | { type: 'USE_KEY'; keyType: string }
   | { type: 'SET_BATTLE'; battle: BattleSnapshot | null }
   | { type: 'SET_UI'; ui: Partial<UiSnapshot> }
+  | { type: 'SET_ENEMYS'; enemys: Record<string, Enemy> }
+  | { type: 'COLLECT_TILE'; floorId: string; x: number; y: number }
   | { type: 'LOAD_STATE'; state: GameState }
   | { type: 'RESET' }

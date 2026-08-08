@@ -33,6 +33,7 @@ export const createInitialState = (floorId: string, x: number, y: number): GameS
   enemys: {},
   battle: null,
   ui: { ...INITIAL_UI },
+  collectedTiles: {},
 })
 
 interface StoreState {
@@ -81,6 +82,18 @@ function createStore() {
             case 'SET_BATTLE':
               s.state.battle = action.battle
               break
+            case 'SET_ENEMYS':
+              s.state.enemys = action.enemys
+              break
+            case 'COLLECT_TILE':
+              {
+                const key = `${action.x},${action.y}`
+                const list = s.state.collectedTiles[action.floorId] ?? []
+                if (!list.includes(key)) {
+                  s.state.collectedTiles[action.floorId] = [...list, key]
+                }
+                break
+              }
             case 'SET_UI':
               Object.assign(s.state.ui, action.ui)
               break

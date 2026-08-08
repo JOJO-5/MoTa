@@ -23,6 +23,8 @@ export async function initTower(gameId: string) {
     towerData = await loadTowerContent(root)
     console.log('[bridge] loaded, floors:', Object.keys(towerData.floors).length)
     ;(globalThis as Record<string, unknown>)['__towerData'] = towerData
+    // Populate enemy data into the store so event-machine battles can resolve enemies
+    dispatch({ type: 'SET_ENEMYS', enemys: towerData.enemys })
     const firstFloorId = towerData.main.floorIds[0]
     const firstFloor = towerData.floors[firstFloorId]
     console.log('[bridge] firstFloor:', firstFloorId)
