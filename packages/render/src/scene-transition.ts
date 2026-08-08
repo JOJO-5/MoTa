@@ -64,10 +64,19 @@ export class GameScene extends Phaser.Scene {
       })
     )
 
-    // Set up keyboard input
-    this.keyboardInput = new KeyboardInput(this, (direction) => {
-      this.tryMove(direction)
-    })
+    // Set up keyboard input: move with arrows/WASD, confirm dialogs with Enter/Space
+    this.keyboardInput = new KeyboardInput(
+      this,
+      (direction) => {
+        this.tryMove(direction)
+      },
+      () => {
+        // Advance modal dialogs (original mota-js style: press to continue)
+        if (eventMachine.getState() === 'waiting') {
+          eventMachine.resume()
+        }
+      }
+    )
 
     // Mount DOM UI layer (HP bar, floor name, messages) inside the game container
     const container = (this.game.canvas?.parentElement as HTMLElement | null) ?? document.body
@@ -82,6 +91,7 @@ export class GameScene extends Phaser.Scene {
     if (typeof window !== 'undefined') {
       ;(window as unknown as Record<string, unknown>).__gameScene = this
       ;(window as unknown as Record<string, unknown>).__gameStore = gameStore
+      ;(window as unknown as Record<string, unknown>).__eventMachine = eventMachine
     }
 
     loadFloorFromState()
@@ -89,6 +99,8 @@ export class GameScene extends Phaser.Scene {
 
   tryMove(direction: 'up' | 'down' | 'left' | 'right') {
     if (!this.currentFloor) return
+    // Block movement while a modal dialog is open
+    if (eventMachine.getState() === 'waiting' || gameStore.getState().state.ui.modal) return
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
       maps: Record<string, { cls: string; id: string; doorInfo?: unknown }>
     } | null
@@ -106,22 +118,26 @@ export class GameScene extends Phaser.Scene {
     const pos = state.position
     const key = `${pos.x},${pos.y}`
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      main: { floorIds: string[] }
+      floors: Record<string, Floor>
       maps: Record<string, { cls: string; id: string; doorInfo?: unknown }>
       items: Record<string, unknown>
       enemys: Record<string, unknown>
     } | null
 
-    // Trigger changeFloor (stairs)
+    // Trigger changeFloor (stairs) — resolve :next/:before and missing loc
     const changeFloor = (this.currentFloor.changeFloor as Record<string, Record<string, unknown>> | undefined)?.[key]
     if (changeFloor) {
-      const events = [{ type: 'changeFloor', ...changeFloor }] as Event[]
-      eventMachine.start(events, {
-        floorId: this.currentFloor.floorId,
-        x: pos.x,
-        y: pos.y,
-        eventIndex: 0,
-        eventCount: events.length,
-      })
+      const resolved = this.resolveChangeFloor(changeFloor)
+      if (resolved) {
+        eventMachine.start([{ type: 'changeFloor', ...resolved }], {
+          floorId: this.currentFloor.floorId,
+          x: pos.x,
+          y: pos.y,
+          eventIndex: 0,
+          eventCount: 1,
+        })
+      }
       return
     }
 
@@ -157,6 +173,52 @@ export class GameScene extends Phaser.Scene {
       dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
       this.rerenderTiles()
     }
+  }
+
+  /**
+   * Resolve a changeFloor entry: expand :next/:before floorId aliases and
+   * fill in the landing position when `loc` is missing (matching the
+   * original mota-js behaviour of landing on the complementary stair).
+   */
+  private resolveChangeFloor(
+    changeFloor: Record<string, unknown>
+  ): { floorId: string; loc?: [number, number] } | null {
+    const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      main: { floorIds: string[] }
+      floors: Record<string, Floor>
+    } | null
+    if (!towerData || !this.currentFloor) return null
+
+    const floorIds = towerData.main.floorIds
+    const currentIdx = floorIds.indexOf(this.currentFloor.floorId)
+    let nextFloorId = changeFloor.floorId as string
+    if (nextFloorId === ':next') nextFloorId = floorIds[currentIdx + 1]
+    else if (nextFloorId === ':before') nextFloorId = floorIds[currentIdx - 1]
+
+    if (!nextFloorId || !towerData.floors[nextFloorId]) {
+      console.warn('[GameScene] cannot resolve changeFloor target:', changeFloor.floorId, 'from', this.currentFloor.floorId)
+      return null
+    }
+
+    const loc = changeFloor.loc as [number, number] | undefined
+    if (loc && Array.isArray(loc) && loc.length === 2) {
+      return { floorId: nextFloorId, loc: [loc[0] as number, loc[1] as number] }
+    }
+
+    // No loc: land on the complementary stair tile of the target floor.
+    // upFloor stairs (87) lead to a downFloor (88) landing and vice versa.
+    const stair = changeFloor.stair as string | undefined
+    const targetTile = stair === 'upFloor' ? 88 : stair === 'downFloor' ? 87 : null
+    const target = towerData.floors[nextFloorId]
+    for (let y = 0; y < target.map.length; y++) {
+      for (let x = 0; x < (target.map[0]?.length ?? 0); x++) {
+        if (targetTile !== null ? target.map[y][x] === targetTile : target.map[y][x] === 87 || target.map[y][x] === 88) {
+          return { floorId: nextFloorId, loc: [x, y] }
+        }
+      }
+    }
+    // Fallback: keep current position
+    return { floorId: nextFloorId }
   }
 
   /** Re-render the tile layer, skipping tiles that were picked up / cleared. */

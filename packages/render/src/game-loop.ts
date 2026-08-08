@@ -1,12 +1,16 @@
-import { gameStore } from '@modern-mota/core'
+import { gameStore, dispatch } from '@modern-mota/core'
 import type { GameScene } from './scene-transition.js'
 import { UiLayer } from './ui/layer.js'
 import { Hud } from './hud.js'
+
+const FLOOR_MSG_TIMEOUT = 3500
 
 export class GameLoop {
   private uiLayer: UiLayer
   private hud: Hud
   private running: boolean = false
+  private lastMsg = ''
+  private lastMsgAt = 0
 
   constructor(_scene: GameScene, container: HTMLElement) {
     this.uiLayer = new UiLayer(container)
@@ -36,9 +40,26 @@ export class GameLoop {
     const floor = towerData?.floors?.[floorId]
     this.uiLayer.updateFloorName(floor?.name || floorId)
 
-    if (ui.floorMsg) {
-      this.uiLayer.showMessage(ui.floorMsg)
+    // Modal dialog (NPC conversations) — stays until player confirms
+    if (ui.modal) {
+      this.uiLayer.showModal(ui.modal)
+      this.lastMsg = ''
     } else {
+      this.uiLayer.hideModal()
+    }
+
+    // Floor message box with auto-hide after a few seconds
+    if (ui.floorMsg) {
+      if (ui.floorMsg !== this.lastMsg) {
+        this.lastMsg = ui.floorMsg
+        this.lastMsgAt = Date.now()
+      }
+      this.uiLayer.showMessage(ui.floorMsg)
+      if (Date.now() - this.lastMsgAt > FLOOR_MSG_TIMEOUT) {
+        dispatch({ type: 'SET_UI', ui: { floorMsg: null } })
+      }
+    } else {
+      this.lastMsg = ''
       this.uiLayer.hideMessage()
     }
   }

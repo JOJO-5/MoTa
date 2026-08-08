@@ -22,7 +22,7 @@
 
 - 门（`doorInfo`）目前只阻挡、没有开门消耗钥匙的逻辑
 - 战斗失败（HP=0）没有死亡/回城流程
-- NPC 对话、商店、`firstArrive` 等事件机能力已接入，但部分事件类型（`setBlock`/`choices`/`shop` 等）尚未实现
+- 商店、`choices`/`setBlock`/`showImage` 等事件类型尚未实现
 - 存档（继续游戏）、设置（音量）尚未接入 UI
 - `data.json` 的 `values`/`flags` 未从原版导入（宝石/药水数值目前在 `tile-interactions.ts` 中硬编码，与原版 `data.js` 一致）
 

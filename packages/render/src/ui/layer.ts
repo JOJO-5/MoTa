@@ -6,6 +6,7 @@ export class UiLayer {
   private floorNameEl: HTMLElement
   private msgBox: HTMLElement
   private statusEl: HTMLElement
+  private modalEl: HTMLElement
 
   constructor(container: HTMLElement) {
     this.container = document.createElement('div')
@@ -16,6 +17,7 @@ export class UiLayer {
     this.floorNameEl = this.createFloorName()
     this.msgBox = this.createMsgBox()
     this.statusEl = this.createStatus()
+    this.modalEl = this.createModal()
   }
 
   private createHpBar(): HTMLElement {
@@ -50,6 +52,24 @@ export class UiLayer {
     el.className = 'mota-status'
     this.container.appendChild(el)
     return el
+  }
+
+  private createModal(): HTMLElement {
+    const el = document.createElement('div')
+    el.className = 'mota-modal'
+    el.style.display = 'none'
+    this.container.appendChild(el)
+    return el
+  }
+
+  showModal(text: string) {
+    this.modalEl.textContent = text
+    this.modalEl.style.display = 'block'
+  }
+
+  hideModal() {
+    this.modalEl.style.display = 'none'
+    this.modalEl.textContent = ''
   }
 
   updateHero(hero: HeroSnapshot) {

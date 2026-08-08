@@ -27,17 +27,14 @@ describe('eventMachine', () => {
     expect(State.flags.branch).toBe(true)
   })
 
-  it('yields and waits for tip events', () => {
+  it('shows tip messages without blocking the event flow', () => {
     const events: Event[] = [
       { type: 'tip', text: '你好！' },
       { type: 'setFlag', name: 'afterTip', value: true },
     ]
     eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 2 })
-    expect(eventMachine.getState()).toBe('waiting')
+    expect(eventMachine.getState()).toBe('idle')
     expect(State.ui.floorMsg).toBe('你好！')
-    expect(State.flags.afterTip).toBeUndefined()
-
-    eventMachine.resume()
     expect(State.flags.afterTip).toBe(true)
   })
 
@@ -51,11 +48,29 @@ describe('eventMachine', () => {
     expect(eventMachine.getState()).toBe('idle')
   })
 
-  it('handles wait events', () => {
+  it('handles wait events without blocking', () => {
     const events: Event[] = [{ type: 'wait', time: 500 }]
     eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 1 })
+    expect(eventMachine.getState()).toBe('idle')
+  })
+
+  it('shows dialog lines one by one, waiting for resume between them', () => {
+    const events = [
+      '\t[勇者,hero]你好！',
+      '\t[魔女,N406]欢迎来到魔塔。',
+      { type: 'setFlag', name: 'talked', value: true } as Event,
+    ]
+    eventMachine.start(events as Event[], { floorId: 'MT1', x: 7, y: 7, eventIndex: 0, eventCount: 3 })
     expect(eventMachine.getState()).toBe('waiting')
+    expect(State.ui.modal).toBe('你好！')
+
+    eventMachine.resume()
+    expect(eventMachine.getState()).toBe('waiting')
+    expect(State.ui.modal).toBe('欢迎来到魔塔。')
+
     eventMachine.resume()
     expect(eventMachine.getState()).toBe('idle')
+    expect(State.flags.talked).toBe(true)
+    expect(State.ui.modal).toBeNull()
   })
 })

@@ -12,6 +12,8 @@ const LocSchema = z.union([
 ])
 
 export const EventSchema = z.union([
+  // Original mota-js dialog lines: "\t[speaker,icon]text"
+  z.string(),
   BaseEvent.extend({ type: z.literal('setValue'), name: z.string(), value: z.string() }),
   BaseEvent.extend({ type: z.literal('addValue'), name: z.string(), value: z.string() }),
   BaseEvent.extend({ type: z.literal('setFlag'), name: z.string(), value: z.union([z.boolean(), z.string(), z.number()]) }),

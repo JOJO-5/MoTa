@@ -31,6 +31,16 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
     const event = events[i]
     currentContext = { ...context, eventIndex: i, eventCount: events.length }
 
+    // Original mota-js dialog format: strings like "\t[speaker,icon]text"
+    if (typeof event === 'string') {
+      const trimmed = event.replace(/^\t/, '').trim()
+      const m = trimmed.match(/^\[([^\]]*)\]([\s\S]*)/)
+      const text = m ? m[2].trim() : trimmed
+      dispatch({ type: 'SET_UI', ui: { modal: text } })
+      yield 'dialog'
+      continue
+    }
+
     switch (event.type) {
       case 'setValue': {
         dispatch({ type: 'SET_VALUE', name: event.name, value: Number(evaluate(event.value)) })
@@ -58,22 +68,17 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       }
       case 'tip': {
         dispatch({ type: 'SET_UI', ui: { floorMsg: event.text } })
-        yield 'tip'
         break
       }
-      case 'wait': {
-        yield 'wait'
-        break
-      }
+      case 'wait':
       case 'sleep': {
-        yield 'sleep'
+        // No timed animation system yet; treat as instant to avoid deadlock.
         break
       }
       case 'battle': {
         const enemy = State.enemys?.[event.id]
         if (enemy) {
           startBattle(enemy)
-          yield 'battle'
           endBattle()
         }
         break
@@ -144,6 +149,8 @@ function step() {
     machineState = 'idle'
     currentContext = null
     generator = null
+    // Close any dialog/message left open by the event sequence
+    dispatch({ type: 'SET_UI', ui: { modal: null } })
   } else {
     // Yielded -> waiting for external resume
     machineState = 'waiting'
