@@ -1,2 +1,5 @@
 export * from './boot.js'
 export * from './constants.js'
+export * from './tilemap.js'
+export * from './autotile.js'
+export * from './sprite.js'

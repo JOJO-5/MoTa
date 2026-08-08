@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "phaser": "^3.80.1",
+    "@modern-mota/core": "workspace:*",
     "@modern-mota/data": "workspace:*"
   },
   "devDependencies": {
