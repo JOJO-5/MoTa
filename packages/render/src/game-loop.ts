@@ -22,7 +22,8 @@ export class GameLoop {
   }
 
   private update() {
-    const { hero, ui } = gameStore.getState()
+    const { state } = gameStore.getState()
+    const { hero, ui } = state
 
     this.uiLayer.updateHero(hero)
     this.uiLayer.updateStatus(hero)

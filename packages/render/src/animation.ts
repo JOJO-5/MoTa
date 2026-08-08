@@ -26,16 +26,22 @@ export function registerAnimations(scene: Phaser.Scene) {
     }
   })
 
-  const enemyTextures = scene.textures.getAll()
-    .filter(t => t.key.startsWith('enemy_'))
-    
-  enemyTextures.forEach((texture) => {
-    const enemyId = texture.key.replace('enemy_', '')
-    scene.anims.create({
-      key: `enemy_idle_${enemyId}`,
-      frames: [{ key: `enemy_${enemyId}`, frame: '0' }],
-      frameRate: 1,
-      repeat: -1,
+  try {
+    const keys = scene.textures.getTextureKeys()
+    keys.forEach((key) => {
+      if (key.startsWith('enemy_')) {
+        const enemyId = key.replace('enemy_', '')
+        if (scene.textures.exists(`enemy_${enemyId}`)) {
+          scene.anims.create({
+            key: `enemy_idle_${enemyId}`,
+            frames: [{ key: `enemy_${enemyId}`, frame: '0' }],
+            frameRate: 1,
+            repeat: -1,
+          })
+        }
+      }
     })
-  })
+  } catch {
+    // textures iteration not available
+  }
 }
