@@ -37,9 +37,25 @@ type JsepNode = {
   [key: string]: unknown
 }
 
+function preprocessExpression(expression: string): string {
+  // Convert mota-js flag/status prefixes to member expressions.
+  // flag:name -> flags.name
+  // status:name -> status.name (resolved in context if available)
+  return expression
+    .replace(/\bflag:(\w+)/g, 'flags.$1')
+    .replace(/\bstatus:(\w+)/g, 'status.$1')
+}
+
 export function evaluate(expression: string): number | boolean | string | null {
   const ctx = getContext()
-  const ast = jsep(expression) as JsepNode
+  const processed = preprocessExpression(expression)
+  let ast: JsepNode
+  try {
+    ast = jsep(processed) as JsepNode
+  } catch {
+    // Unsupported expression syntax; default to false/0 to keep game running.
+    return false
+  }
 
   function evalNode(node: JsepNode): unknown {
     switch (node.type) {
@@ -49,7 +65,9 @@ export function evaluate(expression: string): number | boolean | string | null {
         const name = node.name as string
         if (name === 'hero') return ctx.hero
         if (name in ctx.hero) return (ctx.hero as Record<string, unknown>)[name]
+        if (name === 'flags') return ctx.flags
         if (name in ctx.flags) return ctx.flags[name]
+        if (name === 'status') return { hard: 1, floorId: '' }
         if (name in ctx.values) return ctx.values[name]
         return null
       }

@@ -36,7 +36,7 @@ function permissiveFloorSchema() {
     bgmap: z.array(z.array(z.number())).default([]),
     fgmap: z.array(z.array(z.number())).default([]),
     events: z.record(z.string(), z.array(z.any())).default({}),
-    cannotMove: z.record(z.string(), z.array(z.any())).default({}),
+    cannotMove: z.record(z.string(), z.array(z.enum(['up', 'down', 'left', 'right']))).default({}),
     afterBattle: z.record(z.string(), z.array(z.any())).default({}),
     afterGetItem: z.record(z.string(), z.array(z.any())).default({}),
     afterOpenDoor: z.record(z.string(), z.array(z.any())).default({}),

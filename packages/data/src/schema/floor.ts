@@ -24,7 +24,7 @@ export const FloorSchema = z.object({
   eachArrive: EventListSchema.default([]),
   parallelDo: z.union([z.array(z.string()), z.string()]).default([]),
   events: z.record(z.string(), EventListSchema).default({}),
-  cannotMove: z.record(z.string(), EventListSchema).default({}),
+  cannotMove: z.record(z.string(), z.array(z.enum(['up', 'down', 'left', 'right']))).default({}),
   afterBattle: z.record(z.string(), EventListSchema).default({}),
   afterGetItem: z.record(z.string(), EventListSchema).default({}),
   afterOpenDoor: z.record(z.string(), EventListSchema).default({}),

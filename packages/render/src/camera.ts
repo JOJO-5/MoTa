@@ -11,7 +11,10 @@ export class CameraSystem {
     this.worldWidth = worldWidth * TILE_SIZE
     this.worldHeight = worldHeight * TILE_SIZE
     this.camera.setBounds(0, 0, this.worldWidth, this.worldHeight)
-    this.camera.setViewport(0, 0, GAME_WIDTH, GAME_HEIGHT)
+    // Center the viewport if world is smaller than game window; otherwise clamp to origin.
+    const vx = Math.max(0, Math.floor((this.worldWidth - GAME_WIDTH) / 2))
+    const vy = Math.max(0, Math.floor((this.worldHeight - GAME_HEIGHT) / 2))
+    this.camera.setViewport(vx, vy, GAME_WIDTH, GAME_HEIGHT)
   }
 
   follow(target: Phaser.GameObjects.GameObject, lerp: number = 0.1) {

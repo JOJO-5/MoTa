@@ -1,25 +1,31 @@
 import Phaser from 'phaser'
 import { TILE_SIZE } from './constants.js'
+import { HERO_FRAMES, HERO_COLS, ICONS } from './icons.js'
 import type { Direction } from '@modern-mota/core'
 
 export class HeroSprite {
   public container: Phaser.GameObjects.Container
-  private body: Phaser.GameObjects.Graphics
+  private sprite: Phaser.GameObjects.Image
+  private direction: Direction
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
-    this.body = scene.add.graphics()
-    this.body.fillStyle(0xffcc00, 1)
-    this.body.fillRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4)
-    this.body.fillStyle(0x000000, 1)
-    this.body.fillRect(6, 4, 4, 4)
-    this.body.fillRect(14, 4, 4, 4)
-    this.body.fillStyle(0xffd700, 1)
-    this.body.fillRect(6, 10, 12, 4)
-    this.container.add(this.body)
+    this.direction = 'down'
+
+    // hero.png: 128x192, 4 cols x 4 rows, each frame 32x48
+    // Frame = row * HERO_COLS + col
+    // Use 'down stop' frame as initial (row 0, col 0 = frame 0)
+    const initialFrame = HERO_FRAMES[this.direction].row * HERO_COLS + HERO_FRAMES[this.direction].stop
+    this.sprite = scene.add.image(0, -8, 'hero', initialFrame).setOrigin(0, 0)
+    this.container.add(this.sprite)
   }
 
-  setDirection(_direction: Direction) {
+  setDirection(direction: Direction) {
+    this.direction = direction
+    const dirData = HERO_FRAMES[direction]
+    if (!dirData) return
+    const frame = dirData.row * HERO_COLS + dirData.stop
+    this.sprite.setFrame(frame)
   }
 
   setPosition(x: number, y: number) {
@@ -34,15 +40,13 @@ export class HeroSprite {
 export class EnemySprite {
   private container: Phaser.GameObjects.Container
 
-  constructor(scene: Phaser.Scene, x: number, y: number, _enemyId: string) {
+  constructor(scene: Phaser.Scene, x: number, y: number, enemyId: string) {
     this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
-    const g = scene.add.graphics()
-    g.fillStyle(0xff0000, 1)
-    g.fillCircle(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2 - 2)
-    g.fillStyle(0x000000, 1)
-    g.fillCircle(TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 2, 2)
-    g.fillCircle(TILE_SIZE / 2 + 4, TILE_SIZE / 2 - 2, 2)
-    this.container.add(g)
+
+    // Try to use enemys sprite sheet
+    const frame = ICONS.enemys?.[enemyId] ?? 0
+    const sprite = scene.add.image(0, 0, 'enemys', frame).setOrigin(0, 0)
+    this.container.add(sprite)
   }
 
   setPosition(x: number, y: number) {

@@ -1,110 +1,120 @@
 import Phaser from 'phaser'
 import { TILE_SIZE } from './constants.js'
+import { getTileSprite, SHEET_CONFIG } from './icons.js'
 
-const TILE_COLORS: Record<number, number> = {
-  0: 0x333333,
-  141: 0x3d5a80,
-  142: 0x4a7fa8,
-  143: 0xee6c4b,
-  144: 0x293241,
-  153: 0x5c4033,
-  201: 0xffd700,
-  22: 0xff4500,
-  23: 0xff6b6b,
-  21: 0xffd700,
-  11359: 0x7a6b5a,
-  10726: 0x4a7a4a,
-  11116: 0x3a6a4a,
-  11124: 0x2a5a3a,
-  10104: 0x3a4a6a,
-  10105: 0x3a4a6a,
-  10106: 0x3a4a6a,
-  10112: 0x2a3a5a,
-  10113: 0x2a3a5a,
-  10114: 0x2a3a5a,
-  10118: 0x4a5a7a,
-  10126: 0x5a6a8a,
-  10134: 0x6a7a9a,
-  10125: 0x7a8aaa,
-  10133: 0x8a9aba,
-  10030: 0x1a1a3e,
-  10031: 0x16213e,
-  10032: 0x0f3460,
-  10033: 0x1b003b,
-  10034: 0x00334d,
-  10734: 0x5a8a5a,
-  11792: 0x112233,
-  20706: 0x8a6a4a,
+/** Maps data from maps.json: tileId → { cls, id } */
+type MapsData = Record<string, { cls: string; id: string }>
+
+function getMapsData(): MapsData {
+  const td = (globalThis as Record<string, unknown>)['__towerData'] as {
+    maps: MapsData
+  } | null
+  return td?.maps ?? {}
 }
 
-function getTileColor(tileId: number): number {
-  return TILE_COLORS[tileId] ?? 0x444444
+/** Autotile id → texture key index */
+const AUTOTILE_KEYS: Record<string, string> = {
+  autotile: 'autotile_0',
+  autotile1: 'autotile_1',
+  autotile2: 'autotile_2',
+  autotile3: 'autotile_3',
+  autotile4: 'autotile_4',
+  autotile5: 'autotile_5',
+  autotile6: 'autotile_6',
+  autotile7: 'autotile_7',
+  autotile8: 'autotile_8',
 }
+
+const DEFAULT_AUTOTILE = 'autotile_0'
 
 export class TileMapLayer {
-  private bgLayer!: Phaser.GameObjects.Graphics
-  private wallLayer!: Phaser.GameObjects.Graphics
-  private fgLayer!: Phaser.GameObjects.Graphics
+  private scene: Phaser.Scene
+  private sprites: Phaser.GameObjects.Image[] = []
+  private mapsData: MapsData
 
   constructor(scene: Phaser.Scene) {
-    this.bgLayer = scene.add.graphics()
-    this.wallLayer = scene.add.graphics()
-    this.fgLayer = scene.add.graphics()
+    this.scene = scene
+    this.mapsData = getMapsData()
   }
 
   render(
     map: number[][],
     bgmap: number[][] | null,
-    fgmap: number[][] | null
+    fgmap: number[][] | null,
+    defaultGround: string | null = null
   ) {
-    this.bgLayer.clear()
-    this.wallLayer.clear()
-    this.fgLayer.clear()
+    this.destroy()
 
     const rows = map.length
     const cols = map[0]?.length ?? 0
 
+    // Pass 1: default ground layer (fills the entire floor)
+    const groundKey = defaultGround ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE) : DEFAULT_AUTOTILE
+    const groundTexture = this.scene.textures.exists(groundKey) ? groundKey : DEFAULT_AUTOTILE
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const img = this.scene.add.image(x * TILE_SIZE, y * TILE_SIZE, groundTexture).setOrigin(0, 0)
+        this.sprites.push(img)
+      }
+    }
+
+    // Pass 2: background layer overrides (only non-zero entries)
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const bgId = bgmap?.[y]?.[x] ?? 0
+        if (bgId !== 0) this.drawTile(bgId, x * TILE_SIZE, y * TILE_SIZE)
+      }
+    }
+
+    // Pass 3: wall/object layer
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const wallId = map[y]?.[x] ?? 0
-        const bgId = bgmap?.[y]?.[x] ?? 0
+        if (wallId !== 0) this.drawTile(wallId, x * TILE_SIZE, y * TILE_SIZE)
+      }
+    }
+
+    // Pass 4: foreground layer
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
         const fgId = fgmap?.[y]?.[x] ?? 0
-
-        const px = x * TILE_SIZE
-        const py = y * TILE_SIZE
-
-        if (bgId !== 0) {
-          this.bgLayer.fillStyle(getTileColor(bgId), 1)
-          this.bgLayer.fillRect(px, py, TILE_SIZE, TILE_SIZE)
-        }
-
-        if (wallId !== 0) {
-          const color = getTileColor(wallId)
-          this.wallLayer.fillStyle(color, 1)
-          this.wallLayer.fillRect(px, py, TILE_SIZE, TILE_SIZE)
-          this.wallLayer.lineStyle(1, 0x000000, 0.6)
-          this.wallLayer.strokeRect(px, py, TILE_SIZE, TILE_SIZE)
-        } else {
-          this.wallLayer.fillStyle(getTileColor(0), 1)
-          this.wallLayer.fillRect(px, py, TILE_SIZE, TILE_SIZE)
-          this.wallLayer.lineStyle(1, 0x222222, 0.3)
-          this.wallLayer.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
-        }
-
-        if (fgId !== 0) {
-          const color = getTileColor(fgId)
-          this.fgLayer.fillStyle(color, 1)
-          this.fgLayer.fillRect(px, py, TILE_SIZE, TILE_SIZE)
-          this.fgLayer.lineStyle(1, 0x000000, 0.4)
-          this.fgLayer.strokeRect(px, py, TILE_SIZE, TILE_SIZE)
-        }
+        if (fgId !== 0) this.drawTile(fgId, x * TILE_SIZE, y * TILE_SIZE)
       }
     }
   }
 
+  private drawTile(tileId: number, px: number, py: number) {
+    const spriteInfo = getTileSprite(tileId, this.mapsData)
+    if (!spriteInfo) return
+
+    const { sheet, frame } = spriteInfo
+
+    // Autotiles: use individual image textures
+    if (sheet === 'autotile') {
+      const entry = this.mapsData[String(tileId)]
+      const atKey = entry ? (AUTOTILE_KEYS[entry.id] ?? DEFAULT_AUTOTILE) : DEFAULT_AUTOTILE
+      const textureKey = this.scene.textures.exists(atKey) ? atKey : DEFAULT_AUTOTILE
+      const img = this.scene.add.image(px, py, textureKey).setOrigin(0, 0)
+      this.sprites.push(img)
+      return
+    }
+
+    // Standard sprite sheets: use frame index
+    const textureKey = sheet as string
+    if (!this.scene.textures.exists(textureKey)) return
+
+    // Tall sprites (npc48/enemy48) are 48px high; bottom-align to the 32px cell.
+    const frameHeight = SHEET_CONFIG[sheet]?.frameHeight ?? 32
+    const dy = frameHeight > 32 ? py - (frameHeight - 32) : py
+
+    const img = this.scene.add.image(px, dy, textureKey, frame).setOrigin(0, 0)
+    this.sprites.push(img)
+  }
+
   destroy() {
-    this.bgLayer.destroy()
-    this.wallLayer.destroy()
-    this.fgLayer.destroy()
+    for (const s of this.sprites) {
+      s.destroy()
+    }
+    this.sprites = []
   }
 }
