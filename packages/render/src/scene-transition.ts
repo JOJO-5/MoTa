@@ -16,16 +16,20 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
+    console.log('[GameScene] create() called')
     this.cameraSystem = new CameraSystem(this, 13, 13)
 
     const loadFloorFromState = () => {
       const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
         floors: Record<string, Floor>
       } | null
+      console.log('[GameScene] towerData:', !!towerData)
       if (!towerData) return
       const { state } = gameStore.getState()
+      console.log('[GameScene] floorId:', state.floorId)
       if (!state.floorId) return
       const floor = towerData.floors[state.floorId]
+      console.log('[GameScene] floor found:', floor?.floorId, 'map rows:', floor?.map?.length)
       if (floor) {
         this.loadFloor(floor)
       }
@@ -33,6 +37,7 @@ export class GameScene extends Phaser.Scene {
 
     this.unsubscribers.push(
       gameStore.subscribe((_prev, next) => {
+        console.log('[GameScene] Zustand:', next.state.floorId)
         if (next.state.floorId) {
           loadFloorFromState()
         }
@@ -43,24 +48,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   shutdown() {
+    console.log('[GameScene] shutdown')
     this.unsubscribers.forEach((unsub) => unsub())
     this.unsubscribers = []
   }
 
   loadFloor(floor: Floor) {
-    if (this.tileMap) {
-      this.tileMap.destroy()
-    }
-    if (this.heroSprite) {
-      this.heroSprite.destroy()
-    }
+    console.log('[GameScene] loadFloor', floor.floorId)
+    if (this.tileMap) { this.tileMap.destroy() }
+    if (this.heroSprite) { this.heroSprite.destroy() }
 
     this.tileMap = new TileMapLayer(this)
     this.tileMap.render(floor.map, floor.bgmap, floor.fgmap)
+    console.log('[GameScene] TileMapLayer done, rows:', floor.map.length)
 
     this.heroSprite = new HeroSprite(this, 6, 6)
-    const spriteObj = (this.heroSprite as unknown as { sprite: Phaser.GameObjects.GameObject }).sprite
-    this.cameraSystem.follow(spriteObj)
+    this.cameraSystem.follow(this.heroSprite.container as Phaser.GameObjects.GameObject)
+    console.log('[GameScene] HeroSprite done')
   }
 
   changeFloor(

@@ -3,7 +3,7 @@ import { TILE_SIZE } from './constants.js'
 import type { Direction } from '@modern-mota/core'
 
 export class HeroSprite {
-  private container: Phaser.GameObjects.Container
+  public container: Phaser.GameObjects.Container
   private body: Phaser.GameObjects.Graphics
 
   constructor(scene: Phaser.Scene, x: number, y: number) {

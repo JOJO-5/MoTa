@@ -16,17 +16,27 @@ let towerData: TowerContent | null = null
 ;(globalThis as Record<string, unknown>)['__towerData'] = null
 
 export async function initTower(gameId: string) {
-  const root = `./content/${gameId}`
-  towerData = await loadTowerContent(root)
-  ;(globalThis as Record<string, unknown>)['__towerData'] = towerData
-  const firstFloorId = towerData.main.floorIds[0]
-  const firstFloor = towerData.floors[firstFloorId]
-  if (firstFloor) {
-    dispatch({ type: 'SET_FLOOR', floorId: firstFloorId })
-    dispatch({ type: 'SET_POSITION', position: { x: 6, y: 6 } })
-    dispatch({ type: 'SET_DIRECTION', direction: 'up' })
+  console.log('[bridge] initTower called, gameId:', gameId)
+  try {
+    const root = `./content/${gameId}`
+    console.log('[bridge] loading from:', root)
+    towerData = await loadTowerContent(root)
+    console.log('[bridge] loaded, floors:', Object.keys(towerData.floors).length)
+    ;(globalThis as Record<string, unknown>)['__towerData'] = towerData
+    const firstFloorId = towerData.main.floorIds[0]
+    const firstFloor = towerData.floors[firstFloorId]
+    console.log('[bridge] firstFloor:', firstFloorId)
+    if (firstFloor) {
+      dispatch({ type: 'SET_FLOOR', floorId: firstFloorId })
+      dispatch({ type: 'SET_POSITION', position: { x: 6, y: 6 } })
+      dispatch({ type: 'SET_DIRECTION', direction: 'up' })
+      console.log('[bridge] dispatched, floorId:', firstFloorId)
+    }
+    return towerData
+  } catch (err) {
+    console.error('[bridge] initTower failed:', err)
+    throw err
   }
-  return towerData
 }
 
 export function getTowerData() {

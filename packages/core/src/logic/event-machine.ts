@@ -89,7 +89,8 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       case 'changeFloor': {
         dispatch({ type: 'SET_FLOOR', floorId: event.floorId })
         if (event.loc) {
-          dispatch({ type: 'SET_POSITION', position: { x: event.loc[0], y: event.loc[1] } })
+          const loc = Array.isArray(event.loc) ? event.loc : [event.loc, 0]
+          dispatch({ type: 'SET_POSITION', position: { x: loc[0] as number, y: loc[1] as number } })
         }
         break
       }
