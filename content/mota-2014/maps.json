@@ -1,0 +1,2591 @@
+{
+  "1": {
+    "cls": "animates",
+    "id": "yellowWall",
+    "canBreak": true,
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {}
+    }
+  },
+  "2": {
+    "cls": "animates",
+    "id": "whiteWall",
+    "canBreak": true,
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {}
+    }
+  },
+  "3": {
+    "cls": "animates",
+    "id": "blueWall",
+    "canBreak": true,
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {}
+    }
+  },
+  "4": {
+    "cls": "animates",
+    "id": "star",
+    "name": "星空"
+  },
+  "5": {
+    "cls": "animates",
+    "id": "lava",
+    "name": "岩浆"
+  },
+  "6": {
+    "cls": "animates",
+    "id": "ice",
+    "doorInfo": {
+      "time": 160,
+      "openSound": "破冰镐",
+      "closeSound": "door.mp3",
+      "keys": {
+        "icePickaxe": 1
+      }
+    },
+    "animate": 1
+  },
+  "7": {
+    "cls": "terrains",
+    "id": "blueShopLeft"
+  },
+  "8": {
+    "cls": "terrains",
+    "id": "blueShopRight"
+  },
+  "9": {
+    "cls": "terrains",
+    "id": "pinkShopLeft"
+  },
+  "10": {
+    "cls": "terrains",
+    "id": "pinkShopRight"
+  },
+  "11": {
+    "cls": "animates",
+    "id": "lavaNet",
+    "canPass": true,
+    "trigger": "null",
+    "script": "(function () {\n\t// 血网的伤害效果移动到 checkBlock 中处理\n\n\t// 如果要做一次性血网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})();",
+    "name": "熔岩"
+  },
+  "12": {
+    "cls": "animates",
+    "id": "poisonNet",
+    "canPass": true,
+    "trigger": "null",
+    "script": "(function () {\n\tif (!core.hasItem('amulet')) {\n\t\tcore.triggerDebuff('get', 'poison');\n\t\tcore.updateStatusBar();\n\t}\n\n\t// 如果要做一次性毒网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})()",
+    "name": "毒网"
+  },
+  "13": {
+    "cls": "animates",
+    "id": "weakNet",
+    "canPass": true,
+    "trigger": "null",
+    "script": "(function () {\n\tif (!core.hasItem('amulet')) {\n\t\tcore.drawHeroAnimate('weekness');\n\t\tcore.triggerDebuff('get', 'weak');\n\t\tcore.updateStatusBar();\n\t}\n\n\t// 如果要做一次性衰网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})()",
+    "name": "衰网"
+  },
+  "14": {
+    "cls": "animates",
+    "id": "curseNet",
+    "canPass": true,
+    "trigger": "null",
+    "script": "(function () {\n\tif (!core.hasItem('amulet')) {\n\t\tcore.triggerDebuff('get', 'curse');\n\t\tcore.updateStatusBar();\n\t}\n\n\t// 如果要做一次性咒网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})()",
+    "name": "咒网"
+  },
+  "15": {
+    "cls": "animates",
+    "id": "blueLava"
+  },
+  "16": {
+    "cls": "animates",
+    "id": "water"
+  },
+  "20": {
+    "cls": "autotile",
+    "id": "autotile"
+  },
+  "21": {
+    "cls": "items",
+    "id": "yellowKey"
+  },
+  "22": {
+    "cls": "items",
+    "id": "blueKey"
+  },
+  "23": {
+    "cls": "items",
+    "id": "redKey"
+  },
+  "24": {
+    "cls": "items",
+    "id": "greenKey"
+  },
+  "25": {
+    "cls": "items",
+    "id": "steelKey"
+  },
+  "26": {
+    "cls": "items",
+    "id": "bigKey"
+  },
+  "27": {
+    "cls": "items",
+    "id": "redGem"
+  },
+  "28": {
+    "cls": "items",
+    "id": "blueGem"
+  },
+  "29": {
+    "cls": "items",
+    "id": "greenGem"
+  },
+  "30": {
+    "cls": "items",
+    "id": "yellowGem"
+  },
+  "31": {
+    "cls": "items",
+    "id": "redPotion"
+  },
+  "32": {
+    "cls": "items",
+    "id": "bluePotion"
+  },
+  "33": {
+    "cls": "items",
+    "id": "greenPotion"
+  },
+  "34": {
+    "cls": "items",
+    "id": "yellowPotion"
+  },
+  "35": {
+    "cls": "items",
+    "id": "sword1"
+  },
+  "36": {
+    "cls": "items",
+    "id": "shield1"
+  },
+  "37": {
+    "cls": "items",
+    "id": "sword2"
+  },
+  "38": {
+    "cls": "items",
+    "id": "shield2"
+  },
+  "39": {
+    "cls": "items",
+    "id": "sword3"
+  },
+  "40": {
+    "cls": "items",
+    "id": "shield3"
+  },
+  "41": {
+    "cls": "items",
+    "id": "sword4"
+  },
+  "42": {
+    "cls": "items",
+    "id": "shield4"
+  },
+  "43": {
+    "cls": "items",
+    "id": "sword5"
+  },
+  "44": {
+    "cls": "items",
+    "id": "shield5"
+  },
+  "45": {
+    "cls": "items",
+    "id": "book"
+  },
+  "46": {
+    "cls": "items",
+    "id": "fly"
+  },
+  "47": {
+    "cls": "items",
+    "id": "pickaxe"
+  },
+  "48": {
+    "cls": "items",
+    "id": "icePickaxe"
+  },
+  "49": {
+    "cls": "items",
+    "id": "bomb"
+  },
+  "50": {
+    "cls": "items",
+    "id": "centerFly"
+  },
+  "51": {
+    "cls": "items",
+    "id": "upFly"
+  },
+  "52": {
+    "cls": "items",
+    "id": "downFly"
+  },
+  "53": {
+    "cls": "items",
+    "id": "coin"
+  },
+  "54": {
+    "cls": "items",
+    "id": "freezeBadge"
+  },
+  "55": {
+    "cls": "items",
+    "id": "cross"
+  },
+  "56": {
+    "cls": "items",
+    "id": "superPotion"
+  },
+  "57": {
+    "cls": "items",
+    "id": "earthquake"
+  },
+  "58": {
+    "cls": "items",
+    "id": "poisonWine"
+  },
+  "59": {
+    "cls": "items",
+    "id": "weakWine"
+  },
+  "60": {
+    "cls": "items",
+    "id": "curseWine"
+  },
+  "61": {
+    "cls": "items",
+    "id": "superWine"
+  },
+  "62": {
+    "cls": "items",
+    "id": "dagger"
+  },
+  "63": {
+    "cls": "items",
+    "id": "pack"
+  },
+  "64": {
+    "cls": "items",
+    "id": "amulet"
+  },
+  "65": {
+    "cls": "items",
+    "id": "hammer"
+  },
+  "68": {
+    "cls": "items",
+    "id": "lifeWand"
+  },
+  "69": {
+    "cls": "items",
+    "id": "jumpShoes"
+  },
+  "70": {
+    "cls": "items",
+    "id": "sword0"
+  },
+  "71": {
+    "cls": "items",
+    "id": "shield0"
+  },
+  "72": {
+    "cls": "items",
+    "id": "skill1"
+  },
+  "73": {
+    "cls": "items",
+    "id": "wand"
+  },
+  "81": {
+    "cls": "animates",
+    "id": "yellowDoor",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "yellowKey": 1
+      }
+    },
+    "name": "黄门"
+  },
+  "82": {
+    "cls": "animates",
+    "id": "blueDoor",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "blueKey": 1
+      }
+    },
+    "name": "蓝门"
+  },
+  "83": {
+    "cls": "animates",
+    "id": "redDoor",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "redKey": 1
+      }
+    },
+    "name": "红门"
+  },
+  "84": {
+    "cls": "animates",
+    "id": "greenDoor",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "greenKey": 1
+      }
+    },
+    "name": "绿门"
+  },
+  "85": {
+    "cls": "animates",
+    "id": "specialDoor",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "027-Door04.mp3",
+      "closeSound": "027-Door04.mp3",
+      "keys": {
+        "specialKey": 1
+      }
+    },
+    "name": "机关门"
+  },
+  "86": {
+    "cls": "animates",
+    "id": "steelDoor",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "steelKey": 1
+      }
+    },
+    "name": "铁门"
+  },
+  "87": {
+    "cls": "terrains",
+    "id": "upFloor",
+    "canPass": true
+  },
+  "88": {
+    "cls": "terrains",
+    "id": "downFloor",
+    "canPass": true
+  },
+  "89": {
+    "cls": "animates",
+    "id": "portal",
+    "canPass": true
+  },
+  "90": {
+    "cls": "animates",
+    "id": "starPortal",
+    "canPass": true
+  },
+  "91": {
+    "cls": "animates",
+    "id": "upPortal",
+    "canPass": true
+  },
+  "92": {
+    "cls": "animates",
+    "id": "leftPortal",
+    "canPass": true
+  },
+  "93": {
+    "cls": "animates",
+    "id": "downPortal",
+    "canPass": true
+  },
+  "94": {
+    "cls": "animates",
+    "id": "rightPortal",
+    "canPass": true
+  },
+  "101": {
+    "cls": "animates",
+    "id": "crystalUp"
+  },
+  "102": {
+    "cls": "animates",
+    "id": "crystalBottom"
+  },
+  "103": {
+    "cls": "animates",
+    "id": "fire"
+  },
+  "104": {
+    "cls": "animates",
+    "id": "switch"
+  },
+  "109": {
+    "cls": "animates",
+    "id": "magentaWall",
+    "canBreak": true,
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {}
+    }
+  },
+  "121": {
+    "cls": "npcs",
+    "id": "man"
+  },
+  "122": {
+    "cls": "npcs",
+    "id": "trader"
+  },
+  "123": {
+    "cls": "npcs",
+    "id": "thief"
+  },
+  "124": {
+    "cls": "npcs",
+    "id": "fairy"
+  },
+  "125": {
+    "cls": "npcs",
+    "id": "wizard"
+  },
+  "126": {
+    "cls": "npcs",
+    "id": "recluse"
+  },
+  "127": {
+    "cls": "npcs",
+    "id": "king"
+  },
+  "128": {
+    "cls": "npcs",
+    "id": "youngMan"
+  },
+  "129": {
+    "cls": "npcs",
+    "id": "sign"
+  },
+  "130": {
+    "cls": "npcs",
+    "id": "expShop"
+  },
+  "131": {
+    "cls": "npcs",
+    "id": "moneyShop"
+  },
+  "132": {
+    "cls": "npcs",
+    "id": "princess"
+  },
+  "133": {
+    "cls": "npc48",
+    "id": "npc0",
+    "faceIds": {
+      "down": "npc0",
+      "left": "npc1",
+      "right": "npc2",
+      "up": "npc3"
+    },
+    "animate": 1
+  },
+  "134": {
+    "cls": "npc48",
+    "id": "npc1",
+    "faceIds": {
+      "down": "npc0",
+      "left": "npc1",
+      "right": "npc2",
+      "up": "npc3"
+    },
+    "animate": 1
+  },
+  "135": {
+    "cls": "npc48",
+    "id": "npc2",
+    "faceIds": {
+      "down": "npc0",
+      "left": "npc1",
+      "right": "npc2",
+      "up": "npc3"
+    },
+    "animate": 1
+  },
+  "136": {
+    "cls": "npc48",
+    "id": "npc3",
+    "faceIds": {
+      "down": "npc0",
+      "left": "npc1",
+      "right": "npc2",
+      "up": "npc3"
+    },
+    "animate": 1
+  },
+  "137": {
+    "cls": "npcs",
+    "id": "greenMan"
+  },
+  "138": {
+    "cls": "npcs",
+    "id": "blueTrader"
+  },
+  "140": {
+    "cls": "autotile",
+    "id": "autotile4",
+    "canPass": true
+  },
+  "141": {
+    "cls": "autotile",
+    "id": "autotile5"
+  },
+  "142": {
+    "cls": "autotile",
+    "id": "autotile6"
+  },
+  "143": {
+    "cls": "autotile",
+    "id": "autotile7"
+  },
+  "144": {
+    "cls": "autotile",
+    "id": "autotile8"
+  },
+  "151": {
+    "cls": "autotile",
+    "id": "autotile1"
+  },
+  "152": {
+    "cls": "autotile",
+    "id": "autotile2"
+  },
+  "153": {
+    "cls": "autotile",
+    "id": "autotile3"
+  },
+  "161": {
+    "cls": "terrains",
+    "id": "arrowUp",
+    "canPass": true,
+    "cannotOut": [
+      "left",
+      "right",
+      "down"
+    ],
+    "cannotIn": [
+      "up"
+    ]
+  },
+  "162": {
+    "cls": "terrains",
+    "id": "arrowDown",
+    "canPass": true,
+    "cannotOut": [
+      "left",
+      "right",
+      "up"
+    ],
+    "cannotIn": [
+      "down"
+    ]
+  },
+  "163": {
+    "cls": "terrains",
+    "id": "arrowLeft",
+    "canPass": true,
+    "cannotOut": [
+      "up",
+      "down",
+      "right"
+    ],
+    "cannotIn": [
+      "left"
+    ]
+  },
+  "164": {
+    "cls": "terrains",
+    "id": "arrowRight",
+    "canPass": true,
+    "cannotOut": [
+      "up",
+      "down",
+      "left"
+    ],
+    "cannotIn": [
+      "right"
+    ]
+  },
+  "165": {
+    "cls": "terrains",
+    "id": "light",
+    "trigger": "null",
+    "canPass": true,
+    "script": "(function () {\n\tcore.setBlock(core.getNumberById('darkLight'), core.getHeroLoc('x'), core.getHeroLoc('y'));\n})();"
+  },
+  "166": {
+    "cls": "terrains",
+    "id": "darkLight"
+  },
+  "167": {
+    "cls": "terrains",
+    "id": "ski",
+    "trigger": "ski",
+    "canPass": true
+  },
+  "168": {
+    "cls": "terrains",
+    "id": "flower",
+    "canPass": true
+  },
+  "169": {
+    "cls": "terrains",
+    "id": "box",
+    "trigger": "pushBox"
+  },
+  "170": {
+    "cls": "terrains",
+    "id": "boxed",
+    "trigger": "pushBox"
+  },
+  "201": {
+    "cls": "enemys",
+    "id": "greenSlime"
+  },
+  "202": {
+    "cls": "enemys",
+    "id": "redSlime"
+  },
+  "203": {
+    "cls": "enemys",
+    "id": "blackSlime"
+  },
+  "204": {
+    "cls": "enemys",
+    "id": "slimelord"
+  },
+  "205": {
+    "cls": "enemys",
+    "id": "bat"
+  },
+  "206": {
+    "cls": "enemys",
+    "id": "bigBat"
+  },
+  "207": {
+    "cls": "enemys",
+    "id": "redBat"
+  },
+  "208": {
+    "cls": "enemys",
+    "id": "vampire"
+  },
+  "209": {
+    "cls": "enemys",
+    "id": "skeleton"
+  },
+  "210": {
+    "cls": "enemys",
+    "id": "skeletonWarrior"
+  },
+  "211": {
+    "cls": "enemys",
+    "id": "skeletonCaptain"
+  },
+  "212": {
+    "cls": "enemys",
+    "id": "ghostSoldier"
+  },
+  "213": {
+    "cls": "enemys",
+    "id": "zombie"
+  },
+  "214": {
+    "cls": "enemys",
+    "id": "zombieKnight"
+  },
+  "215": {
+    "cls": "enemys",
+    "id": "rock"
+  },
+  "216": {
+    "cls": "enemys",
+    "id": "slimeman"
+  },
+  "217": {
+    "cls": "enemys",
+    "id": "bluePriest"
+  },
+  "218": {
+    "cls": "enemys",
+    "id": "redPriest"
+  },
+  "219": {
+    "cls": "enemys",
+    "id": "brownWizard"
+  },
+  "220": {
+    "cls": "enemys",
+    "id": "redWizard"
+  },
+  "221": {
+    "cls": "enemys",
+    "id": "yellowGateKeeper"
+  },
+  "222": {
+    "cls": "enemys",
+    "id": "blueGateKeeper"
+  },
+  "223": {
+    "cls": "enemys",
+    "id": "redGateKeeper"
+  },
+  "224": {
+    "cls": "enemys",
+    "id": "swordsman"
+  },
+  "225": {
+    "cls": "enemys",
+    "id": "soldier"
+  },
+  "226": {
+    "cls": "enemys",
+    "id": "yellowKnight"
+  },
+  "227": {
+    "cls": "enemys",
+    "id": "redKnight"
+  },
+  "228": {
+    "cls": "enemys",
+    "id": "darkKnight"
+  },
+  "229": {
+    "cls": "enemys",
+    "id": "blackKing"
+  },
+  "230": {
+    "cls": "enemys",
+    "id": "yellowKing"
+  },
+  "231": {
+    "cls": "enemys",
+    "id": "greenKing"
+  },
+  "232": {
+    "cls": "enemys",
+    "id": "blueKnight"
+  },
+  "233": {
+    "cls": "enemys",
+    "id": "goldSlime"
+  },
+  "234": {
+    "cls": "enemys",
+    "id": "poisonSkeleton"
+  },
+  "235": {
+    "cls": "enemys",
+    "id": "poisonBat"
+  },
+  "236": {
+    "cls": "enemys",
+    "id": "ironRock"
+  },
+  "237": {
+    "cls": "enemys",
+    "id": "skeletonPriest"
+  },
+  "238": {
+    "cls": "enemys",
+    "id": "skeletonKing"
+  },
+  "239": {
+    "cls": "enemys",
+    "id": "skeletonPresbyter"
+  },
+  "240": {
+    "cls": "enemys",
+    "id": "skeletonKnight"
+  },
+  "241": {
+    "cls": "enemys",
+    "id": "evilHero"
+  },
+  "242": {
+    "cls": "enemys",
+    "id": "devilWarrior"
+  },
+  "243": {
+    "cls": "enemys",
+    "id": "demonPriest"
+  },
+  "244": {
+    "cls": "enemys",
+    "id": "goldHornSlime"
+  },
+  "245": {
+    "cls": "enemys",
+    "id": "redKing"
+  },
+  "246": {
+    "cls": "enemys",
+    "id": "blueKing"
+  },
+  "247": {
+    "cls": "enemys",
+    "id": "magicMaster"
+  },
+  "248": {
+    "cls": "enemys",
+    "id": "silverSlime"
+  },
+  "249": {
+    "cls": "enemys",
+    "id": "blademaster"
+  },
+  "250": {
+    "cls": "enemys",
+    "id": "whiteHornSlime"
+  },
+  "251": {
+    "cls": "enemys",
+    "id": "evilPrincess"
+  },
+  "252": {
+    "cls": "enemys",
+    "id": "evilFairy"
+  },
+  "253": {
+    "cls": "enemys",
+    "id": "yellowPriest"
+  },
+  "254": {
+    "cls": "enemys",
+    "id": "redSwordsman"
+  },
+  "255": {
+    "cls": "enemys",
+    "id": "whiteSlimeman"
+  },
+  "256": {
+    "cls": "enemys",
+    "id": "poisonZombie"
+  },
+  "257": {
+    "cls": "enemys",
+    "id": "dragon"
+  },
+  "258": {
+    "cls": "enemys",
+    "id": "octopus"
+  },
+  "259": {
+    "cls": "enemys",
+    "id": "fairyEnemy"
+  },
+  "260": {
+    "cls": "enemys",
+    "id": "princessEnemy"
+  },
+  "261": {
+    "cls": "enemy48",
+    "id": "angel"
+  },
+  "262": {
+    "cls": "enemy48",
+    "id": "elemental"
+  },
+  "263": {
+    "cls": "enemy48",
+    "id": "steelGuard"
+  },
+  "264": {
+    "cls": "enemy48",
+    "id": "evilBat"
+  },
+  "265": {
+    "cls": "enemys",
+    "id": "silverSlimelord"
+  },
+  "266": {
+    "cls": "enemys",
+    "id": "goldSlimelord"
+  },
+  "267": {
+    "cls": "enemys",
+    "id": "grayRock"
+  },
+  "270": {
+    "cls": "enemys",
+    "id": "greenKnight"
+  },
+  "271": {
+    "cls": "enemys",
+    "id": "bowman"
+  },
+  "272": {
+    "cls": "enemys",
+    "id": "purpleBowman"
+  },
+  "275": {
+    "cls": "enemys",
+    "id": "watcherSlime"
+  },
+  "277": {
+    "cls": "enemys",
+    "id": "frostBat"
+  },
+  "278": {
+    "cls": "enemys",
+    "id": "devilKnight"
+  },
+  "279": {
+    "cls": "enemys",
+    "id": "grayPriest"
+  },
+  "280": {
+    "cls": "enemys",
+    "id": "greenGateKeeper"
+  },
+  "300": {
+    "cls": "terrains",
+    "id": "ground"
+  },
+  "301": {
+    "cls": "terrains",
+    "id": "sWallT",
+    "name": "薄墙-上",
+    "cannotOut": [
+      "up"
+    ],
+    "cannotIn": [
+      "up"
+    ]
+  },
+  "302": {
+    "cls": "terrains",
+    "id": "sWallL",
+    "name": "薄墙-左",
+    "cannotOut": [
+      "left"
+    ],
+    "cannotIn": [
+      "left"
+    ]
+  },
+  "303": {
+    "cls": "terrains",
+    "id": "sWallR",
+    "name": "薄墙-右",
+    "cannotOut": [
+      "right"
+    ],
+    "cannotIn": [
+      "right"
+    ]
+  },
+  "304": {
+    "cls": "terrains",
+    "id": "sWallB",
+    "name": "薄墙-下",
+    "cannotOut": [
+      "down"
+    ],
+    "cannotIn": [
+      "down"
+    ]
+  },
+  "305": {
+    "cls": "terrains",
+    "id": "grass"
+  },
+  "306": {
+    "cls": "terrains",
+    "id": "sWallTL",
+    "name": "薄墙-上左",
+    "cannotOut": [
+      "up",
+      "left"
+    ],
+    "cannotIn": [
+      "up",
+      "left"
+    ]
+  },
+  "307": {
+    "cls": "terrains",
+    "id": "sWallBR",
+    "name": "薄墙-下右",
+    "cannotOut": [
+      "down",
+      "right"
+    ],
+    "cannotIn": [
+      "down",
+      "right"
+    ]
+  },
+  "308": {
+    "cls": "terrains",
+    "id": "grass2"
+  },
+  "309": {
+    "cls": "terrains",
+    "id": "sWallTR",
+    "name": "薄墙-上右",
+    "cannotOut": [
+      "up",
+      "right"
+    ],
+    "cannotIn": [
+      "up",
+      "right"
+    ]
+  },
+  "310": {
+    "cls": "terrains",
+    "id": "sWallBL",
+    "name": "薄墙-下左",
+    "cannotOut": [
+      "down",
+      "left"
+    ],
+    "cannotIn": [
+      "down",
+      "left"
+    ]
+  },
+  "311": {
+    "cls": "terrains",
+    "id": "ground2"
+  },
+  "312": {
+    "cls": "terrains",
+    "id": "sWallTB",
+    "name": "薄墙-上下",
+    "cannotOut": [
+      "up",
+      "down"
+    ],
+    "cannotIn": [
+      "up",
+      "down"
+    ]
+  },
+  "313": {
+    "cls": "terrains",
+    "id": "ground3"
+  },
+  "314": {
+    "cls": "terrains",
+    "id": "sWallLR",
+    "name": "薄墙-左右",
+    "cannotOut": [
+      "left",
+      "right"
+    ],
+    "cannotIn": [
+      "left",
+      "right"
+    ]
+  },
+  "315": {
+    "cls": "terrains",
+    "id": "sWallBLR",
+    "name": "薄墙-下左右",
+    "cannotOut": [
+      "down",
+      "left",
+      "right"
+    ],
+    "cannotIn": [
+      "down",
+      "left",
+      "right"
+    ]
+  },
+  "316": {
+    "cls": "terrains",
+    "id": "sWallTLR",
+    "name": "薄墙-上左右",
+    "cannotOut": [
+      "up",
+      "left",
+      "right"
+    ],
+    "cannotIn": [
+      "up",
+      "left",
+      "right"
+    ]
+  },
+  "317": {
+    "cls": "terrains",
+    "id": "sWallTBR",
+    "name": "薄墙-上下右",
+    "cannotOut": [
+      "up",
+      "down",
+      "right"
+    ],
+    "cannotIn": [
+      "up",
+      "down",
+      "right"
+    ]
+  },
+  "318": {
+    "cls": "terrains",
+    "id": "sWallTBL",
+    "name": "薄墙-上下左",
+    "cannotOut": [
+      "up",
+      "down",
+      "left"
+    ],
+    "cannotIn": [
+      "up",
+      "down",
+      "left"
+    ]
+  },
+  "319": {
+    "cls": "npc48",
+    "id": "tallYellowDoor",
+    "trigger": "openDoor",
+    "name": "高黄门",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "yellowKey": 1
+      }
+    }
+  },
+  "320": {
+    "cls": "npc48",
+    "id": "tallBlueDoor",
+    "trigger": "openDoor",
+    "name": "高蓝门",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "blueKey": 1
+      }
+    }
+  },
+  "321": {
+    "cls": "npc48",
+    "id": "tallRedDoor",
+    "trigger": "openDoor",
+    "name": "高红门",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "redKey": 1
+      }
+    }
+  },
+  "322": {
+    "cls": "npc48",
+    "id": "tallGreenDoor",
+    "trigger": "openDoor",
+    "name": "高绿门",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "greenKey": 1
+      }
+    }
+  },
+  "323": {
+    "cls": "npc48",
+    "id": "tallSpecialDoor",
+    "trigger": "openDoor",
+    "name": "高机关门",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "specialKey": 1
+      }
+    }
+  },
+  "324": {
+    "cls": "npc48",
+    "id": "tallSteelDoor",
+    "trigger": "openDoor",
+    "name": "高铁门",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "door.mp3",
+      "closeSound": "door.mp3",
+      "keys": {
+        "steelKey": 1
+      }
+    }
+  },
+  "325": {
+    "cls": "enemys",
+    "id": "keiskeiFairy"
+  },
+  "326": {
+    "cls": "enemys",
+    "id": "tulipFairy"
+  },
+  "327": {
+    "cls": "enemy48",
+    "id": "bearDown"
+  },
+  "328": {
+    "cls": "enemy48",
+    "id": "bearLeft"
+  },
+  "329": {
+    "cls": "enemy48",
+    "id": "bearRight"
+  },
+  "330": {
+    "cls": "enemy48",
+    "id": "bearUp"
+  },
+  "331": {
+    "cls": "enemys",
+    "id": "E331"
+  },
+  "332": {
+    "cls": "enemys",
+    "id": "E332"
+  },
+  "333": {
+    "cls": "enemys",
+    "id": "E333"
+  },
+  "334": {
+    "cls": "enemys",
+    "id": "E334"
+  },
+  "335": {
+    "cls": "enemys",
+    "id": "E335"
+  },
+  "336": {
+    "cls": "enemys",
+    "id": "E336"
+  },
+  "337": {
+    "cls": "enemys",
+    "id": "E337"
+  },
+  "338": {
+    "cls": "enemys",
+    "id": "E338"
+  },
+  "339": {
+    "cls": "terrains",
+    "id": "T339"
+  },
+  "340": {
+    "cls": "terrains",
+    "id": "T340"
+  },
+  "341": {
+    "cls": "terrains",
+    "id": "T341"
+  },
+  "342": {
+    "cls": "terrains",
+    "id": "T342"
+  },
+  "343": {
+    "cls": "enemy48",
+    "id": "E343"
+  },
+  "344": {
+    "cls": "enemy48",
+    "id": "E344"
+  },
+  "345": {
+    "cls": "enemy48",
+    "id": "E345"
+  },
+  "346": {
+    "cls": "items",
+    "id": "MagicKey"
+  },
+  "347": {
+    "cls": "items",
+    "id": "I347"
+  },
+  "348": {
+    "cls": "items",
+    "id": "I348"
+  },
+  "349": {
+    "cls": "items",
+    "id": "I349"
+  },
+  "350": {
+    "cls": "items",
+    "id": "I350"
+  },
+  "351": {
+    "cls": "items",
+    "id": "I351"
+  },
+  "352": {
+    "cls": "items",
+    "id": "I352"
+  },
+  "353": {
+    "cls": "items",
+    "id": "I353"
+  },
+  "354": {
+    "cls": "items",
+    "id": "I354"
+  },
+  "355": {
+    "cls": "items",
+    "id": "I355"
+  },
+  "356": {
+    "cls": "items",
+    "id": "I356"
+  },
+  "357": {
+    "cls": "items",
+    "id": "I357"
+  },
+  "358": {
+    "cls": "items",
+    "id": "I358"
+  },
+  "359": {
+    "cls": "items",
+    "id": "I359"
+  },
+  "360": {
+    "cls": "items",
+    "id": "I360"
+  },
+  "361": {
+    "cls": "items",
+    "id": "I361"
+  },
+  "362": {
+    "cls": "items",
+    "id": "I362"
+  },
+  "363": {
+    "cls": "animates",
+    "id": "A363",
+    "animate": 1
+  },
+  "364": {
+    "cls": "animates",
+    "id": "A364",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {}
+    },
+    "trigger": "openDoor"
+  },
+  "365": {
+    "cls": "animates",
+    "id": "A365"
+  },
+  "366": {
+    "cls": "animates",
+    "id": "A366"
+  },
+  "367": {
+    "cls": "animates",
+    "id": "A367",
+    "canPass": true
+  },
+  "368": {
+    "cls": "animates",
+    "id": "A368",
+    "canBreak": true,
+    "animate": 1
+  },
+  "369": {
+    "cls": "animates",
+    "id": "A369"
+  },
+  "370": {
+    "cls": "animates",
+    "id": "A370",
+    "canBreak": true,
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {}
+    }
+  },
+  "371": {
+    "cls": "animates",
+    "id": "A371",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {}
+    }
+  },
+  "372": {
+    "cls": "enemy48",
+    "id": "E372"
+  },
+  "373": {
+    "cls": "enemy48",
+    "id": "E373"
+  },
+  "374": {
+    "cls": "enemy48",
+    "id": "E374"
+  },
+  "375": {
+    "cls": "enemy48",
+    "id": "E375"
+  },
+  "376": {
+    "cls": "enemy48",
+    "id": "E376"
+  },
+  "377": {
+    "cls": "enemy48",
+    "id": "E377"
+  },
+  "378": {
+    "cls": "enemy48",
+    "id": "E378"
+  },
+  "379": {
+    "cls": "enemy48",
+    "id": "E379"
+  },
+  "380": {
+    "cls": "enemy48",
+    "id": "E380"
+  },
+  "381": {
+    "cls": "enemy48",
+    "id": "E381"
+  },
+  "382": {
+    "cls": "enemy48",
+    "id": "E382"
+  },
+  "383": {
+    "cls": "enemy48",
+    "id": "E383"
+  },
+  "384": {
+    "cls": "enemy48",
+    "id": "E384"
+  },
+  "385": {
+    "cls": "enemy48",
+    "id": "E385"
+  },
+  "386": {
+    "cls": "enemy48",
+    "id": "E386"
+  },
+  "387": {
+    "cls": "enemy48",
+    "id": "E387"
+  },
+  "388": {
+    "cls": "enemy48",
+    "id": "E388"
+  },
+  "389": {
+    "cls": "enemy48",
+    "id": "E389"
+  },
+  "390": {
+    "cls": "enemy48",
+    "id": "E390"
+  },
+  "391": {
+    "cls": "enemy48",
+    "id": "E391"
+  },
+  "392": {
+    "cls": "enemy48",
+    "id": "E392"
+  },
+  "393": {
+    "cls": "enemy48",
+    "id": "E393"
+  },
+  "394": {
+    "cls": "enemy48",
+    "id": "E394"
+  },
+  "395": {
+    "cls": "enemy48",
+    "id": "E395"
+  },
+  "396": {
+    "cls": "enemy48",
+    "id": "E396"
+  },
+  "397": {
+    "cls": "enemy48",
+    "id": "E397"
+  },
+  "398": {
+    "cls": "enemy48",
+    "id": "E398"
+  },
+  "399": {
+    "cls": "enemy48",
+    "id": "E399"
+  },
+  "400": {
+    "cls": "enemy48",
+    "id": "E400"
+  },
+  "401": {
+    "cls": "enemy48",
+    "id": "E401"
+  },
+  "402": {
+    "cls": "enemy48",
+    "id": "E402"
+  },
+  "403": {
+    "cls": "enemy48",
+    "id": "E403"
+  },
+  "404": {
+    "cls": "enemy48",
+    "id": "E404"
+  },
+  "405": {
+    "cls": "enemy48",
+    "id": "E405"
+  },
+  "406": {
+    "cls": "npc48",
+    "id": "N406",
+    "faceIds": {
+      "down": "N406",
+      "left": "N407",
+      "right": "N408",
+      "up": "N409"
+    },
+    "animate": 1
+  },
+  "407": {
+    "cls": "npc48",
+    "id": "N407",
+    "faceIds": {
+      "down": "N406",
+      "left": "N407",
+      "right": "N408",
+      "up": "N409"
+    }
+  },
+  "408": {
+    "cls": "npc48",
+    "id": "N408"
+  },
+  "409": {
+    "cls": "npc48",
+    "id": "N409"
+  },
+  "410": {
+    "cls": "npc48",
+    "id": "N410",
+    "animate": 1,
+    "faceIds": {
+      "down": "N410",
+      "left": "N411",
+      "right": "N412",
+      "up": "N413"
+    }
+  },
+  "411": {
+    "cls": "npc48",
+    "id": "N411",
+    "faceIds": {
+      "down": "N410",
+      "left": "N411",
+      "right": "N412",
+      "up": "N413"
+    }
+  },
+  "412": {
+    "cls": "npc48",
+    "id": "N412",
+    "faceIds": {
+      "down": "N410",
+      "left": "N411",
+      "right": "N412",
+      "up": "N413"
+    }
+  },
+  "413": {
+    "cls": "npc48",
+    "id": "N413",
+    "faceIds": {
+      "down": "N410",
+      "left": "N411",
+      "right": "N412",
+      "up": "N413"
+    }
+  },
+  "414": {
+    "cls": "npc48",
+    "id": "N414",
+    "faceIds": {
+      "down": "N414",
+      "left": "N415",
+      "right": "N416",
+      "up": "N417"
+    },
+    "animate": 1
+  },
+  "415": {
+    "cls": "npc48",
+    "id": "N415",
+    "faceIds": {
+      "down": "N414",
+      "left": "N415",
+      "right": "N416",
+      "up": "N417"
+    }
+  },
+  "416": {
+    "cls": "npc48",
+    "id": "N416",
+    "faceIds": {
+      "down": "N414",
+      "left": "N415",
+      "right": "N416",
+      "up": "N417"
+    }
+  },
+  "417": {
+    "cls": "npc48",
+    "id": "N417",
+    "faceIds": {
+      "down": "N414",
+      "left": "N415",
+      "right": "N416",
+      "up": "N417"
+    }
+  },
+  "418": {
+    "cls": "animates",
+    "id": "A418"
+  },
+  "419": {
+    "cls": "animates",
+    "id": "A419"
+  },
+  "420": {
+    "cls": "animates",
+    "id": "A420",
+    "canPass": true
+  },
+  "421": {
+    "cls": "animates",
+    "id": "A421",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {}
+    }
+  },
+  "422": {
+    "cls": "animates",
+    "id": "A422",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {}
+    },
+    "trigger": "openDoor"
+  },
+  "423": {
+    "cls": "animates",
+    "id": "A423"
+  },
+  "424": {
+    "cls": "enemys",
+    "id": "E424"
+  },
+  "425": {
+    "cls": "enemys",
+    "id": "E425"
+  },
+  "426": {
+    "cls": "enemys",
+    "id": "E426"
+  },
+  "427": {
+    "cls": "enemys",
+    "id": "E427"
+  },
+  "428": {
+    "cls": "enemys",
+    "id": "E428"
+  },
+  "429": {
+    "cls": "enemys",
+    "id": "E429"
+  },
+  "430": {
+    "cls": "enemys",
+    "id": "E430"
+  },
+  "431": {
+    "cls": "enemys",
+    "id": "E431"
+  },
+  "432": {
+    "cls": "enemys",
+    "id": "E432"
+  },
+  "433": {
+    "cls": "enemys",
+    "id": "E433"
+  },
+  "434": {
+    "cls": "enemys",
+    "id": "E434"
+  },
+  "435": {
+    "cls": "enemys",
+    "id": "E435"
+  },
+  "436": {
+    "cls": "enemys",
+    "id": "E436"
+  },
+  "437": {
+    "cls": "enemys",
+    "id": "E437"
+  },
+  "438": {
+    "cls": "enemys",
+    "id": "E438"
+  },
+  "439": {
+    "cls": "enemys",
+    "id": "E439"
+  },
+  "440": {
+    "cls": "enemys",
+    "id": "E440"
+  },
+  "441": {
+    "cls": "enemys",
+    "id": "E441"
+  },
+  "442": {
+    "cls": "enemys",
+    "id": "E442"
+  },
+  "443": {
+    "cls": "enemys",
+    "id": "E443"
+  },
+  "444": {
+    "cls": "enemys",
+    "id": "E444"
+  },
+  "445": {
+    "cls": "enemys",
+    "id": "E445"
+  },
+  "446": {
+    "cls": "enemys",
+    "id": "E446"
+  },
+  "447": {
+    "cls": "enemys",
+    "id": "E447"
+  },
+  "448": {
+    "cls": "enemys",
+    "id": "E448"
+  },
+  "449": {
+    "cls": "enemys",
+    "id": "E449"
+  },
+  "450": {
+    "cls": "enemys",
+    "id": "E450"
+  },
+  "451": {
+    "cls": "items",
+    "id": "I451"
+  },
+  "452": {
+    "cls": "items",
+    "id": "I452"
+  },
+  "453": {
+    "cls": "items",
+    "id": "I453"
+  },
+  "454": {
+    "cls": "items",
+    "id": "I454"
+  },
+  "455": {
+    "cls": "items",
+    "id": "I455"
+  },
+  "456": {
+    "cls": "items",
+    "id": "I456"
+  },
+  "457": {
+    "cls": "items",
+    "id": "I457"
+  },
+  "458": {
+    "cls": "items",
+    "id": "I458"
+  },
+  "459": {
+    "cls": "animates",
+    "id": "A459"
+  },
+  "460": {
+    "cls": "animates",
+    "id": "A460"
+  },
+  "461": {
+    "cls": "animates",
+    "id": "A461"
+  },
+  "462": {
+    "cls": "enemys",
+    "id": "E462"
+  },
+  "463": {
+    "cls": "enemys",
+    "id": "E463"
+  },
+  "464": {
+    "cls": "enemys",
+    "id": "E464"
+  },
+  "465": {
+    "cls": "animates",
+    "id": "A465"
+  },
+  "466": {
+    "cls": "enemys",
+    "id": "E466"
+  },
+  "467": {
+    "cls": "enemys",
+    "id": "E467"
+  },
+  "468": {
+    "cls": "enemys",
+    "id": "E468"
+  },
+  "469": {
+    "cls": "enemys",
+    "id": "E469"
+  },
+  "470": {
+    "cls": "enemys",
+    "id": "E470"
+  },
+  "471": {
+    "cls": "enemys",
+    "id": "E471"
+  },
+  "472": {
+    "cls": "enemys",
+    "id": "E472"
+  },
+  "473": {
+    "cls": "npc48",
+    "id": "N473",
+    "faceIds": {
+      "down": "N473",
+      "left": "N474",
+      "right": "N475",
+      "up": "N476"
+    },
+    "animate": 1
+  },
+  "474": {
+    "cls": "npc48",
+    "id": "N474",
+    "faceIds": {
+      "down": "N473",
+      "left": "N474",
+      "right": "N475",
+      "up": "N476"
+    }
+  },
+  "475": {
+    "cls": "npc48",
+    "id": "N475",
+    "faceIds": {
+      "down": "N473",
+      "left": "N474",
+      "right": "N475",
+      "up": "N476"
+    }
+  },
+  "476": {
+    "cls": "npc48",
+    "id": "N476",
+    "faceIds": {
+      "down": "N473",
+      "left": "N474",
+      "right": "N475",
+      "up": "N476"
+    }
+  },
+  "477": {
+    "cls": "enemys",
+    "id": "E477"
+  },
+  "478": {
+    "cls": "animates",
+    "id": "IceNet",
+    "script": "(function () {\n\tif (!core.hasItem('amulet')) {\n\t\tcore.drawHeroAnimate('icevx1');\n\t\tcore.status.hero.hp -= 50;\n\t\tcore.drawTip('经过过冷水，受到伤害50点');\n\t}\n})()",
+    "canPass": true,
+    "name": "过冷水"
+  },
+  "479": {
+    "cls": "animates",
+    "id": "A479",
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {
+        "yellowKey": 1
+      }
+    },
+    "animate": 1,
+    "trigger": "openDoor",
+    "name": "黄色机关"
+  },
+  "480": {
+    "cls": "animates",
+    "id": "A480",
+    "name": "蓝色机关",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {
+        "blueKey": 1
+      }
+    }
+  },
+  "481": {
+    "cls": "animates",
+    "id": "A481",
+    "name": "红色机关",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {
+        "redKey": 1
+      }
+    }
+  },
+  "482": {
+    "cls": "animates",
+    "id": "A482",
+    "name": "绿色机关",
+    "trigger": "openDoor",
+    "animate": 1,
+    "doorInfo": {
+      "time": 160,
+      "openSound": "045-Push01.mp3",
+      "closeSound": "045-Push01.mp3",
+      "keys": {
+        "greenKey": 1
+      }
+    }
+  },
+  "483": {
+    "cls": "enemy48",
+    "id": "E483"
+  },
+  "484": {
+    "cls": "enemy48",
+    "id": "E484"
+  },
+  "485": {
+    "cls": "enemy48",
+    "id": "E485"
+  },
+  "486": {
+    "cls": "enemy48",
+    "id": "E486"
+  },
+  "487": {
+    "cls": "animates",
+    "id": "A487",
+    "event": [
+      {
+        "type": "setValue",
+        "name": "item:amulet",
+        "operator": "+=",
+        "value": "1"
+      },
+      {
+        "type": "hide",
+        "remove": true
+      }
+    ]
+  },
+  "488": {
+    "cls": "animates",
+    "id": "A488"
+  },
+  "489": {
+    "cls": "enemys",
+    "id": "E489"
+  },
+  "490": {
+    "cls": "terrains",
+    "id": "hole",
+    "name": "落穴",
+    "canPass": true
+  },
+  "491": {
+    "cls": "terrains",
+    "id": "T491"
+  },
+  "492": {
+    "cls": "terrains",
+    "id": "T492"
+  },
+  "493": {
+    "cls": "terrains",
+    "id": "T493"
+  },
+  "494": {
+    "cls": "enemys",
+    "id": "E494"
+  },
+  "495": {
+    "cls": "terrains",
+    "id": "T495",
+    "name": "大元气瓶",
+    "event": [
+      {
+        "type": "playSound",
+        "name": "回血"
+      },
+      {
+        "type": "tip",
+        "text": "获得 大元气瓶，生命增加4000点"
+      },
+      {
+        "type": "setValue",
+        "name": "status:hp",
+        "operator": "+=",
+        "value": "4000"
+      },
+      {
+        "type": "hide",
+        "remove": true
+      }
+    ],
+    "bigImage": "bigpotion_1.png"
+  },
+  "496": {
+    "cls": "items",
+    "id": "I496"
+  },
+  "497": {
+    "cls": "items",
+    "id": "I497"
+  },
+  "498": {
+    "cls": "terrains",
+    "id": "T498",
+    "name": "发光水晶",
+    "event": [
+      {
+        "type": "playSound",
+        "name": "取消"
+      },
+      {
+        "type": "setValue",
+        "name": "status:atk",
+        "operator": "+=",
+        "value": "20"
+      },
+      {
+        "type": "setValue",
+        "name": "status:def",
+        "operator": "+=",
+        "value": "20"
+      },
+      {
+        "type": "hide",
+        "remove": true
+      }
+    ],
+    "bigImage": "biggems_0.png"
+  },
+  "499": {
+    "cls": "terrains",
+    "id": "T499"
+  },
+  "500": {
+    "cls": "terrains",
+    "id": "T500",
+    "bigImage": "supergems_3.png"
+  },
+  "10005": {
+    "cls": "tileset",
+    "id": "X10005",
+    "canBreak": true
+  },
+  "10006": {
+    "cls": "tileset",
+    "id": "X10006",
+    "canBreak": true
+  },
+  "10007": {
+    "cls": "tileset",
+    "id": "X10007",
+    "canBreak": true
+  },
+  "10009": {
+    "cls": "tileset",
+    "id": "X10009",
+    "canBreak": true
+  },
+  "10010": {
+    "cls": "tileset",
+    "id": "X10010",
+    "canBreak": false
+  },
+  "10011": {
+    "cls": "tileset",
+    "id": "X10011",
+    "canBreak": true
+  },
+  "10025": {
+    "cls": "tileset",
+    "id": "X10025",
+    "canPass": true
+  },
+  "10113": {
+    "cls": "tileset",
+    "id": "X10113",
+    "canPass": true
+  },
+  "10247": {
+    "cls": "tileset",
+    "id": "X10247",
+    "canPass": true
+  },
+  "10255": {
+    "cls": "tileset",
+    "id": "X10255",
+    "canPass": true
+  },
+  "10256": {
+    "cls": "tileset",
+    "id": "X10256",
+    "canPass": true
+  },
+  "10267": {
+    "cls": "tileset",
+    "id": "X10267",
+    "canPass": true
+  },
+  "10268": {
+    "cls": "tileset",
+    "id": "X10268",
+    "canPass": true
+  },
+  "10269": {
+    "cls": "tileset",
+    "id": "X10269",
+    "cannotOut": [
+      "left"
+    ],
+    "cannotIn": [
+      "right"
+    ]
+  },
+  "10270": {
+    "cls": "tileset",
+    "id": "X10270",
+    "cannotOut": [
+      "right"
+    ],
+    "cannotIn": [
+      "left"
+    ]
+  },
+  "10277": {
+    "cls": "tileset",
+    "id": "X10277",
+    "cannotIn": [
+      "right"
+    ],
+    "cannotOut": [
+      "left"
+    ]
+  },
+  "10278": {
+    "cls": "tileset",
+    "id": "X10278",
+    "cannotIn": [
+      "left"
+    ],
+    "cannotOut": [
+      "right"
+    ]
+  },
+  "10288": {
+    "cls": "tileset",
+    "id": "X10288",
+    "canPass": true
+  },
+  "10368": {
+    "cls": "tileset",
+    "id": "X10368",
+    "canPass": true
+  },
+  "10369": {
+    "cls": "tileset",
+    "id": "X10369",
+    "canPass": true
+  },
+  "10374": {
+    "cls": "tileset",
+    "id": "X10374",
+    "canPass": true
+  },
+  "10396": {
+    "cls": "tileset",
+    "id": "X10396",
+    "canPass": true
+  },
+  "10397": {
+    "cls": "tileset",
+    "id": "X10397",
+    "canPass": true
+  },
+  "10398": {
+    "cls": "tileset",
+    "id": "X10398",
+    "canPass": true
+  },
+  "10399": {
+    "cls": "tileset",
+    "id": "X10399",
+    "canPass": true
+  },
+  "10404": {
+    "cls": "tileset",
+    "id": "X10404",
+    "canPass": true
+  },
+  "10405": {
+    "cls": "tileset",
+    "id": "X10405",
+    "canPass": true
+  },
+  "10406": {
+    "cls": "tileset",
+    "id": "X10406",
+    "canPass": true
+  },
+  "10407": {
+    "cls": "tileset",
+    "id": "X10407",
+    "canPass": true
+  },
+  "10425": {
+    "cls": "tileset",
+    "id": "X10425",
+    "canPass": true
+  },
+  "10430": {
+    "cls": "tileset",
+    "id": "X10430",
+    "canPass": true
+  },
+  "10750": {
+    "cls": "tileset",
+    "id": "X10750",
+    "canPass": true
+  },
+  "11112": {
+    "cls": "tileset",
+    "id": "X11112",
+    "canPass": true
+  },
+  "20005": {
+    "cls": "tileset",
+    "id": "X20005",
+    "canBreak": true
+  },
+  "20006": {
+    "cls": "tileset",
+    "id": "X20006",
+    "canBreak": true
+  },
+  "20007": {
+    "cls": "tileset",
+    "id": "X20007",
+    "canBreak": true
+  },
+  "20060": {
+    "cls": "tileset",
+    "id": "X20060",
+    "canPass": true
+  },
+  "20088": {
+    "cls": "tileset",
+    "id": "X20088",
+    "canPass": true
+  },
+  "20106": {
+    "cls": "tileset",
+    "id": "X20106",
+    "canPass": true
+  },
+  "20424": {
+    "cls": "tileset",
+    "id": "X20424",
+    "canPass": true
+  },
+  "20425": {
+    "cls": "tileset",
+    "id": "X20425",
+    "canPass": true
+  },
+  "20426": {
+    "cls": "tileset",
+    "id": "X20426",
+    "canPass": true
+  },
+  "20427": {
+    "cls": "tileset",
+    "id": "X20427",
+    "canPass": true
+  },
+  "20432": {
+    "cls": "tileset",
+    "id": "X20432",
+    "canPass": true
+  },
+  "20433": {
+    "cls": "tileset",
+    "id": "X20433",
+    "canPass": true
+  },
+  "20434": {
+    "cls": "tileset",
+    "id": "X20434",
+    "canPass": true
+  },
+  "20435": {
+    "cls": "tileset",
+    "id": "X20435",
+    "canPass": true
+  },
+  "20818": {
+    "cls": "tileset",
+    "id": "X20818",
+    "cannotOut": [
+      "up"
+    ],
+    "canPass": true,
+    "cannotIn": [
+      "down"
+    ]
+  },
+  "20888": {
+    "cls": "tileset",
+    "id": "X20888",
+    "canPass": true
+  },
+  "20889": {
+    "cls": "tileset",
+    "id": "X20889",
+    "canPass": true
+  },
+  "20890": {
+    "cls": "tileset",
+    "id": "X20890",
+    "canPass": true
+  },
+  "20891": {
+    "cls": "tileset",
+    "id": "X20891",
+    "canPass": true
+  },
+  "20892": {
+    "cls": "tileset",
+    "id": "X20892",
+    "canPass": true
+  },
+  "20893": {
+    "cls": "tileset",
+    "id": "X20893",
+    "canPass": true
+  },
+  "20896": {
+    "cls": "tileset",
+    "id": "X20896",
+    "canPass": true
+  },
+  "20897": {
+    "cls": "tileset",
+    "id": "X20897",
+    "canPass": true
+  },
+  "20898": {
+    "cls": "tileset",
+    "id": "X20898",
+    "canPass": true
+  },
+  "20899": {
+    "cls": "tileset",
+    "id": "X20899",
+    "canPass": true
+  },
+  "20900": {
+    "cls": "tileset",
+    "id": "X20900",
+    "canPass": true
+  },
+  "20901": {
+    "cls": "tileset",
+    "id": "X20901",
+    "canPass": true
+  },
+  "20904": {
+    "cls": "tileset",
+    "id": "X20904",
+    "canPass": true
+  },
+  "20905": {
+    "cls": "tileset",
+    "id": "X20905",
+    "canPass": true
+  },
+  "20906": {
+    "cls": "tileset",
+    "id": "X20906",
+    "canPass": true
+  },
+  "20907": {
+    "cls": "tileset",
+    "id": "X20907",
+    "canPass": true
+  },
+  "20908": {
+    "cls": "tileset",
+    "id": "X20908",
+    "canPass": true
+  },
+  "20909": {
+    "cls": "tileset",
+    "id": "X20909",
+    "canPass": true
+  }
+}
