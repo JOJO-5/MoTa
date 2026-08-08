@@ -13,9 +13,12 @@ export function subscribeState(listener: StateListener) {
 
 let towerData: TowerContent | null = null
 
+;(globalThis as Record<string, unknown>)['__towerData'] = null
+
 export async function initTower(gameId: string) {
   const root = `./content/${gameId}`
   towerData = await loadTowerContent(root)
+  ;(globalThis as Record<string, unknown>)['__towerData'] = towerData
   const firstFloorId = towerData.main.floorIds[0]
   const firstFloor = towerData.floors[firstFloorId]
   if (firstFloor) {
@@ -32,5 +35,6 @@ export function getTowerData() {
 
 export function getCurrentFloor(): Floor | null {
   if (!towerData) return null
-  return towerData.floors[gameStore.getState().state.floorId] ?? null
+  const { state } = gameStore.getState()
+  return towerData.floors[state.floorId] ?? null
 }

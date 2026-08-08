@@ -3,49 +3,53 @@ import { TILE_SIZE } from './constants.js'
 import type { Direction } from '@modern-mota/core'
 
 export class HeroSprite {
-  private sprite: Phaser.GameObjects.Sprite
+  private container: Phaser.GameObjects.Container
+  private body: Phaser.GameObjects.Graphics
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.sprite = scene.add.sprite(x * TILE_SIZE, y * TILE_SIZE, 'hero')
-    this.sprite.setOrigin(0, 0)
+    this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
+    this.body = scene.add.graphics()
+    this.body.fillStyle(0xffcc00, 1)
+    this.body.fillRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4)
+    this.body.fillStyle(0x000000, 1)
+    this.body.fillRect(6, 4, 4, 4)
+    this.body.fillRect(14, 4, 4, 4)
+    this.body.fillStyle(0xffd700, 1)
+    this.body.fillRect(6, 10, 12, 4)
+    this.container.add(this.body)
   }
 
-  setDirection(direction: Direction) {
-    const frameMap: Record<Direction, number> = {
-      up: 0, down: 1, left: 2, right: 3
-    }
-    this.sprite.setFrame(frameMap[direction])
-  }
-
-  playWalk(direction: Direction) {
-    const frameMap: Record<Direction, number> = {
-      up: 4, down: 5, left: 6, right: 7
-    }
-    this.sprite.setFrame(frameMap[direction])
+  setDirection(_direction: Direction) {
   }
 
   setPosition(x: number, y: number) {
-    this.sprite.setPosition(x * TILE_SIZE, y * TILE_SIZE)
+    this.container.setPosition(x * TILE_SIZE, y * TILE_SIZE)
   }
 
   destroy() {
-    this.sprite.destroy()
+    this.container.destroy()
   }
 }
 
 export class EnemySprite {
-  private sprite: Phaser.GameObjects.Sprite
+  private container: Phaser.GameObjects.Container
 
-  constructor(scene: Phaser.Scene, x: number, y: number, enemyId: string) {
-    this.sprite = scene.add.sprite(x * TILE_SIZE, y * TILE_SIZE, `enemy_${enemyId}`)
-    this.sprite.setOrigin(0, 0)
+  constructor(scene: Phaser.Scene, x: number, y: number, _enemyId: string) {
+    this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
+    const g = scene.add.graphics()
+    g.fillStyle(0xff0000, 1)
+    g.fillCircle(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE / 2 - 2)
+    g.fillStyle(0x000000, 1)
+    g.fillCircle(TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 2, 2)
+    g.fillCircle(TILE_SIZE / 2 + 4, TILE_SIZE / 2 - 2, 2)
+    this.container.add(g)
   }
 
   setPosition(x: number, y: number) {
-    this.sprite.setPosition(x * TILE_SIZE, y * TILE_SIZE)
+    this.container.setPosition(x * TILE_SIZE, y * TILE_SIZE)
   }
 
   destroy() {
-    this.sprite.destroy()
+    this.container.destroy()
   }
 }

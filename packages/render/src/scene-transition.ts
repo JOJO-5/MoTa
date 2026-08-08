@@ -3,11 +3,13 @@ import type { Floor } from '@modern-mota/data'
 import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
+import { gameStore } from '@modern-mota/core'
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
   private cameraSystem!: CameraSystem
   private heroSprite!: HeroSprite
+  private unsubscribers: (() => void)[] = []
 
   constructor() {
     super('GameScene')
@@ -15,6 +17,34 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     this.cameraSystem = new CameraSystem(this, 13, 13)
+
+    const loadFloorFromState = () => {
+      const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+        floors: Record<string, Floor>
+      } | null
+      if (!towerData) return
+      const state = gameStore.getState()
+      if (!state.state.floorId) return
+      const floor = towerData.floors[state.state.floorId]
+      if (floor) {
+        this.loadFloor(floor)
+      }
+    }
+
+    this.unsubscribers.push(
+      gameStore.subscribe((_prev, next) => {
+        if (next.state.floorId) {
+          loadFloorFromState()
+        }
+      })
+    )
+
+    loadFloorFromState()
+  }
+
+  shutdown() {
+    this.unsubscribers.forEach((unsub) => unsub())
+    this.unsubscribers = []
   }
 
   loadFloor(floor: Floor) {
@@ -26,10 +56,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.tileMap = new TileMapLayer(this)
-    this.tileMap.render(floor.map, 'tileset')
+    this.tileMap.render(floor.map, floor.bgmap, floor.fgmap)
 
     this.heroSprite = new HeroSprite(this, 6, 6)
-    this.cameraSystem.follow(this.heroSprite['sprite'])
+    const spriteObj = (this.heroSprite as unknown as { sprite: Phaser.GameObjects.GameObject }).sprite
+    this.cameraSystem.follow(spriteObj)
   }
 
   changeFloor(

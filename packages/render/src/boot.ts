@@ -5,11 +5,6 @@ export class BootScene extends Phaser.Scene {
     super('BootScene')
   }
 
-  preload() {
-    // Initial loading assets, e.g. loading screen images
-    this.load.image('loading', 'assets/loading.png')
-  }
-
   create() {
     this.scene.start('GameScene')
   }
