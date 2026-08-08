@@ -23,9 +23,9 @@ export class GameScene extends Phaser.Scene {
         floors: Record<string, Floor>
       } | null
       if (!towerData) return
-      const state = gameStore.getState()
-      if (!state.state.floorId) return
-      const floor = towerData.floors[state.state.floorId]
+      const { state } = gameStore.getState()
+      if (!state.floorId) return
+      const floor = towerData.floors[state.floorId]
       if (floor) {
         this.loadFloor(floor)
       }
