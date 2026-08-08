@@ -1,0 +1,134 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: monospace;
+  color: white;
+  overflow: hidden;
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-menu {
+  text-align: center;
+}
+
+.title {
+  font-size: 48px;
+  color: #ffcc00;
+  text-shadow: 2px 2px 0 #000;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 40px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu-buttons button {
+  padding: 14px 48px;
+  font-size: 18px;
+  background: #222;
+  border: 2px solid #ffcc00;
+  color: #ffcc00;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.menu-buttons button:hover {
+  background: #ffcc00;
+  color: #000;
+}
+
+.game-screen {
+  position: relative;
+}
+
+.game-container canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.game-hud-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid #888;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #1a1a1a;
+  border: 2px solid #ffcc00;
+  border-radius: 8px;
+  padding: 32px;
+  min-width: 320px;
+}
+
+.modal h2 {
+  margin-bottom: 24px;
+  color: #ffcc00;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.setting-row input[type="range"] {
+  width: 160px;
+}
+
+.close-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: #ffcc00;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}

@@ -1,14 +1,29 @@
-import { CORE_VERSION } from '@modern-mota/core'
+import { useState } from 'react'
+import { GameCanvas } from './components/GameCanvas'
+import { MainMenu } from './components/MainMenu'
+import { Settings } from './components/Settings'
+import './styles/global.css'
+
+export type Screen = 'menu' | 'game' | 'settings' | 'save'
 
 export function App() {
+  const [screen, setScreen] = useState<Screen>('menu')
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
   return (
     <div className="app">
-      <header className="app__header">
-        <h1>魔塔 · 2026 Modern Rebuild</h1>
-      </header>
-      <main className="app__main">
-        <p>脚手架已就绪。Core version: {CORE_VERSION}</p>
-      </main>
+      {screen === 'menu' && (
+        <MainMenu
+          onStart={() => setScreen('game')}
+          onSettings={() => setSettingsOpen(true)}
+        />
+      )}
+      {screen === 'game' && (
+        <GameCanvas onBackToMenu={() => setScreen('menu')} />
+      )}
+      {settingsOpen && (
+        <Settings onClose={() => setSettingsOpen(false)} />
+      )}
     </div>
   )
 }
