@@ -372,7 +372,7 @@ input:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 48px 20px 30px;
-  background: #070d18 url('/art/mota-title-bg-v1.png') center / cover no-repeat;
+  background: #070d18 center / cover no-repeat;
 }
 
 .main-menu::before {

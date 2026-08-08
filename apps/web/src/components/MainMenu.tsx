@@ -4,11 +4,23 @@ interface Props {
 }
 
 export function MainMenu({ onStart, onSettings }: Props) {
+  const baseUrl =
+    (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env?.BASE_URL ?? './'
+
   return (
-    <main className="main-menu" aria-labelledby="game-title">
+    <main
+      className="main-menu"
+      aria-labelledby="game-title"
+      style={{ backgroundImage: `url("${baseUrl}art/mota-title-bg-v1.png")` }}
+    >
       <div className="title-atmosphere" aria-hidden="true" />
       <div className="title-copy">
-        <img className="title-sigil" src="/art/mota-sigil-v1.png" alt="" aria-hidden="true" />
+        <img
+          className="title-sigil"
+          src={`${baseUrl}art/mota-sigil-v1.png`}
+          alt=""
+          aria-hidden="true"
+        />
         <p className="title-kicker">THE TOWER // REBUILT EDITION</p>
         <h1 id="game-title" className="title">
           魔塔 <span>2014</span>
