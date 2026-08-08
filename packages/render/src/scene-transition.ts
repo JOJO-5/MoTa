@@ -8,7 +8,6 @@ export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
   private cameraSystem!: CameraSystem
   private heroSprite!: HeroSprite
-  private currentFloor: Floor | null = null
 
   constructor() {
     super('GameScene')
@@ -19,8 +18,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   loadFloor(floor: Floor) {
-    this.currentFloor = floor
-
     if (this.tileMap) {
       this.tileMap.destroy()
     }

@@ -35,6 +35,7 @@ export class CameraSystem {
 
   fadeOut(duration: number = 500) {
     this.camera.fadeOut(duration)
+    return this.camera
   }
 
   setZoom(zoom: number) {
