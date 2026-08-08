@@ -193,11 +193,14 @@ export function getTileSprite(
 ): { sheet: SpriteSheetKey; frame: number } | null {
   if (tileId === 0) return null
 
-  // Tileset tiles are raw frame offsets into tileset.png regardless of maps.json.
-  // Valid range is 10000 ~ (tilesetFrameCount + 9999). Fallback to frame 0 for
-  // out-of-range IDs (e.g. 20706 in MT0) to avoid rendering a black rectangle.
+  // Tileset tiles are encoded with two legacy bases in mota-js data:
+  // 10xxx and 20xxx both refer to the frame after removing their base. The
+  // 20xxx form is common in the restored special floors (e.g. 20706 -> 706).
+  // Treating every ID as 10xxx sends those tiles far past the spritesheet and
+  // makes them fall back to a dark/black-looking frame.
   if (tileId >= 10000) {
-    const frame = tileId - 10000
+    const base = tileId >= 20000 ? 20000 : 10000
+    const frame = tileId - base
     const safeFrame = frame < tilesetFrameCount ? frame : 0
     return { sheet: 'tileset', frame: safeFrame }
   }
