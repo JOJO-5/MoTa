@@ -4,12 +4,10 @@ import type { Direction } from '@modern-mota/core'
 
 export class HeroSprite {
   private sprite: Phaser.GameObjects.Sprite
-  private anims: Map<string, Phaser.Animations.Animation>
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.sprite = scene.add.sprite(x * TILE_SIZE, y * TILE_SIZE, 'hero')
     this.sprite.setOrigin(0, 0)
-    this.anims = new Map()
   }
 
   setDirection(direction: Direction) {

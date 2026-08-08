@@ -1,4 +1,4 @@
-import type { HeroSnapshot, UiSnapshot } from '@modern-mota/core'
+import type { HeroSnapshot } from '@modern-mota/core'
 
 export class UiLayer {
   private container: HTMLElement

@@ -104,6 +104,9 @@ importers:
 
   packages/render:
     dependencies:
+      '@modern-mota/core':
+        specifier: workspace:*
+        version: link:../core
       '@modern-mota/data':
         specifier: workspace:*
         version: link:../data
