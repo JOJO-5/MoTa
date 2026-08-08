@@ -1,6 +1,7 @@
 export * from './boot.js'
 export * from './game.js'
 export * from './constants.js'
+export * from './bridge.js'
 export * from './tilemap.js'
 export * from './autotile.js'
 export * from './sprite.js'
