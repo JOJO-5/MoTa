@@ -1,13 +1,14 @@
 import Phaser from 'phaser'
 import { BootScene } from './boot.js'
+import { GameScene } from './scene-transition.js'
 
 export function createGame(container: HTMLElement) {
   return new Phaser.Game({
     type: Phaser.AUTO,
-    width: 416, // 13 * 32
+    width: 416,
     height: 416,
     parent: container,
-    scene: [BootScene],
+    scene: [BootScene, GameScene],
     pixelArt: true,
   })
 }
