@@ -4,7 +4,6 @@ import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
 import { KeyboardInput } from './input/keyboard.js'
-import { VirtualPad } from './input/virtual-pad.js'
 import { gameStore, moveHero, eventMachine, dispatch, pickUpItem, battleEnemy } from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
 
@@ -13,7 +12,6 @@ export class GameScene extends Phaser.Scene {
   private cameraSystem!: CameraSystem
   private heroSprite!: HeroSprite
   private keyboardInput!: KeyboardInput
-  private virtualPad: VirtualPad | null = null
   private gameLoop: GameLoop | null = null
   private unsubscribers: (() => void)[] = []
   private currentFloor: Floor | null = null
@@ -80,19 +78,6 @@ export class GameScene extends Phaser.Scene {
       }
     )
 
-    // Phaser's touch input is enabled on mobile browsers, but it does not
-    // provide a game-specific movement UI. Mount the pixel-styled pad only
-    // for coarse/touch pointers so desktop play remains keyboard-first.
-    if (this.isTouchDevice()) {
-      this.virtualPad = new VirtualPad(
-        this,
-        (direction) => this.tryMove(direction),
-        () => {
-          if (eventMachine.getState() === 'waiting') eventMachine.resume()
-        }
-      )
-    }
-
     // Mount DOM UI layer (HP bar, floor name, messages) inside the game container
     const container = (this.game.canvas?.parentElement as HTMLElement | null) ?? document.body
     this.gameLoop = new GameLoop(this, container)
@@ -131,6 +116,10 @@ export class GameScene extends Phaser.Scene {
     } else {
       this.tryOpenDoor(direction, maps)
     }
+  }
+
+  tryAction() {
+    if (eventMachine.getState() === 'waiting') eventMachine.resume()
   }
 
   /** Open legacy mota-js doors when the player taps into them. */
@@ -307,19 +296,8 @@ export class GameScene extends Phaser.Scene {
     this.unsubscribers.forEach((unsub) => unsub())
     this.unsubscribers = []
     this.keyboardInput?.destroy()
-    this.virtualPad?.destroy()
-    this.virtualPad = null
     this.gameLoop?.stop()
     this.gameLoop = null
-  }
-
-  private isTouchDevice() {
-    if (typeof window === 'undefined') return false
-    return Boolean(
-      this.sys.game.device.input.touch ||
-      window.matchMedia?.('(pointer: coarse)').matches ||
-      'ontouchstart' in window
-    )
   }
 
   loadFloor(floor: Floor) {
