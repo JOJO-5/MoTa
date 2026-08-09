@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { gameStore, dispatch, pickUpItem, battleEnemy } from '../index.js'
+import { gameStore, dispatch, pickUpItem, battleEnemy, interactWithTile } from '../index.js'
 import type { RawItem, RawEnemy } from './tile-interactions.js'
 
 const ITEMS: Record<string, RawItem> = {
@@ -15,6 +15,11 @@ const ENEMIES: Record<string, RawEnemy> = {
   greenSlime: { name: '绿色史莱姆', hp: 15, atk: 2, def: 0, money: 0, exp: 1 },
   wolf: { name: '恶狼', hp: 50, atk: 25, def: 0, money: 3, exp: 2 },
   dragon: { name: '巨龙', hp: 99999, atk: 999, def: 999, money: 0, exp: 0 },
+}
+
+const MAPS = {
+  '21': { cls: 'items', id: 'yellowKey' },
+  '201': { cls: 'enemys', id: 'greenSlime' },
 }
 
 describe('tile-interactions', () => {
@@ -68,6 +73,22 @@ describe('tile-interactions', () => {
     const result = battleEnemy('dragon', ENEMIES)
     expect(result?.consumed).toBe(false)
     expect(gameStore.getState().state.hero.hp).toBe(0)
+  })
+
+  it('records a victorious enemy coordinate after clearing the tile', () => {
+    const result = interactWithTile('MT0', 7, 4, 201, MAPS, ITEMS, ENEMIES)
+    expect(result?.consumed).toBe(true)
+    expect(gameStore.getState().state.collectedTiles.MT0).toContain('7,4')
+  })
+
+  it('increments a key and records its coordinate after pickup', () => {
+    const result = interactWithTile('MT0', 3, 8, 21, MAPS, ITEMS, ENEMIES)
+    expect(result?.consumed).toBe(true)
+    expect(gameStore.getState().state.hero.keys.yellowKey).toBe(1)
+    expect(gameStore.getState().state.collectedTiles.MT0).toContain('3,8')
+
+    expect(interactWithTile('MT0', 3, 8, 21, MAPS, ITEMS, ENEMIES)).toBeNull()
+    expect(gameStore.getState().state.hero.keys.yellowKey).toBe(1)
   })
 
   it('returns null for unknown items', () => {

@@ -4,7 +4,7 @@ import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
 import { KeyboardInput } from './input/keyboard.js'
-import { gameStore, moveHero, eventMachine, dispatch, pickUpItem, battleEnemy } from '@modern-mota/core'
+import { gameStore, moveHero, eventMachine, dispatch, interactWithTile } from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
 
 export class GameScene extends Phaser.Scene {
@@ -218,17 +218,17 @@ export class GameScene extends Phaser.Scene {
     const entry = towerData.maps[String(tileId)]
     if (!entry) return
 
-    let result: { message: string; consumed: boolean } | null = null
-    if (entry.cls === 'items') {
-      result = pickUpItem(entry.id, towerData.items as never)
-    } else if (entry.cls === 'enemys') {
-      result = battleEnemy(entry.id, towerData.enemys as never)
-    }
+    const result = interactWithTile(
+      this.currentFloor.floorId,
+      pos.x,
+      pos.y,
+      tileId,
+      towerData.maps,
+      towerData.items as never,
+      towerData.enemys as never,
+    )
 
     if (result) {
-      if (result.consumed) {
-        dispatch({ type: 'COLLECT_TILE', floorId: this.currentFloor.floorId, x: pos.x, y: pos.y })
-      }
       dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
       this.rerenderTiles()
     }

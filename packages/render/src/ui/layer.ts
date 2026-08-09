@@ -1,4 +1,5 @@
 import type { HeroSnapshot } from '@modern-mota/core'
+import { formatKeyCounts } from './keys.js'
 
 export class UiLayer {
   private container: HTMLElement
@@ -98,7 +99,7 @@ export class UiLayer {
       <span>ATK: ${hero.atk}</span>
       <span>DEF: ${hero.def}</span>
       <span>💰 ${hero.money}</span>
-      <span>🔑 ${hero.keys.yellowKey ?? 0}</span>
+      <span>🔑 ${formatKeyCounts(hero.keys)}</span>
     `
   }
 

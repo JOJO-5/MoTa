@@ -183,6 +183,16 @@ export const HERO_FRAMES = {
 export const HERO_COLS = 4
 
 /**
+ * Frames in the restored 2014 tileset that contain no usable artwork.
+ * Mobile Phaser builds may use ImageBitmap sources, so canvas pixel
+ * inspection cannot be the only protection against these frames.
+ */
+export const LEGACY_BLANK_TILE_IDS = new Set([
+  10133, 20302, 20312, 20316, 20509,
+  20519, 20671, 20679, 20852, 20896,
+])
+
+/**
  * Get sprite info for a tile ID.
  * Returns { sheet, frame } or null if not found.
  */
@@ -193,6 +203,8 @@ export function getTileSprite(
 ): { sheet: SpriteSheetKey; frame: number } | null {
   if (tileId === 0) return null
 
+  if (LEGACY_BLANK_TILE_IDS.has(tileId)) return null
+
   // Tileset tiles are encoded with two legacy bases in mota-js data:
   // 10xxx and 20xxx both refer to the frame after removing their base. The
   // 20xxx form is common in the restored special floors (e.g. 20706 -> 706).
@@ -201,8 +213,8 @@ export function getTileSprite(
   if (tileId >= 10000) {
     const base = tileId >= 20000 ? 20000 : 10000
     const frame = tileId - base
-    const safeFrame = frame < tilesetFrameCount ? frame : 0
-    return { sheet: 'tileset', frame: safeFrame }
+    if (frame < 0 || frame >= tilesetFrameCount) return null
+    return { sheet: 'tileset', frame }
   }
 
   const entry = maps[String(tileId)]

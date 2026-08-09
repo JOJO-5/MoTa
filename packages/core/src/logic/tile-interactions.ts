@@ -32,6 +32,11 @@ export interface RawEnemy {
   special?: number | string[]
 }
 
+export interface RawMapEntry {
+  cls?: string
+  id?: string
+}
+
 /** Gem values copied from the original project's data.js `values` table. */
 const GEM_VALUES: Record<string, { atk?: number; def?: number; mdef?: number }> = {
   redGem: { atk: 1 },
@@ -55,6 +60,34 @@ export interface TileInteractionResult {
   message: string
   /** Whether the tile should be cleared from the map. */
   consumed: boolean
+}
+
+/** Resolve and apply one map tile interaction, including its collection state. */
+export function interactWithTile(
+  floorId: string,
+  x: number,
+  y: number,
+  tileId: number,
+  maps: Record<string, RawMapEntry> | undefined,
+  itemsData: Record<string, RawItem> | undefined,
+  enemysData: Record<string, RawEnemy> | undefined,
+): TileInteractionResult | null {
+  if (State.collectedTiles[floorId]?.includes(`${x},${y}`)) return null
+
+  const entry = maps?.[String(tileId)]
+  if (!entry?.id) return null
+
+  const result = entry.cls === 'items'
+    ? pickUpItem(entry.id, itemsData)
+    : entry.cls === 'enemys'
+      ? battleEnemy(entry.id, enemysData)
+      : null
+
+  if (result?.consumed) {
+    dispatch({ type: 'COLLECT_TILE', floorId, x, y })
+  }
+
+  return result
 }
 
 /**

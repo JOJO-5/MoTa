@@ -8,6 +8,11 @@ describe('legacy tileset ids', () => {
   })
 
   it('keeps legacy frames inside the source sheet range', () => {
-    expect(getTileSprite(20852, {})).toEqual({ sheet: 'tileset', frame: 852 })
+    expect(getTileSprite(20706, {})).toEqual({ sheet: 'tileset', frame: 706 })
+  })
+
+  it('routes known blank legacy tiles to the generated fallback', () => {
+    expect(getTileSprite(20302, {})).toBeNull()
+    expect(getTileSprite(20852, {})).toBeNull()
   })
 })

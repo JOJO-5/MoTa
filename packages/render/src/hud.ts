@@ -1,4 +1,5 @@
 import type { HeroSnapshot } from '@modern-mota/core'
+import { formatKeyCounts } from './ui/keys.js'
 
 export class Hud {
   private container: HTMLElement
@@ -34,9 +35,7 @@ export class Hud {
     `
     this.keysEl.innerHTML = `
       <span class="mota-hud__section-label">KEYS</span>
-      ${Object.entries(hero.keys)
-        .map(([k, v]) => `<span class="mota-hud__key"><i>${k.replace('Key', '')}</i>${v}</span>`)
-        .join('')}
+      <span class="mota-hud__key"><i>KEYS</i>${formatKeyCounts(hero.keys)}</span>
     `
     this.itemsEl.innerHTML = `<span class="mota-hud__section-label">RELICS</span><span>${hero.items.length ? hero.items.slice(0, 6).join(' · ') : '暂无装备'}</span>`
   }
