@@ -26,6 +26,8 @@ async function state(page: Page) {
               position: { x: number; y: number }
               visitedFloors: string[]
               ui: { modal: string | null }
+              flags: Record<string, unknown>
+              tileOverrides: Record<string, Record<string, { hidden?: boolean }>>
             }
           }
         }
@@ -38,6 +40,8 @@ async function state(page: Page) {
           position: snapshot.position,
           visitedFloors: snapshot.visitedFloors,
           modal: snapshot.ui.modal,
+          flags: snapshot.flags,
+          tileOverrides: snapshot.tileOverrides,
         }
       : null
   })
@@ -194,6 +198,9 @@ test('desktop keyboard can enter MT1 and return to MT0 with one atomic landing s
   page,
 }) => {
   await startGame(page)
+  const initial = await state(page)
+  expect(initial?.flags.hard).toBe(3)
+  expect(initial?.tileOverrides.MT0?.['13,3']?.hidden).not.toBe(true)
   const toMt1 = await routeToFloor(page, 'MT1')
   expect(toMt1.length).toBeGreaterThan(0)
   await completeRoute(page, toMt1, false)

@@ -57,6 +57,7 @@ describe('GameState', () => {
     expect(store.floorId).toBe('MT0')
     expect(store.position).toEqual({ x: 6, y: 6 })
     expect(store.battle).toBeNull()
+    expect(store.flags.hard).toBe(3)
   })
 
   it('SET_HERO updates hero fields', () => {

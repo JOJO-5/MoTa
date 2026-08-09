@@ -33,7 +33,10 @@ export const createInitialState = (floorId: string, x: number, y: number): GameS
   position: { x, y },
   direction: 'up' as Direction,
   actors: [],
-  flags: {},
+  // The 2014 event data uses numeric flag:hard conditions.  The web entry
+  // starts in the default Premium mode, so keep that legacy flag populated
+  // instead of letting a missing value behave like null in comparisons.
+  flags: { hard: 3 },
   values: {},
   enemys: {},
   battle: null,

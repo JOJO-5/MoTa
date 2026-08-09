@@ -74,6 +74,7 @@ describe('expression evaluator', () => {
 
   it('supports legacy core.status.hard conditions', () => {
     expect(evaluate("core.status.hard == 'Premium'")).toBe(true)
+    expect(evaluate('flag:hard<=2')).toBe(false)
     dispatch({ type: 'SET_FLAG', name: 'hard', value: 2 })
     expect(evaluate("core.status.hard == 'Basic'")).toBe(true)
     expect(evaluate("core.status.hard == 'Premium'")).toBe(false)
