@@ -31,6 +31,7 @@ export class TileMapLayer {
   private scene: Phaser.Scene
   private sprites: Phaser.GameObjects.Image[] = []
   private mapsData: MapsData
+  private blankFrameCache = new Map<number, boolean>()
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -90,7 +91,10 @@ export class TileMapLayer {
 
   private drawTile(tileId: number, px: number, py: number) {
     const spriteInfo = getTileSprite(tileId, this.mapsData)
-    if (!spriteInfo) return
+    if (!spriteInfo) {
+      this.drawFallback(px, py)
+      return
+    }
 
     const { sheet, frame } = spriteInfo
 
@@ -106,7 +110,15 @@ export class TileMapLayer {
 
     // Standard sprite sheets: use frame index
     const textureKey = sheet as string
-    if (!this.scene.textures.exists(textureKey)) return
+    if (!this.scene.textures.exists(textureKey)) {
+      this.drawFallback(px, py)
+      return
+    }
+
+    if (sheet === 'tileset' && this.isBlankTilesetFrame(frame)) {
+      this.drawFallback(px, py)
+      return
+    }
 
     // Tall sprites (npc48/enemy48) are 48px high; bottom-align to the 32px cell.
     const frameHeight = SHEET_CONFIG[sheet]?.frameHeight ?? 32
@@ -114,6 +126,67 @@ export class TileMapLayer {
 
     const img = this.scene.add.image(px, dy, textureKey, frame).setOrigin(0, 0)
     this.sprites.push(img)
+  }
+
+  private drawFallback(px: number, py: number) {
+    if (!this.scene.textures.exists('__legacy-fallback')) return
+    const img = this.scene.add.image(px, py, '__legacy-fallback').setOrigin(0, 0)
+    this.sprites.push(img)
+  }
+
+  /** Detect transparent/solid-black legacy frames and replace them visually. */
+  private isBlankTilesetFrame(frameIndex: number) {
+    const cached = this.blankFrameCache.get(frameIndex)
+    if (cached !== undefined) return cached
+
+    let blank = false
+    try {
+      const frame = this.scene.textures.getFrame('tileset', frameIndex)
+      const source = frame.source.image
+      if (
+        typeof document !== 'undefined' &&
+        (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement)
+      ) {
+        const canvas = document.createElement('canvas')
+        canvas.width = frame.cutWidth
+        canvas.height = frame.cutHeight
+        const context = canvas.getContext('2d')
+        if (context) {
+          context.drawImage(
+            source,
+            frame.cutX,
+            frame.cutY,
+            frame.cutWidth,
+            frame.cutHeight,
+            0,
+            0,
+            frame.cutWidth,
+            frame.cutHeight
+          )
+          const pixels = context.getImageData(0, 0, frame.cutWidth, frame.cutHeight).data
+          let opaque = 0
+          let visible = 0
+          let luminance = 0
+          for (let i = 0; i < pixels.length; i += 4) {
+            const alpha = pixels[i + 3]
+            if (alpha > 20) {
+              opaque++
+              const light = pixels[i] + pixels[i + 1] + pixels[i + 2]
+              luminance += light
+              if (light > 24) visible++
+            }
+          }
+          const total = frame.cutWidth * frame.cutHeight
+          blank = opaque < total * 0.08 || (opaque > total * 0.75 && luminance / opaque < 24 && visible < total * 0.08)
+        }
+      }
+    } catch {
+      // A protected/cross-origin image should keep the original frame.
+      blank = false
+    }
+
+    this.blankFrameCache.set(frameIndex, blank)
+    return blank
   }
 
   destroy() {

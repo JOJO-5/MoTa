@@ -53,6 +53,28 @@ export class BootScene extends Phaser.Scene {
     g.fillRect(0, 0, 32, 32)
     g.generateTexture('__placeholder', 32, 32)
     g.destroy()
+
+    // Generated pixel-art replacement for legacy tiles that point to an
+    // empty/missing frame. This keeps old floors readable instead of showing
+    // a solid black square.
+    const fallback = this.make.graphics({ x: 0, y: 0 })
+    fallback.fillStyle(0x182334, 1)
+    fallback.fillRect(0, 0, 32, 32)
+    fallback.fillStyle(0x26374b, 1)
+    fallback.fillRect(3, 3, 26, 2)
+    fallback.fillRect(3, 27, 26, 2)
+    fallback.fillStyle(0x0c1420, 1)
+    fallback.fillRect(3, 5, 2, 22)
+    fallback.fillRect(27, 5, 2, 22)
+    fallback.lineStyle(1, 0x65e3d3, 0.75)
+    fallback.strokeRect(8, 8, 16, 16)
+    fallback.fillStyle(0xf3c85b, 0.9)
+    fallback.fillRect(15, 9, 2, 5)
+    fallback.fillRect(15, 18, 2, 5)
+    fallback.fillRect(9, 15, 5, 2)
+    fallback.fillRect(18, 15, 5, 2)
+    fallback.generateTexture('__legacy-fallback', 32, 32)
+    fallback.destroy()
   }
 
   create() {
