@@ -1,9 +1,10 @@
 import Phaser from 'phaser'
 import { TILE_SIZE } from './constants.js'
 import { drawModernTile, resolveModernTileKind } from './modern-theme.js'
+import { getTileSprite } from './icons.js'
 
 /** Maps data from maps.json: tileId → { cls, id } */
-type MapsData = Record<string, { cls: string; id: string }>
+type MapsData = Record<string, { cls: string; id: string; canPass?: boolean }>
 
 function getMapsData(): MapsData {
   const td = (globalThis as Record<string, unknown>)['__towerData'] as {
@@ -11,21 +12,6 @@ function getMapsData(): MapsData {
   } | null
   return td?.maps ?? {}
 }
-
-/** Autotile id → texture key index */
-const AUTOTILE_KEYS: Record<string, string> = {
-  autotile: 'autotile_0',
-  autotile1: 'autotile_1',
-  autotile2: 'autotile_2',
-  autotile3: 'autotile_3',
-  autotile4: 'autotile_4',
-  autotile5: 'autotile_5',
-  autotile6: 'autotile_6',
-  autotile7: 'autotile_7',
-  autotile8: 'autotile_8',
-}
-
-const DEFAULT_AUTOTILE = 'autotile_0'
 
 export class TileMapLayer {
   private scene: Phaser.Scene
@@ -41,7 +27,7 @@ export class TileMapLayer {
     map: number[][],
     bgmap: number[][] | null,
     fgmap: number[][] | null,
-    defaultGround: string | null = null,
+    _defaultGround: string | null = null,
     collectedTiles: string[] = [],
     opacities: Record<string, number> = {},
     stairPoints: Array<[number, number]> = []
@@ -52,50 +38,25 @@ export class TileMapLayer {
     const cols = map[0]?.length ?? 0
     const collected = new Set(collectedTiles)
 
-    // Pass 1: use a generated modern texture as the floor foundation. The
-    // legacy map IDs remain untouched; this layer is purely visual.
-    if (this.scene.textures.exists('modern-floor-texture')) {
-      const floor = this.scene.add
-        .tileSprite(0, 0, cols * TILE_SIZE, rows * TILE_SIZE, 'modern-floor-texture')
-        .setOrigin(0, 0)
-        .setDepth(-5)
-      this.sprites.push(floor)
-    } else {
-      const groundKey = defaultGround
-        ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE)
-        : DEFAULT_AUTOTILE
-      const groundTexture = this.scene.textures.exists(groundKey) ? groundKey : DEFAULT_AUTOTILE
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const img = this.scene.add
-            .image(x * TILE_SIZE, y * TILE_SIZE, groundTexture)
-            .setOrigin(0, 0)
-          this.sprites.push(img)
-        }
+    // Pass 1: a low-noise tactical grid. Large generated textures looked like
+    // collision geometry after being squeezed into 32px cells, so the board is
+    // intentionally code-drawn and stable at every viewport size.
+    const floor = this.scene.add.graphics().setDepth(-5)
+    floor.fillStyle(0x0b1422, 1)
+    floor.fillRect(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const px = x * TILE_SIZE
+        const py = y * TILE_SIZE
+        floor.fillStyle((x + y) % 2 === 0 ? 0x111e30 : 0x0f1b2b, 1)
+        floor.fillRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+        floor.lineStyle(1, 0x2d405d, 0.42)
+        floor.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+        floor.fillStyle(0x6f91b8, 0.28)
+        floor.fillRect(px + 4, py + 4, 2, 2)
       }
     }
-
-    // Paint all blocking map cells from one continuous generated wall texture.
-    // This keeps adjacent walls visually connected instead of rendering every
-    // collision cell as an isolated UI-like card.
-    if (this.scene.textures.exists('modern-wall-texture')) {
-      const maskShape = this.scene.make.graphics({}, false)
-      maskShape.fillStyle(0xffffff, 1)
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          if ((map[y]?.[x] ?? 0) !== 0) {
-            maskShape.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-          }
-        }
-      }
-      const wallTexture = this.scene.add
-        .tileSprite(0, 0, cols * TILE_SIZE, rows * TILE_SIZE, 'modern-wall-texture')
-        .setOrigin(0, 0)
-        .setAlpha(0.98)
-        .setDepth(0)
-      wallTexture.setMask(new Phaser.Display.Masks.GeometryMask(this.scene, maskShape))
-      this.sprites.push(maskShape, wallTexture)
-    }
+    this.sprites.push(floor)
 
     // Pass 2: background layer overrides (only non-zero entries)
     for (let y = 0; y < rows; y++) {
@@ -103,7 +64,13 @@ export class TileMapLayer {
         if (collected.has(`${x},${y}`)) continue
         const bgId = bgmap?.[y]?.[x] ?? 0
         if (bgId !== 0)
-          this.drawTile(bgId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
+          this.drawTile(
+            bgId,
+            x * TILE_SIZE,
+            y * TILE_SIZE,
+            opacities[`${x},${y}`] ?? 1,
+            'background'
+          )
       }
     }
 
@@ -113,7 +80,7 @@ export class TileMapLayer {
         if (collected.has(`${x},${y}`)) continue
         const wallId = map[y]?.[x] ?? 0
         if (wallId !== 0)
-          this.drawTile(wallId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
+          this.drawTile(wallId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1, 'map')
       }
     }
 
@@ -123,7 +90,13 @@ export class TileMapLayer {
         if (collected.has(`${x},${y}`)) continue
         const fgId = fgmap?.[y]?.[x] ?? 0
         if (fgId !== 0)
-          this.drawTile(fgId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
+          this.drawTile(
+            fgId,
+            x * TILE_SIZE,
+            y * TILE_SIZE,
+            opacities[`${x},${y}`] ?? 1,
+            'foreground'
+          )
       }
     }
 
@@ -134,20 +107,97 @@ export class TileMapLayer {
       const marker = this.scene.add.graphics()
       const px = x * TILE_SIZE
       const py = y * TILE_SIZE
-      marker.lineStyle(2, 0xffd166, 0.95)
+      marker.fillStyle(0x2f260f, 0.92)
+      marker.fillRoundedRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4, 6)
+      marker.lineStyle(2, 0xffd166, 1)
       marker.strokeRoundedRect(px + 3, py + 3, TILE_SIZE - 6, TILE_SIZE - 6, 5)
       marker.fillStyle(0xffd166, 0.9)
       marker.fillTriangle(px + 16, py + 7, px + 8, py + 17, px + 24, py + 17)
-      marker.setDepth(2)
+      marker.setDepth(6)
       this.sprites.push(marker)
     }
   }
 
-  private drawTile(tileId: number, px: number, py: number, opacity = 1) {
+  private drawTile(
+    tileId: number,
+    px: number,
+    py: number,
+    opacity = 1,
+    layer: 'background' | 'map' | 'foreground' = 'map'
+  ) {
+    const legacy = getTileSprite(tileId, this.mapsData)
+
+    // Background and foreground are decoration layers, never collision walls.
+    // Preserve their authored silhouette at restrained opacity instead of
+    // converting every encoded tileset cell into a solid block.
+    if (layer !== 'map') {
+      if (!legacy || !this.scene.textures.exists(legacy.sheet)) return
+      const decoration = this.scene.add
+        .image(px + TILE_SIZE / 2, py + TILE_SIZE / 2, legacy.sheet, legacy.frame)
+        .setAlpha(opacity * (layer === 'background' ? 0.34 : 0.82))
+        .setDepth(layer === 'background' ? -2 : 5)
+      this.sprites.push(decoration)
+      return
+    }
+
     const kind = resolveModernTileKind(tileId, this.mapsData)
-    // The generated wall texture above owns wall presentation. Keep this
-    // fallback for scenes/tests that do not load the asset bundle.
-    if (kind.kind === 'wall' && this.scene.textures.exists('modern-wall-texture')) return
+
+    // Enemies and NPCs need silhouette detail at a glance. Use the restored
+    // authored sprite art, framed by a semantic base that remains readable on
+    // the new low-noise board.
+    if (
+      (kind.kind === 'enemy' || kind.kind === 'npc') &&
+      legacy &&
+      this.scene.textures.exists(legacy.sheet)
+    ) {
+      const frame = this.scene.add.graphics().setAlpha(opacity).setDepth(2)
+      const accent = kind.kind === 'enemy' ? 0xff5d73 : 0x4de1ff
+      frame.fillStyle(0x050a12, 0.82)
+      frame.fillEllipse(px + 4, py + 22, TILE_SIZE - 8, 9)
+      frame.lineStyle(2, accent, 0.82)
+      frame.strokeCircle(px + 16, py + 16, 14)
+      const sprite = this.scene.add
+        .image(px + TILE_SIZE / 2, py + TILE_SIZE - 1, legacy.sheet, legacy.frame)
+        .setOrigin(0.5, 1)
+        .setAlpha(opacity)
+        .setDepth(4)
+      this.scene.tweens.add({
+        targets: sprite,
+        y: sprite.y - 1.5,
+        duration: kind.kind === 'enemy' ? 720 : 980,
+        ease: 'Sine.InOut',
+        yoyo: true,
+        repeat: -1,
+      })
+      this.sprites.push(frame, sprite)
+      return
+    }
+
+    // The original item sheet is far more legible than abstract placeholder
+    // geometry. A small glow plate separates it from the floor without turning
+    // the whole tile into an obstacle.
+    if (kind.kind === 'item' && legacy && this.scene.textures.exists(legacy.sheet)) {
+      const plate = this.scene.add.graphics().setAlpha(opacity).setDepth(2)
+      const accent =
+        kind.variant === 'yellow-key'
+          ? 0xffd166
+          : kind.variant === 'blue-key'
+            ? 0x59b8ff
+            : kind.variant === 'red-key'
+              ? 0xff667a
+              : 0x7ce7ff
+      plate.fillStyle(accent, 0.14)
+      plate.fillCircle(px + 16, py + 16, 14)
+      plate.lineStyle(1, accent, 0.8)
+      plate.strokeCircle(px + 16, py + 16, 13)
+      const sprite = this.scene.add
+        .image(px + TILE_SIZE / 2, py + TILE_SIZE / 2, legacy.sheet, legacy.frame)
+        .setAlpha(opacity)
+        .setDepth(4)
+      this.sprites.push(plate, sprite)
+      return
+    }
+
     const modern = drawModernTile(this.scene, kind, px, py, opacity)
     modern.setDepth(1)
     this.sprites.push(modern)

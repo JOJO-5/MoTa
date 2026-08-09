@@ -6,12 +6,24 @@ export type ModernTileKind =
   | { kind: 'wall'; variant: 'basalt' }
   | { kind: 'stair'; variant: 'up' | 'down' }
   | { kind: 'door'; variant: 'yellow' | 'blue' | 'red' | 'green' | 'special' | 'steel' }
-  | { kind: 'item'; variant: 'yellow-key' | 'blue-key' | 'red-key' | 'green-key' | 'key' | 'gem' | 'potion' | 'equipment' | 'item' }
+  | {
+      kind: 'item'
+      variant:
+        | 'yellow-key'
+        | 'blue-key'
+        | 'red-key'
+        | 'green-key'
+        | 'key'
+        | 'gem'
+        | 'potion'
+        | 'equipment'
+        | 'item'
+    }
   | { kind: 'enemy'; variant: string }
   | { kind: 'npc'; variant: 'sage' | 'trader' | 'fairy' | 'royal' | 'npc' }
   | { kind: 'unknown'; variant: 'rune' }
 
-type MapsData = Record<string, { cls: string; id: string }>
+type MapsData = Record<string, { cls: string; id: string; canPass?: boolean }>
 
 const KEY_VARIANTS: Record<string, ModernTileKind & { kind: 'item' }> = {
   yellowKey: { kind: 'item', variant: 'yellow-key' },
@@ -30,9 +42,9 @@ const DOOR_VARIANTS: Record<string, ModernTileKind & { kind: 'door' }> = {
 }
 
 export function resolveModernTileKind(tileId: number, maps: MapsData): ModernTileKind {
-  if (tileId >= 10000) return { kind: 'wall', variant: 'basalt' }
-
   const entry = maps[String(tileId)]
+  if (tileId >= 10000 && entry?.canPass) return { kind: 'ground', variant: 'stone' }
+  if (tileId >= 10000) return { kind: 'wall', variant: 'basalt' }
   if (!entry) return { kind: 'unknown', variant: 'rune' }
 
   if (entry.cls === 'autotile') return { kind: 'ground', variant: 'stone' }
@@ -91,7 +103,15 @@ const DOOR_COLORS: Record<string, number> = {
   steel: 0x94a3b8,
 }
 
-function drawPixelRect(graphics: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, color: number, alpha = 1) {
+function drawPixelRect(
+  graphics: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  color: number,
+  alpha = 1
+) {
   graphics.fillStyle(color, alpha)
   graphics.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h))
 }
@@ -115,26 +135,37 @@ export function drawModernTile(
   graphics.setAlpha(opacity)
 
   if (kind.kind === 'ground') {
-    graphics.lineStyle(1, 0x26324a, 0.9)
-    graphics.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+    // A quiet inset plate: passable special tiles must still read as floor.
+    graphics.fillStyle(0x16243a, 0.42)
+    graphics.fillRoundedRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3)
+    graphics.lineStyle(1, 0x3f5878, 0.45)
+    graphics.strokeRoundedRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3)
     return graphics
   }
 
   if (kind.kind === 'wall') {
-    drawPixelRect(graphics, px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2, 0x111a2c)
-    drawPixelRect(graphics, px + 3, py + 3, TILE_SIZE - 6, 2, 0x33466b)
-    drawPixelRect(graphics, px + 4, py + 8, 2, 14, 0x253553)
-    drawPixelRect(graphics, px + 21, py + 13, 7, 2, 0x3a4f77)
-    graphics.lineStyle(1, 0x425a87, 0.75)
-    graphics.strokeRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4)
-    const accent = ((px / TILE_SIZE + py / TILE_SIZE) % 3 + 3) % 3
-    if (accent === 0) drawPixelRect(graphics, px + 24, py + 7, 4, 2, 0x39d9d2, 0.8)
-    if (accent === 1) drawPixelRect(graphics, px + 8, py + 25, 5, 2, 0xf97316, 0.75)
+    // Raised, cool-blue masonry is deliberately much brighter than the floor.
+    // The top/side bevel makes the collision boundary readable without relying
+    // on a noisy photographic texture.
+    drawPixelRect(graphics, px, py, TILE_SIZE, TILE_SIZE, 0x0a101d)
+    drawPixelRect(graphics, px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 5, 0x263a58)
+    drawPixelRect(graphics, px + 3, py + 3, TILE_SIZE - 6, 4, 0x59749b)
+    drawPixelRect(graphics, px + 3, py + 7, 3, TILE_SIZE - 12, 0x3e587c)
+    drawPixelRect(graphics, px + 6, py + TILE_SIZE - 7, TILE_SIZE - 10, 3, 0x111d31)
+    graphics.lineStyle(1, 0x89a8cf, 0.55)
+    graphics.strokeRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 5)
+    const seam = (((px / TILE_SIZE + py / TILE_SIZE) % 2) + 2) % 2
+    drawPixelRect(graphics, px + (seam ? 7 : 18), py + 13, 10, 2, 0x172740, 0.9)
+    if (((px / TILE_SIZE) * 3 + py / TILE_SIZE) % 7 === 0) {
+      drawPixelRect(graphics, px + 22, py + 8, 4, 2, 0xf59e0b, 0.8)
+    }
     return graphics
   }
 
   if (kind.kind === 'stair') {
-    graphics.lineStyle(2, 0xf5c84b, 0.95)
+    graphics.fillStyle(0x3a2d12, 0.9)
+    graphics.fillRoundedRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4, 6)
+    graphics.lineStyle(2, 0xffd166, 1)
     graphics.strokeRoundedRect(px + 3, py + 3, TILE_SIZE - 6, TILE_SIZE - 6, 5)
     graphics.fillStyle(0xf5c84b, 0.9)
     if (kind.variant === 'up') {
@@ -149,23 +180,35 @@ export function drawModernTile(
 
   if (kind.kind === 'door') {
     const color = DOOR_COLORS[kind.variant]
+    graphics.fillStyle(0x070d18, 0.94)
+    graphics.fillRoundedRect(px + 3, py + 1, TILE_SIZE - 6, TILE_SIZE - 2, 5)
     graphics.lineStyle(2, color, 0.95)
-    graphics.strokeRoundedRect(px + 5, py + 2, TILE_SIZE - 10, TILE_SIZE - 4, 4)
-    drawPixelRect(graphics, px + 9, py + 6, TILE_SIZE - 18, TILE_SIZE - 12, 0x121b2f)
+    graphics.strokeRoundedRect(px + 4, py + 2, TILE_SIZE - 8, TILE_SIZE - 4, 4)
+    drawPixelRect(graphics, px + 8, py + 6, TILE_SIZE - 16, TILE_SIZE - 11, 0x17253c)
     drawPixelRect(graphics, px + 14, py + 10, 4, 13, color, 0.92)
     drawPixelRect(graphics, px + 18, py + 10, 2, 13, color, 0.55)
+    graphics.fillStyle(color, 0.95)
+    graphics.fillCircle(px + 23, py + 17, 2)
     return graphics
   }
 
   if (kind.kind === 'item') {
     const color =
-      kind.variant === 'yellow-key' ? 0xf5c84b :
-      kind.variant === 'blue-key' ? 0x4da3ff :
-      kind.variant === 'red-key' ? 0xff6b6b :
-      kind.variant === 'green-key' ? 0x47d7a0 :
-      kind.variant === 'gem' ? 0x4de1ff :
-      kind.variant === 'potion' ? 0xf472b6 :
-      kind.variant === 'equipment' ? 0xc084fc : 0xf5c84b
+      kind.variant === 'yellow-key'
+        ? 0xf5c84b
+        : kind.variant === 'blue-key'
+          ? 0x4da3ff
+          : kind.variant === 'red-key'
+            ? 0xff6b6b
+            : kind.variant === 'green-key'
+              ? 0x47d7a0
+              : kind.variant === 'gem'
+                ? 0x4de1ff
+                : kind.variant === 'potion'
+                  ? 0xf472b6
+                  : kind.variant === 'equipment'
+                    ? 0xc084fc
+                    : 0xf5c84b
     graphics.fillStyle(color, 0.95)
     if (kind.variant.includes('key') || kind.variant === 'key') {
       graphics.fillCircle(px + 12, py + 13, 5)

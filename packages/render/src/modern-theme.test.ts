@@ -13,6 +13,7 @@ describe('modern gameplay skin mapping', () => {
     '200': { cls: 'enemys', id: 'bat' },
     '201': { cls: 'enemys', id: 'dragon' },
     '300': { cls: 'npcs', id: 'wizard' },
+    '10113': { cls: 'tileset', id: 'X10113', canPass: true },
   }
 
   it('maps legacy semantic entries to modern visual roles', () => {
@@ -32,5 +33,9 @@ describe('modern gameplay skin mapping', () => {
     expect(resolveModernTileKind(10001, maps)).toEqual({ kind: 'wall', variant: 'basalt' })
     expect(resolveModernTileKind(20706, maps)).toEqual({ kind: 'wall', variant: 'basalt' })
     expect(resolveModernTileKind(9999, maps)).toEqual({ kind: 'unknown', variant: 'rune' })
+  })
+
+  it('keeps explicitly passable tileset cells visually walkable', () => {
+    expect(resolveModernTileKind(10113, maps)).toEqual({ kind: 'ground', variant: 'stone' })
   })
 })

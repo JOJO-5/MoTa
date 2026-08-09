@@ -22,6 +22,11 @@ export class HeroSprite {
     this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
     this.direction = 'down'
 
+    const shadow = scene.add
+      .ellipse(TILE_SIZE / 2, TILE_SIZE - 4, 23, 8, 0x02050a, 0.78)
+      .setStrokeStyle(1, 0x35e4ff, 0.75)
+    this.container.add(shadow)
+
     if (scene.textures.exists('modern-hero')) {
       this.sprite = scene.add
         .image(TILE_SIZE / 2, TILE_SIZE, 'modern-hero')
@@ -36,10 +41,21 @@ export class HeroSprite {
     } else {
       // Keep a safe fallback for standalone scene tests that do not preload
       // the modern asset bundle.
-      const initialFrame = HERO_FRAMES[this.direction].row * HERO_COLS + HERO_FRAMES[this.direction].stop
+      const initialFrame =
+        HERO_FRAMES[this.direction].row * HERO_COLS + HERO_FRAMES[this.direction].stop
       this.sprite = scene.add.image(0, -8, 'hero', initialFrame).setOrigin(0, 0)
     }
     this.container.add(this.sprite)
+
+    scene.tweens.add({
+      targets: shadow,
+      scaleX: 0.88,
+      alpha: 0.55,
+      duration: 820,
+      ease: 'Sine.InOut',
+      yoyo: true,
+      repeat: -1,
+    })
   }
 
   setDirection(direction: Direction) {
