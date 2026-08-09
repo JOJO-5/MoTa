@@ -207,7 +207,8 @@ test('desktop keyboard can enter MT1 and return to MT0 with one atomic landing s
   await expect.poll(async () => (await state(page))?.visitedFloors).toEqual(['MT0', 'MT1'])
 })
 
-test('Pixel 7 touch controls stay below the game and can enter MT1', async ({ page }) => {
+test('Pixel 7 touch controls stay below the game and can enter MT1', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-pixel-7', 'This scenario requires the mobile project')
   await startGame(page)
   const canvasBox = await page.locator('canvas').boundingBox()
   const controlsBox = await page.locator('.mobile-controls').boundingBox()
