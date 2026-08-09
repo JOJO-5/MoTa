@@ -10,18 +10,18 @@
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "dev": "pnpm --filter @modern-mota/web dev",
+    "dev": "corepack pnpm --filter @modern-mota/web dev",
     "build": "corepack pnpm -r build",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
-    "test:e2e": "pnpm --filter @modern-mota/web test:e2e",
+    "typecheck": "corepack pnpm -r typecheck",
+    "test": "corepack pnpm -r test",
+    "test:e2e": "corepack pnpm --filter @modern-mota/web test:e2e",
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "clean": "pnpm -r exec rm -rf dist node_modules .turbo"
   },
   "devDependencies": {
+    "@types/node": "^20.11.0",
     "prettier": "^3.2.0",
-    "typescript": "^5.4.0",
-    "@types/node": "^20.11.0"
+    "typescript": "^5.4.0"
   }
 }

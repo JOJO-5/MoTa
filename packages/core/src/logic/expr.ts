@@ -29,13 +29,14 @@ export function getContext(): ExpressionContext {
   // The web entry currently starts directly in the tower without a difficulty
   // picker, so keep the legacy high-tier NPC entry available by default.
   const hardFlag = flags.hard ?? values.hard
-  const hard = hardFlag === 1 || hardFlag === 'Starter'
-    ? 'Starter'
-    : hardFlag === 2 || hardFlag === 'Basic'
-      ? 'Basic'
-      : hardFlag === 3 || hardFlag === 'Premium' || hardFlag === undefined
-        ? 'Premium'
-        : hardFlag
+  const hard =
+    hardFlag === 1 || hardFlag === 'Starter'
+      ? 'Starter'
+      : hardFlag === 2 || hardFlag === 'Basic'
+        ? 'Basic'
+        : hardFlag === 3 || hardFlag === 'Premium' || hardFlag === undefined
+          ? 'Premium'
+          : hardFlag
   return {
     hero: {
       hp: hero.hp,
@@ -64,6 +65,8 @@ function preprocessExpression(expression: string): string {
   // flag:name -> flags.name
   // status:name -> status.name (resolved in context if available)
   return expression
+    .replace(/!==/g, '!=')
+    .replace(/===/g, '==')
     .replace(/flag:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'flags.$1')
     .replace(/switch:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'flags.$1')
     .replace(/status:([A-Za-z0-9_\u4e00-\u9fff]+)/g, 'status.$1')

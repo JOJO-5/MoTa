@@ -21,7 +21,12 @@ describe('eventMachine', () => {
 
   it('handles if/else branching', () => {
     const events: Event[] = [
-      { type: 'if', condition: '1 < 2', true: [{ type: 'setFlag', name: 'branch', value: 'true' }], false: [{ type: 'setFlag', name: 'branch', value: 'false' }] },
+      {
+        type: 'if',
+        condition: '1 < 2',
+        true: [{ type: 'setFlag', name: 'branch', value: 'true' }],
+        false: [{ type: 'setFlag', name: 'branch', value: 'false' }],
+      },
     ]
     eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 1 })
     expect(State.flags.branch).toBe(true)
@@ -39,10 +44,7 @@ describe('eventMachine', () => {
   })
 
   it('stops on exit event', () => {
-    const events: Event[] = [
-      { type: 'exit' },
-      { type: 'setFlag', name: 'afterExit', value: true },
-    ]
+    const events: Event[] = [{ type: 'exit' }, { type: 'setFlag', name: 'afterExit', value: true }]
     eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 2 })
     expect(State.flags.afterExit).toBeUndefined()
     expect(eventMachine.getState()).toBe('idle')
@@ -60,7 +62,13 @@ describe('eventMachine', () => {
       '\t[魔女,N406]欢迎来到魔塔。',
       { type: 'setFlag', name: 'talked', value: true } as Event,
     ]
-    eventMachine.start(events as Event[], { floorId: 'MT1', x: 7, y: 7, eventIndex: 0, eventCount: 3 })
+    eventMachine.start(events as Event[], {
+      floorId: 'MT1',
+      x: 7,
+      y: 7,
+      eventIndex: 0,
+      eventCount: 3,
+    })
     expect(eventMachine.getState()).toBe('waiting')
     expect(State.ui.modal).toBe('你好！')
 
@@ -82,7 +90,13 @@ describe('eventMachine', () => {
       { type: 'setValue', name: 'item:oldKey', operator: '+=', value: '1' },
     ] as Event[]
 
-    eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: events.length })
+    eventMachine.start(events, {
+      floorId: 'MT0',
+      x: 6,
+      y: 6,
+      eventIndex: 0,
+      eventCount: events.length,
+    })
 
     expect(State.flags.ancientSwitch).toBe(3)
     expect(State.hero.atk).toBe(15)
@@ -90,14 +104,16 @@ describe('eventMachine', () => {
   })
 
   it('runs a legacy choice branch selected by the mobile/keyboard action flow', () => {
-    const events = [{
-      type: 'choices',
-      text: '选择路线',
-      choices: [
-        { text: '左路', action: [{ type: 'setFlag', name: 'route', value: 'left' }] },
-        { text: '右路', action: [{ type: 'setFlag', name: 'route', value: 'right' }] },
-      ],
-    }] as Event[]
+    const events = [
+      {
+        type: 'choices',
+        text: '选择路线',
+        choices: [
+          { text: '左路', action: [{ type: 'setFlag', name: 'route', value: 'left' }] },
+          { text: '右路', action: [{ type: 'setFlag', name: 'route', value: 'right' }] },
+        ],
+      },
+    ] as Event[]
 
     eventMachine.start(events, { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 1 })
     expect(eventMachine.getState()).toBe('waiting')
@@ -106,5 +122,49 @@ describe('eventMachine', () => {
 
     expect(State.flags.route).toBe('right')
     expect(eventMachine.getState()).toBe('idle')
+  })
+
+  it('queues a new event sequence requested while the current sequence is waiting', () => {
+    eventMachine.start([{ type: 'showText', text: 'first event' }], {
+      floorId: 'MT0',
+      x: 6,
+      y: 6,
+      eventIndex: 0,
+      eventCount: 1,
+    })
+    expect(eventMachine.getState()).toBe('waiting')
+
+    eventMachine.start([{ type: 'setFlag', name: 'arrivalHandled', value: true }], {
+      floorId: 'MT1',
+      x: 7,
+      y: 13,
+      eventIndex: 0,
+      eventCount: 1,
+    })
+    expect(State.flags.arrivalHandled).toBeUndefined()
+
+    eventMachine.resume()
+
+    expect(State.flags.arrivalHandled).toBe(true)
+    expect(eventMachine.getState()).toBe('idle')
+    expect(eventMachine.getContext()).toBeNull()
+  })
+
+  it('persists legacy map-changing events as runtime tile overrides', () => {
+    eventMachine.start(
+      [
+        { type: 'setBlock', number: 'blueGem', loc: [[3, 4]] },
+        { type: 'hide', loc: [[5, 6]], remove: true },
+        { type: 'show', loc: [[5, 6]] },
+        { type: 'setBlockOpacity', loc: [[7, 8]], opacity: 0.4 },
+        { type: 'openDoor', loc: [9, 10] },
+      ] as Event[],
+      { floorId: 'MT0', x: 6, y: 6, eventIndex: 0, eventCount: 5 }
+    )
+
+    expect(State.tileOverrides.MT0['3,4']).toMatchObject({ map: 'blueGem' })
+    expect(State.tileOverrides.MT0['5,6']).toMatchObject({ hidden: false })
+    expect(State.tileOverrides.MT0['7,8']).toMatchObject({ opacity: 0.4 })
+    expect(State.tileOverrides.MT0['9,10']).toMatchObject({ map: 0 })
   })
 })

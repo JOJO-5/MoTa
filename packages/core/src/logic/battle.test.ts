@@ -63,6 +63,24 @@ describe('startBattle', () => {
     expect(State.hero.hp).toBeLessThanOrEqual(0)
     expect(State.battle).not.toBeNull()
   })
+
+  it('stops a zero-damage battle without hanging or declaring victory', () => {
+    const immovableEnemy: Enemy = {
+      ...mockEnemy,
+      id: 'purpleBowman',
+      hp: 1030,
+      atk: 0,
+      def: 200,
+    }
+
+    const result = startBattle(immovableEnemy)
+
+    expect(result.outcome).toBe('stalemate')
+    expect(result.turns).toBe(1)
+    expect(result.enemyHp).toBe(1030)
+    expect(State.hero.hp).toBe(100)
+    expect(State.battle?.enemyHp).toBe(1030)
+  })
 })
 
 describe('endBattle', () => {

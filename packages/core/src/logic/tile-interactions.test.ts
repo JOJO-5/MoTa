@@ -75,6 +75,17 @@ describe('tile-interactions', () => {
     expect(gameStore.getState().state.hero.hp).toBe(0)
   })
 
+  it('does not consume an enemy when neither side can damage the other', () => {
+    const result = battleEnemy('purpleBowman', {
+      ...ENEMIES,
+      purpleBowman: { name: '绮鹃攼寮撶鍏?', hp: 1030, atk: 0, def: 200, money: 26, exp: 3 },
+    })
+
+    expect(result?.consumed).toBe(false)
+    expect(gameStore.getState().state.hero.money).toBe(0)
+    expect(gameStore.getState().state.hero.exp).toBe(0)
+  })
+
   it('records a victorious enemy coordinate after clearing the tile', () => {
     const result = interactWithTile('MT0', 7, 4, 201, MAPS, ITEMS, ENEMIES)
     expect(result?.consumed).toBe(true)

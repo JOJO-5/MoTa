@@ -26,12 +26,12 @@ const AUTOTILE_KEYS: Record<string, string> = {
 }
 
 const DEFAULT_AUTOTILE = 'autotile_0'
+const BLANK_FRAME_CACHE = new Map<number, boolean>()
 
 export class TileMapLayer {
   private scene: Phaser.Scene
   private sprites: Phaser.GameObjects.Image[] = []
   private mapsData: MapsData
-  private blankFrameCache = new Map<number, boolean>()
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -43,7 +43,8 @@ export class TileMapLayer {
     bgmap: number[][] | null,
     fgmap: number[][] | null,
     defaultGround: string | null = null,
-    collectedTiles: string[] = []
+    collectedTiles: string[] = [],
+    opacities: Record<string, number> = {}
   ) {
     this.destroy()
 
@@ -52,11 +53,15 @@ export class TileMapLayer {
     const collected = new Set(collectedTiles)
 
     // Pass 1: default ground layer (fills the entire floor)
-    const groundKey = defaultGround ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE) : DEFAULT_AUTOTILE
+    const groundKey = defaultGround
+      ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE)
+      : DEFAULT_AUTOTILE
     const groundTexture = this.scene.textures.exists(groundKey) ? groundKey : DEFAULT_AUTOTILE
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
-        const img = this.scene.add.image(x * TILE_SIZE, y * TILE_SIZE, groundTexture).setOrigin(0, 0)
+        const img = this.scene.add
+          .image(x * TILE_SIZE, y * TILE_SIZE, groundTexture)
+          .setOrigin(0, 0)
         this.sprites.push(img)
       }
     }
@@ -66,7 +71,8 @@ export class TileMapLayer {
       for (let x = 0; x < cols; x++) {
         if (collected.has(`${x},${y}`)) continue
         const bgId = bgmap?.[y]?.[x] ?? 0
-        if (bgId !== 0) this.drawTile(bgId, x * TILE_SIZE, y * TILE_SIZE)
+        if (bgId !== 0)
+          this.drawTile(bgId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
       }
     }
 
@@ -75,7 +81,8 @@ export class TileMapLayer {
       for (let x = 0; x < cols; x++) {
         if (collected.has(`${x},${y}`)) continue
         const wallId = map[y]?.[x] ?? 0
-        if (wallId !== 0) this.drawTile(wallId, x * TILE_SIZE, y * TILE_SIZE)
+        if (wallId !== 0)
+          this.drawTile(wallId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
       }
     }
 
@@ -84,15 +91,16 @@ export class TileMapLayer {
       for (let x = 0; x < cols; x++) {
         if (collected.has(`${x},${y}`)) continue
         const fgId = fgmap?.[y]?.[x] ?? 0
-        if (fgId !== 0) this.drawTile(fgId, x * TILE_SIZE, y * TILE_SIZE)
+        if (fgId !== 0)
+          this.drawTile(fgId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
       }
     }
   }
 
-  private drawTile(tileId: number, px: number, py: number) {
+  private drawTile(tileId: number, px: number, py: number, opacity = 1) {
     const spriteInfo = getTileSprite(tileId, this.mapsData)
     if (!spriteInfo) {
-      this.drawFallback(px, py)
+      this.drawFallback(px, py, opacity)
       return
     }
 
@@ -103,7 +111,7 @@ export class TileMapLayer {
       const entry = this.mapsData[String(tileId)]
       const atKey = entry ? (AUTOTILE_KEYS[entry.id] ?? DEFAULT_AUTOTILE) : DEFAULT_AUTOTILE
       const textureKey = this.scene.textures.exists(atKey) ? atKey : DEFAULT_AUTOTILE
-      const img = this.scene.add.image(px, py, textureKey).setOrigin(0, 0)
+      const img = this.scene.add.image(px, py, textureKey).setOrigin(0, 0).setAlpha(opacity)
       this.sprites.push(img)
       return
     }
@@ -111,12 +119,12 @@ export class TileMapLayer {
     // Standard sprite sheets: use frame index
     const textureKey = sheet as string
     if (!this.scene.textures.exists(textureKey)) {
-      this.drawFallback(px, py)
+      this.drawFallback(px, py, opacity)
       return
     }
 
     if (sheet === 'tileset' && this.isBlankTilesetFrame(frame)) {
-      this.drawFallback(px, py)
+      this.drawFallback(px, py, opacity)
       return
     }
 
@@ -124,19 +132,19 @@ export class TileMapLayer {
     const frameHeight = SHEET_CONFIG[sheet]?.frameHeight ?? 32
     const dy = frameHeight > 32 ? py - (frameHeight - 32) : py
 
-    const img = this.scene.add.image(px, dy, textureKey, frame).setOrigin(0, 0)
+    const img = this.scene.add.image(px, dy, textureKey, frame).setOrigin(0, 0).setAlpha(opacity)
     this.sprites.push(img)
   }
 
-  private drawFallback(px: number, py: number) {
+  private drawFallback(px: number, py: number, opacity = 1) {
     if (!this.scene.textures.exists('__legacy-fallback')) return
-    const img = this.scene.add.image(px, py, '__legacy-fallback').setOrigin(0, 0)
+    const img = this.scene.add.image(px, py, '__legacy-fallback').setOrigin(0, 0).setAlpha(opacity)
     this.sprites.push(img)
   }
 
   /** Detect transparent/solid-black legacy frames and replace them visually. */
   private isBlankTilesetFrame(frameIndex: number) {
-    const cached = this.blankFrameCache.get(frameIndex)
+    const cached = BLANK_FRAME_CACHE.get(frameIndex)
     if (cached !== undefined) return cached
 
     let blank = false
@@ -177,7 +185,9 @@ export class TileMapLayer {
             }
           }
           const total = frame.cutWidth * frame.cutHeight
-          blank = opaque < total * 0.08 || (opaque > total * 0.75 && luminance / opaque < 24 && visible < total * 0.08)
+          blank =
+            opaque < total * 0.08 ||
+            (opaque > total * 0.75 && luminance / opaque < 24 && visible < total * 0.08)
         }
       }
     } catch {
@@ -185,7 +195,7 @@ export class TileMapLayer {
       blank = false
     }
 
-    this.blankFrameCache.set(frameIndex, blank)
+    BLANK_FRAME_CACHE.set(frameIndex, blank)
     return blank
   }
 

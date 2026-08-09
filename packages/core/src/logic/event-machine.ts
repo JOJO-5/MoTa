@@ -2,7 +2,7 @@ import { dispatch, State } from '../state/store.js'
 import { evaluate } from './expr.js'
 import { startBattle, endBattle } from './battle.js'
 import type { Event } from '@modern-mota/data'
-import type { Direction, HeroSnapshot } from '../types.js'
+import type { Direction, HeroSnapshot, RuntimeTileValue, TileOverride } from '../types.js'
 
 export type EventContext = {
   floorId: string
@@ -38,9 +38,10 @@ let machineState: EventMachineState = 'idle'
 let currentContext: EventContext | null = null
 let generator: Generator<unknown, void, unknown> | null = null
 let pendingChoice: PendingChoice | null = null
+const queuedStarts: Array<{ events: Event[]; context: EventContext }> = []
 
 function asLegacyEvent(event: Event): LegacyEvent | null {
-  return typeof event === 'object' && event !== null ? event as LegacyEvent : null
+  return typeof event === 'object' && event !== null ? (event as LegacyEvent) : null
 }
 
 function parseLegacyValue(raw: unknown): unknown {
@@ -93,6 +94,40 @@ function writeLegacyValue(name: string, value: unknown) {
   dispatch({ type: 'SET_VALUE', name, value: Number(value) || 0 })
 }
 
+function normalizeLocations(raw: unknown, context: EventContext): Array<[number, number]> {
+  if (!Array.isArray(raw)) return [[context.x, context.y]]
+  if (raw.length === 2 && raw.every((value) => typeof value === 'number')) {
+    return [[raw[0] as number, raw[1] as number]]
+  }
+  return raw.flatMap((value) => {
+    if (
+      Array.isArray(value) &&
+      value.length === 2 &&
+      value.every((item) => typeof item === 'number')
+    ) {
+      return [[value[0] as number, value[1] as number]]
+    }
+    return []
+  })
+}
+
+function blockValue(raw: LegacyEvent): RuntimeTileValue | undefined {
+  const value = raw.blockId !== undefined ? raw.blockId : raw.number
+  if (value === undefined) return undefined
+  if (value === null || value === 'null') return null
+  return typeof value === 'number' ? value : String(value)
+}
+
+function applyTileOverride(
+  floorId: string,
+  locations: Array<[number, number]>,
+  override: TileOverride
+) {
+  for (const [x, y] of locations) {
+    dispatch({ type: 'SET_TILE_OVERRIDE', floorId, x, y, override })
+  }
+}
+
 function formatChoices(text: string, choices: PendingChoice['choices'], index: number) {
   const title = text ? `${text}\n\n` : ''
   return `${title}${choices.map((choice, i) => `${i === index ? '▶' : ' '} ${i + 1}. ${choice.text}`).join('\n')}`
@@ -130,7 +165,11 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
         break
       }
       case 'setFlag': {
-        dispatch({ type: 'SET_FLAG', name: String(raw.name ?? ''), value: parseLegacyValue(raw.value) })
+        dispatch({
+          type: 'SET_FLAG',
+          name: String(raw.name ?? ''),
+          value: parseLegacyValue(raw.value),
+        })
         break
       }
       case 'if': {
@@ -141,13 +180,18 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       }
       case 'switch': {
         const value = evaluate(String(raw.condition ?? ''))
-        const cases = Array.isArray(raw.caseList) ? raw.caseList as Array<Record<string, unknown>> : []
-        const selected = cases.find((item) => String(item.case) === String(value)) ?? cases.find((item) => item.case === 'default')
-        if (selected && Array.isArray(selected.action)) yield* processEvents(selected.action as Event[], context)
+        const cases = Array.isArray(raw.caseList)
+          ? (raw.caseList as Array<Record<string, unknown>>)
+          : []
+        const selected =
+          cases.find((item) => String(item.case) === String(value)) ??
+          cases.find((item) => item.case === 'default')
+        if (selected && Array.isArray(selected.action))
+          yield* processEvents(selected.action as Event[], context)
         break
       }
       case 'while': {
-        const data = Array.isArray(raw.data) ? raw.data as Event[] : []
+        const data = Array.isArray(raw.data) ? (raw.data as Event[]) : []
         let guard = 0
         while (Boolean(evaluate(String(raw.condition ?? 'false'))) && guard++ < 1000) {
           yield* processEvents(data, context)
@@ -159,7 +203,7 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
         const from = Number(parseLegacyValue(raw.from)) || 0
         const to = Number(parseLegacyValue(raw.to)) || 0
         const stepValue = Number(parseLegacyValue(raw.step ?? '1')) || 1
-        const data = Array.isArray(raw.data) ? raw.data as Event[] : []
+        const data = Array.isArray(raw.data) ? (raw.data as Event[]) : []
         if (stepValue !== 0) {
           for (let value = from; stepValue > 0 ? value <= to : value >= to; value += stepValue) {
             writeLegacyValue(variable, value)
@@ -174,16 +218,30 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       }
       case 'choices': {
         const choices = Array.isArray(raw.choices)
-          ? raw.choices.filter((choice): choice is { text: string; action: Event[] } => Boolean(choice && typeof choice === 'object' && Array.isArray((choice as Record<string, unknown>).action))).map((choice) => ({
-              text: String((choice as Record<string, unknown>).text ?? ''),
-              action: (choice as Record<string, unknown>).action as Event[],
-            }))
+          ? raw.choices
+              .filter((choice): choice is { text: string; action: Event[] } =>
+                Boolean(
+                  choice &&
+                  typeof choice === 'object' &&
+                  Array.isArray((choice as Record<string, unknown>).action)
+                )
+              )
+              .map((choice) => ({
+                text: String((choice as Record<string, unknown>).text ?? ''),
+                action: (choice as Record<string, unknown>).action as Event[],
+              }))
           : []
         if (choices.length === 0) break
         pendingChoice = { choices, index: 0 }
-        dispatch({ type: 'SET_UI', ui: { modal: formatChoices(String(raw.text ?? ''), choices, 0) } })
+        dispatch({
+          type: 'SET_UI',
+          ui: { modal: formatChoices(String(raw.text ?? ''), choices, 0) },
+        })
         const selectedIndex = yield 'choice'
-        const choice = pendingChoice.choices[Math.max(0, Math.min(pendingChoice.choices.length - 1, Number(selectedIndex) || 0))]
+        const choice =
+          pendingChoice.choices[
+            Math.max(0, Math.min(pendingChoice.choices.length - 1, Number(selectedIndex) || 0))
+          ]
         pendingChoice = null
         if (choice) yield* processEvents(choice.action, context)
         break
@@ -219,11 +277,18 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
         break
       }
       case 'changeFloor': {
-        dispatch({ type: 'SET_FLOOR', floorId: String(raw.floorId ?? '') })
-        if (raw.loc) {
-          const loc = Array.isArray(raw.loc) ? raw.loc : [raw.loc, 0]
-          dispatch({ type: 'SET_POSITION', position: { x: loc[0] as number, y: loc[1] as number } })
-        }
+        const position = raw.loc
+          ? (() => {
+              const loc = Array.isArray(raw.loc) ? raw.loc : [raw.loc, 0]
+              return { x: loc[0] as number, y: loc[1] as number }
+            })()
+          : undefined
+        dispatch({
+          type: 'ENTER_FLOOR',
+          floorId: String(raw.floorId ?? ''),
+          ...(position ? { position } : {}),
+          ...(raw.direction ? { direction: raw.direction as Direction } : {}),
+        })
         break
       }
       case 'loadBgm':
@@ -241,27 +306,106 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       case 'exit': {
         return
       }
-      // These are visual/audio commands from mota-js. They are intentionally
-      // safe no-ops until their Phaser equivalents are available; importantly,
-      // they no longer abort the rest of a legacy event chain.
+      case 'setBlock': {
+        const value = blockValue(raw)
+        if (value !== undefined) {
+          applyTileOverride(
+            String(raw.floorId ?? context.floorId),
+            normalizeLocations(raw.loc, context),
+            { map: value, hidden: false }
+          )
+        }
+        break
+      }
+      case 'hide': {
+        const remove = raw.remove !== false
+        applyTileOverride(
+          String(raw.floorId ?? context.floorId),
+          normalizeLocations(raw.loc, context),
+          remove ? { hidden: true } : { opacity: 0 }
+        )
+        break
+      }
+      case 'show': {
+        applyTileOverride(
+          String(raw.floorId ?? context.floorId),
+          normalizeLocations(raw.loc, context),
+          { hidden: false, opacity: 1 }
+        )
+        break
+      }
+      case 'setBlockOpacity': {
+        applyTileOverride(
+          String(raw.floorId ?? context.floorId),
+          normalizeLocations(raw.loc, context),
+          { opacity: Math.max(0, Math.min(1, Number(raw.opacity) || 0)) }
+        )
+        break
+      }
+      case 'openDoor': {
+        applyTileOverride(
+          String(raw.floorId ?? context.floorId),
+          normalizeLocations(raw.loc, context),
+          { map: 0, hidden: false }
+        )
+        break
+      }
+      case 'closeDoor': {
+        const value = blockValue(raw)
+        const floorId = String(raw.floorId ?? context.floorId)
+        for (const [x, y] of normalizeLocations(raw.loc, context)) {
+          if (value === undefined) dispatch({ type: 'CLEAR_TILE_OVERRIDE', floorId, x, y })
+          else
+            dispatch({
+              type: 'SET_TILE_OVERRIDE',
+              floorId,
+              x,
+              y,
+              override: { map: value, hidden: false },
+            })
+        }
+        break
+      }
+      case 'setFloor': {
+        const floorId = String(raw.floorId ?? raw.name ?? '')
+        if (floorId) dispatch({ type: 'ENTER_FLOOR', floorId })
+        break
+      }
+      case 'turnBlock': {
+        const value = blockValue(raw)
+        if (value !== undefined) {
+          applyTileOverride(
+            String(raw.floorId ?? context.floorId),
+            normalizeLocations(raw.loc, context),
+            { map: value }
+          )
+        } else {
+          console.warn(
+            '[event-machine] legacy turnBlock has no block value; visual rotation is not available',
+            raw
+          )
+        }
+        break
+      }
+      // Pure visual/audio commands are explicitly logged until their Phaser
+      // animation/audio bridge is available; gameplay-changing commands above
+      // must never be silently skipped.
       case 'playSound':
       case 'waitAsync':
-      case 'setBlock':
-      case 'setBlockOpacity':
-      case 'hide':
-      case 'show':
       case 'animate':
-      case 'openDoor':
-      case 'closeDoor':
-      case 'setFloor':
       case 'setCurtain':
       case 'setText':
-      case 'turnBlock':
       case 'move':
       case 'input':
       case 'comment':
       case 'function':
+        console.warn(
+          `[event-machine] legacy event ${raw.type} is deferred to the render bridge`,
+          raw
+        )
+        break
       default:
+        console.warn(`[event-machine] unknown legacy event ${raw.type}`, raw)
         break
     }
   }
@@ -269,12 +413,11 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
 
 export const eventMachine: EventMachine = {
   start(events, context) {
-    if (machineState === 'running') return
-    currentContext = context
-    pendingChoice = null
-    machineState = 'running'
-    generator = processEvents(events, context)
-    step()
+    if (machineState === 'running' || machineState === 'waiting') {
+      queuedStarts.push({ events, context })
+      return
+    }
+    startSequence(events, context)
   },
   pause() {
     if (machineState === 'running') {
@@ -292,6 +435,7 @@ export const eventMachine: EventMachine = {
     currentContext = null
     generator = null
     pendingChoice = null
+    queuedStarts.length = 0
   },
   getState() {
     return machineState
@@ -302,20 +446,35 @@ export const eventMachine: EventMachine = {
   moveChoice(direction) {
     if (machineState !== 'waiting' || !pendingChoice) return
     const delta = direction === 'up' || direction === 'left' ? -1 : 1
-    pendingChoice.index = (pendingChoice.index + delta + pendingChoice.choices.length) % pendingChoice.choices.length
-    dispatch({ type: 'SET_UI', ui: { modal: formatChoices('', pendingChoice.choices, pendingChoice.index) } })
+    pendingChoice.index =
+      (pendingChoice.index + delta + pendingChoice.choices.length) % pendingChoice.choices.length
+    dispatch({
+      type: 'SET_UI',
+      ui: { modal: formatChoices('', pendingChoice.choices, pendingChoice.index) },
+    })
   },
+}
+
+function startSequence(events: Event[], context: EventContext) {
+  currentContext = context
+  pendingChoice = null
+  machineState = 'running'
+  generator = processEvents(events, context)
+  step()
 }
 
 function step(input?: unknown) {
   if (!generator || machineState !== 'running') return
   const result = generator.next(input)
   if (result.done) {
+    const next = queuedStarts.shift()
     machineState = 'idle'
     currentContext = null
     generator = null
-    // Close any dialog/message left open by the event sequence
+    pendingChoice = null
+    // Close any dialog/message left open by the event sequence.
     dispatch({ type: 'SET_UI', ui: { modal: null } })
+    if (next) startSequence(next.events, next.context)
   } else {
     // Yielded -> waiting for external resume
     machineState = 'waiting'

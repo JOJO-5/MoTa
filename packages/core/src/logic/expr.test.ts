@@ -78,4 +78,10 @@ describe('expression evaluator', () => {
     expect(evaluate("core.status.hard == 'Basic'")).toBe(true)
     expect(evaluate("core.status.hard == 'Premium'")).toBe(false)
   })
+
+  it('accepts strict equality syntax used by legacy auto events', () => {
+    expect(evaluate('flag:hard===2')).toBe(false)
+    dispatch({ type: 'SET_FLAG', name: 'hard', value: 2 })
+    expect(evaluate('flag:hard===2')).toBe(true)
+  })
 })

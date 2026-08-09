@@ -70,18 +70,19 @@ export function interactWithTile(
   tileId: number,
   maps: Record<string, RawMapEntry> | undefined,
   itemsData: Record<string, RawItem> | undefined,
-  enemysData: Record<string, RawEnemy> | undefined,
+  enemysData: Record<string, RawEnemy> | undefined
 ): TileInteractionResult | null {
   if (State.collectedTiles[floorId]?.includes(`${x},${y}`)) return null
 
   const entry = maps?.[String(tileId)]
   if (!entry?.id) return null
 
-  const result = entry.cls === 'items'
-    ? pickUpItem(entry.id, itemsData)
-    : entry.cls === 'enemys'
-      ? battleEnemy(entry.id, enemysData)
-      : null
+  const result =
+    entry.cls === 'items'
+      ? pickUpItem(entry.id, itemsData)
+      : entry.cls === 'enemys'
+        ? battleEnemy(entry.id, enemysData)
+        : null
 
   if (result?.consumed) {
     dispatch({ type: 'COLLECT_TILE', floorId, x, y })
@@ -95,7 +96,10 @@ export function interactWithTile(
  * game (keys, gems, potions, equipment); anything else is stored in the
  * hero's item bag without an effect yet.
  */
-export function pickUpItem(itemId: string, itemsData: Record<string, RawItem> | undefined): TileInteractionResult | null {
+export function pickUpItem(
+  itemId: string,
+  itemsData: Record<string, RawItem> | undefined
+): TileInteractionResult | null {
   const item = itemsData?.[itemId]
   if (!item) return null
 
@@ -149,20 +153,29 @@ export function pickUpItem(itemId: string, itemsData: Record<string, RawItem> | 
  * Fight an enemy tile. Runs the battle simulation; on victory the enemy is
  * cleared and money/exp are awarded. On defeat the hero's HP is clamped to 0.
  */
-export function battleEnemy(enemyId: string, enemysData: Record<string, RawEnemy> | undefined): TileInteractionResult | null {
+export function battleEnemy(
+  enemyId: string,
+  enemysData: Record<string, RawEnemy> | undefined
+): TileInteractionResult | null {
   const enemy = enemysData?.[enemyId]
   if (!enemy) return null
 
   const name = enemy.name ?? enemyId
-  startBattle({ ...enemy, id: enemyId } as never)
+  const battle = startBattle({ ...enemy, id: enemyId } as never)
 
   const { hero } = State
   dispatch({ type: 'SET_BATTLE', battle: null })
+  if (battle.outcome === 'stalemate') {
+    return { message: `${name} 当前无法被有效攻击`, consumed: false }
+  }
   if (hero.hp <= 0) {
     dispatch({ type: 'SET_HERO', hero: { hp: 0 } })
     return { message: `你被 ${name} 击败了…`, consumed: false }
   }
 
-  dispatch({ type: 'SET_HERO', hero: { money: hero.money + enemy.money, exp: hero.exp + enemy.exp } })
+  dispatch({
+    type: 'SET_HERO',
+    hero: { money: hero.money + enemy.money, exp: hero.exp + enemy.exp },
+  })
   return { message: `击败${name}（💰+${enemy.money} ⭐+${enemy.exp}）`, consumed: true }
 }

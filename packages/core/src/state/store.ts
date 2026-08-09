@@ -23,7 +23,12 @@ const INITIAL_UI = {
 }
 
 export const createInitialState = (floorId: string, x: number, y: number): GameState => ({
-  hero: { ...INITIAL_HERO, keys: { ...INITIAL_HERO.keys }, items: [...INITIAL_HERO.items], equipment: { ...INITIAL_HERO.equipment } },
+  hero: {
+    ...INITIAL_HERO,
+    keys: { ...INITIAL_HERO.keys },
+    items: [...INITIAL_HERO.items],
+    equipment: { ...INITIAL_HERO.equipment },
+  },
   floorId,
   position: { x, y },
   direction: 'up' as Direction,
@@ -34,6 +39,8 @@ export const createInitialState = (floorId: string, x: number, y: number): GameS
   battle: null,
   ui: { ...INITIAL_UI },
   collectedTiles: {},
+  visitedFloors: [],
+  tileOverrides: {},
 })
 
 interface StoreState {
@@ -60,6 +67,28 @@ function createStore() {
             case 'SET_DIRECTION':
               s.state.direction = action.direction
               break
+            case 'ENTER_FLOOR':
+              s.state.floorId = action.floorId
+              if (action.position) s.state.position = action.position
+              if (action.direction) s.state.direction = action.direction
+              break
+            case 'MARK_FLOOR_VISITED':
+              if (!s.state.visitedFloors.includes(action.floorId)) {
+                s.state.visitedFloors.push(action.floorId)
+              }
+              break
+            case 'SET_TILE_OVERRIDE': {
+              const floorOverrides = s.state.tileOverrides[action.floorId] ?? {}
+              const key = `${action.x},${action.y}`
+              floorOverrides[key] = { ...(floorOverrides[key] ?? {}), ...action.override }
+              s.state.tileOverrides[action.floorId] = floorOverrides
+              break
+            }
+            case 'CLEAR_TILE_OVERRIDE': {
+              const floorOverrides = s.state.tileOverrides[action.floorId]
+              if (floorOverrides) delete floorOverrides[`${action.x},${action.y}`]
+              break
+            }
             case 'SET_FLAG':
               s.state.flags[action.name] = action.value
               break
@@ -85,20 +114,30 @@ function createStore() {
             case 'SET_ENEMYS':
               s.state.enemys = action.enemys
               break
-            case 'COLLECT_TILE':
-              {
-                const key = `${action.x},${action.y}`
-                const list = s.state.collectedTiles[action.floorId] ?? []
-                if (!list.includes(key)) {
-                  s.state.collectedTiles[action.floorId] = [...list, key]
-                }
-                break
+            case 'COLLECT_TILE': {
+              const key = `${action.x},${action.y}`
+              const list = s.state.collectedTiles[action.floorId] ?? []
+              if (!list.includes(key)) {
+                s.state.collectedTiles[action.floorId] = [...list, key]
               }
+              break
+            }
             case 'SET_UI':
               Object.assign(s.state.ui, action.ui)
               break
             case 'LOAD_STATE':
               Object.assign(s.state, action.state)
+              s.state.visitedFloors = Array.isArray(action.state.visitedFloors)
+                ? action.state.visitedFloors
+                : []
+              s.state.tileOverrides =
+                action.state.tileOverrides && typeof action.state.tileOverrides === 'object'
+                  ? action.state.tileOverrides
+                  : {}
+              s.state.collectedTiles =
+                action.state.collectedTiles && typeof action.state.collectedTiles === 'object'
+                  ? action.state.collectedTiles
+                  : {}
               break
             case 'RESET':
               Object.assign(s.state, createInitialState('MT0', 6, 6))
@@ -115,11 +154,14 @@ export const getState = gameStore.getState
 export const setState = gameStore.setState
 export const dispatch = (action: GameAction) => gameStore.getState().dispatch(action)
 export const State = new Proxy({} as GameState, {
-  get: (_target, prop) => (gameStore.getState().state as unknown as Record<string | symbol, unknown>)[prop as string],
+  get: (_target, prop) =>
+    (gameStore.getState().state as unknown as Record<string | symbol, unknown>)[prop as string],
   has: (_target, prop) => prop in gameStore.getState().state,
   ownKeys: () => Reflect.ownKeys(gameStore.getState().state),
   getOwnPropertyDescriptor: (_target, prop) => {
-    const value = (gameStore.getState().state as unknown as Record<string | symbol, unknown>)[prop as string]
+    const value = (gameStore.getState().state as unknown as Record<string | symbol, unknown>)[
+      prop as string
+    ]
     return {
       configurable: true,
       enumerable: true,

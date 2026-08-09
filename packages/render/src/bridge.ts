@@ -29,9 +29,12 @@ export async function initTower(gameId: string) {
     const firstFloor = towerData.floors[firstFloorId]
     console.log('[bridge] firstFloor:', firstFloorId)
     if (firstFloor) {
-      dispatch({ type: 'SET_FLOOR', floorId: firstFloorId })
-      dispatch({ type: 'SET_POSITION', position: { x: 6, y: 6 } })
-      dispatch({ type: 'SET_DIRECTION', direction: 'up' })
+      dispatch({
+        type: 'ENTER_FLOOR',
+        floorId: firstFloorId,
+        position: { x: 6, y: 6 },
+        direction: 'up',
+      })
       console.log('[bridge] dispatched, floorId:', firstFloorId)
     }
     return towerData

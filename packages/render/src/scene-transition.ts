@@ -4,7 +4,18 @@ import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
 import { KeyboardInput } from './input/keyboard.js'
-import { gameStore, moveHero, eventMachine, dispatch, interactWithTile } from '@modern-mota/core'
+import {
+  gameStore,
+  moveHero,
+  eventMachine,
+  dispatch,
+  interactWithTile,
+  getRuntimeLayer,
+  getRuntimeMap,
+  resolveRuntimeTileValue,
+  getTileOpacities,
+  evaluate,
+} from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
 
 export class GameScene extends Phaser.Scene {
@@ -55,11 +66,22 @@ export class GameScene extends Phaser.Scene {
     this.unsubscribers.push(
       gameStore.subscribe((next, prev) => {
         if (!this.heroSprite) return
-        if (prev.state.position.x !== next.state.position.x || prev.state.position.y !== next.state.position.y) {
+        if (
+          prev.state.position.x !== next.state.position.x ||
+          prev.state.position.y !== next.state.position.y
+        ) {
           this.heroSprite.setPosition(next.state.position.x, next.state.position.y)
         }
         if (prev.state.direction !== next.state.direction) {
           this.heroSprite.setDirection(next.state.direction)
+        }
+      })
+    )
+
+    this.unsubscribers.push(
+      gameStore.subscribe((next, prev) => {
+        if (next.state.tileOverrides !== prev.state.tileOverrides && this.tileMap) {
+          this.rerenderTiles()
         }
       })
     )
@@ -108,7 +130,16 @@ export class GameScene extends Phaser.Scene {
     } | null
     const maps = towerData?.maps ?? {}
 
-    const moved = moveHero(direction, this.currentFloor, maps)
+    const runtimeFloor = {
+      ...this.currentFloor,
+      map: getRuntimeMap(
+        this.currentFloor.floorId,
+        this.currentFloor.map,
+        gameStore.getState().state,
+        maps
+      ),
+    }
+    const moved = moveHero(direction, runtimeFloor, maps)
     if (moved) {
       this.triggerEventsAtHero()
     } else {
@@ -148,7 +179,10 @@ export class GameScene extends Phaser.Scene {
     if (direction === 'down') next.y++
     if (direction === 'left') next.x--
     if (direction === 'right') next.x++
-    const tileId = this.currentFloor.map[next.y]?.[next.x]
+    const tileId =
+      getRuntimeMap(this.currentFloor.floorId, this.currentFloor.map, state, maps)[next.y]?.[
+        next.x
+      ] ?? 0
     const entry = maps[String(tileId)]
     const doorInfo = entry?.doorInfo as { keys?: Record<string, number> } | undefined
     if (!entry || entry.trigger !== 'openDoor' || !doorInfo) return
@@ -161,11 +195,22 @@ export class GameScene extends Phaser.Scene {
     if (required) {
       dispatch({
         type: 'SET_HERO',
-        hero: { keys: { ...state.hero.keys, [required[0]]: (state.hero.keys[required[0]] ?? 0) - required[1] } },
+        hero: {
+          keys: {
+            ...state.hero.keys,
+            [required[0]]: (state.hero.keys[required[0]] ?? 0) - required[1],
+          },
+        },
       })
     }
 
-    this.currentFloor.map[next.y][next.x] = 0
+    dispatch({
+      type: 'SET_TILE_OVERRIDE',
+      floorId: this.currentFloor.floorId,
+      x: next.x,
+      y: next.y,
+      override: { map: 0, hidden: false },
+    })
     dispatch({ type: 'SET_UI', ui: { floorMsg: `${entry.id} 已开启` } })
     this.rerenderTiles()
     const afterOpen = this.currentFloor.afterOpenDoor?.[`${next.x},${next.y}`]
@@ -194,7 +239,9 @@ export class GameScene extends Phaser.Scene {
     } | null
 
     // Trigger changeFloor (stairs) — resolve :next/:before and missing loc
-    const changeFloor = (this.currentFloor.changeFloor as Record<string, Record<string, unknown>> | undefined)?.[key]
+    const changeFloor = (
+      this.currentFloor.changeFloor as Record<string, Record<string, unknown>> | undefined
+    )?.[key]
     if (changeFloor) {
       const resolved = this.resolveChangeFloor(changeFloor)
       if (resolved) {
@@ -214,7 +261,10 @@ export class GameScene extends Phaser.Scene {
 
     // Step-on interactions: pick up items, fight enemies
     if (!towerData) return
-    const tileId = this.currentFloor.map[pos.y]?.[pos.x]
+    const tileId =
+      getRuntimeMap(this.currentFloor.floorId, this.currentFloor.map, state, towerData.maps)[
+        pos.y
+      ]?.[pos.x] ?? 0
     const entry = towerData.maps[String(tileId)]
     if (!entry) return
 
@@ -225,12 +275,25 @@ export class GameScene extends Phaser.Scene {
       tileId,
       towerData.maps,
       towerData.items as never,
-      towerData.enemys as never,
+      towerData.enemys as never
     )
 
     if (result) {
       dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
+      if (result.consumed && entry.cls === 'enemys') {
+        const afterBattle = this.currentFloor.afterBattle?.[`${pos.x},${pos.y}`]
+        if (afterBattle?.length) {
+          eventMachine.start(afterBattle as Event[], {
+            floorId: this.currentFloor.floorId,
+            x: pos.x,
+            y: pos.y,
+            eventIndex: 0,
+            eventCount: afterBattle.length,
+          })
+        }
+      }
       this.rerenderTiles()
+      this.runAutoEvents()
     }
   }
 
@@ -255,7 +318,12 @@ export class GameScene extends Phaser.Scene {
     else if (nextFloorId === ':before') nextFloorId = floorIds[currentIdx - 1]
 
     if (!nextFloorId || !towerData.floors[nextFloorId]) {
-      console.warn('[GameScene] cannot resolve changeFloor target:', changeFloor.floorId, 'from', this.currentFloor.floorId)
+      console.warn(
+        '[GameScene] cannot resolve changeFloor target:',
+        changeFloor.floorId,
+        'from',
+        this.currentFloor.floorId
+      )
       return null
     }
 
@@ -271,7 +339,11 @@ export class GameScene extends Phaser.Scene {
     const target = towerData.floors[nextFloorId]
     for (let y = 0; y < target.map.length; y++) {
       for (let x = 0; x < (target.map[0]?.length ?? 0); x++) {
-        if (targetTile !== null ? target.map[y][x] === targetTile : target.map[y][x] === 87 || target.map[y][x] === 88) {
+        if (
+          targetTile !== null
+            ? target.map[y][x] === targetTile
+            : target.map[y][x] === 87 || target.map[y][x] === 88
+        ) {
           return { floorId: nextFloorId, loc: [x, y] }
         }
       }
@@ -284,16 +356,85 @@ export class GameScene extends Phaser.Scene {
   private rerenderTiles() {
     if (!this.currentFloor) return
     const { state } = gameStore.getState()
+    const maps =
+      (
+        (globalThis as Record<string, unknown>)['__towerData'] as {
+          maps?: Record<string, { id: string }>
+        } | null
+      )?.maps ?? {}
+    const runtimeMap = getRuntimeMap(this.currentFloor.floorId, this.currentFloor.map, state, maps)
+    const runtimeBgMap = getRuntimeLayer(
+      this.currentFloor.floorId,
+      'bgmap',
+      this.currentFloor.bgmap,
+      state
+    ).map((row) => row.map((value) => resolveRuntimeTileValue(value, maps)))
+    const runtimeFgMap = getRuntimeLayer(
+      this.currentFloor.floorId,
+      'fgmap',
+      this.currentFloor.fgmap,
+      state
+    ).map((row) => row.map((value) => resolveRuntimeTileValue(value, maps)))
     const collected = state.collectedTiles[this.currentFloor.floorId] ?? []
     this.tileMap.render(
-      this.currentFloor.map,
-      this.currentFloor.bgmap,
-      this.currentFloor.fgmap,
+      runtimeMap,
+      runtimeBgMap,
+      runtimeFgMap,
       this.currentFloor.defaultGround || null,
-      collected
+      collected,
+      getTileOpacities(this.currentFloor.floorId, state)
     )
     // Keep hero above freshly added tiles
     this.heroSprite?.container.setDepth(10)
+  }
+
+  /** Evaluate legacy autoEvent entries after a stable gameplay state change. */
+  private runAutoEvents() {
+    if (!this.currentFloor) return
+    const autoEvent = this.currentFloor.autoEvent as unknown as
+      Record<string, Record<string, unknown>> | undefined
+    if (!autoEvent) return
+    const { state } = gameStore.getState()
+    const candidates: Array<{
+      key: string
+      index: string
+      data: Event[]
+      condition: string
+      multiExecute: boolean
+      priority: number
+    }> = []
+
+    for (const [key, entries] of Object.entries(autoEvent)) {
+      for (const [index, rawValue] of Object.entries(entries ?? {})) {
+        if (!rawValue || typeof rawValue !== 'object') continue
+        const raw = rawValue as Record<string, unknown>
+        if (!Array.isArray(raw.data)) continue
+        candidates.push({
+          key,
+          index,
+          data: raw.data as Event[],
+          condition: String(raw.condition ?? 'false'),
+          multiExecute: raw.multiExecute === true,
+          priority: Number(raw.priority) || 0,
+        })
+      }
+    }
+
+    candidates.sort((a, b) => b.priority - a.priority)
+    for (const candidate of candidates) {
+      const firedKey = `__autoEvent:${this.currentFloor.floorId}:${candidate.key}:${candidate.index}`
+      if (!candidate.multiExecute && state.flags[firedKey]) continue
+      if (!Boolean(evaluate(candidate.condition))) continue
+
+      if (!candidate.multiExecute) dispatch({ type: 'SET_FLAG', name: firedKey, value: true })
+      eventMachine.start(candidate.data, {
+        floorId: this.currentFloor.floorId,
+        x: state.position.x,
+        y: state.position.y,
+        eventIndex: 0,
+        eventCount: candidate.data.length,
+      })
+    }
   }
 
   shutdown() {
@@ -307,7 +448,9 @@ export class GameScene extends Phaser.Scene {
 
   private triggerEventsAtPosition(x: number, y: number): boolean {
     if (!this.currentFloor) return false
-    const tileEvents = (this.currentFloor.events as Record<string, Event[]> | undefined)?.[`${x},${y}`]
+    const tileEvents = (this.currentFloor.events as Record<string, Event[]> | undefined)?.[
+      `${x},${y}`
+    ]
     if (!tileEvents || tileEvents.length === 0) return false
     eventMachine.start(tileEvents, {
       floorId: this.currentFloor.floorId,
@@ -322,8 +465,17 @@ export class GameScene extends Phaser.Scene {
   loadFloor(floor: Floor) {
     console.log('[GameScene] loadFloor', floor.floorId)
     this.currentFloor = floor
-    if (this.tileMap) { this.tileMap.destroy() }
-    if (this.heroSprite) { this.heroSprite.destroy() }
+    const previousState = gameStore.getState().state
+    const firstVisit = !(previousState.visitedFloors ?? []).includes(floor.floorId)
+    if (firstVisit) {
+      gameStore.getState().dispatch({ type: 'MARK_FLOOR_VISITED', floorId: floor.floorId })
+    }
+    if (this.tileMap) {
+      this.tileMap.destroy()
+    }
+    if (this.heroSprite) {
+      this.heroSprite.destroy()
+    }
 
     // Set up camera with actual floor dimensions
     const w = floor.width || floor.map[0]?.length || 13
@@ -331,26 +483,49 @@ export class GameScene extends Phaser.Scene {
     this.cameraSystem = new CameraSystem(this, w, h)
 
     this.tileMap = new TileMapLayer(this)
-    const collected = gameStore.getState().state.collectedTiles[floor.floorId] ?? []
-    this.tileMap.render(floor.map, floor.bgmap, floor.fgmap, floor.defaultGround || null, collected)
+    const state = gameStore.getState().state
+    const maps =
+      (
+        (globalThis as Record<string, unknown>)['__towerData'] as {
+          maps?: Record<string, { id: string }>
+        } | null
+      )?.maps ?? {}
+    const runtimeMap = getRuntimeMap(floor.floorId, floor.map, state, maps)
+    const runtimeBgMap = getRuntimeLayer(floor.floorId, 'bgmap', floor.bgmap, state).map((row) =>
+      row.map((value) => resolveRuntimeTileValue(value, maps))
+    )
+    const runtimeFgMap = getRuntimeLayer(floor.floorId, 'fgmap', floor.fgmap, state).map((row) =>
+      row.map((value) => resolveRuntimeTileValue(value, maps))
+    )
+    const collected = state.collectedTiles[floor.floorId] ?? []
+    this.tileMap.render(
+      runtimeMap,
+      runtimeBgMap,
+      runtimeFgMap,
+      floor.defaultGround || null,
+      collected,
+      getTileOpacities(floor.floorId, state)
+    )
     console.log('[GameScene] TileMapLayer done, rows:', floor.map.length)
 
-    const { state } = gameStore.getState()
-    this.heroSprite = new HeroSprite(this, state.position.x, state.position.y)
-    this.heroSprite.setDirection(state.direction)
+    const { state: latestState } = gameStore.getState()
+    this.heroSprite = new HeroSprite(this, latestState.position.x, latestState.position.y)
+    this.heroSprite.setDirection(latestState.direction)
     this.cameraSystem.follow(this.heroSprite.container as Phaser.GameObjects.GameObject)
     console.log('[GameScene] HeroSprite done')
 
-    // Trigger firstArrive events when entering a floor
-    if (floor.firstArrive && floor.firstArrive.length > 0) {
-      eventMachine.start(floor.firstArrive as Event[], {
+    // Trigger firstArrive only once; revisiting uses eachArrive.
+    const arrivalEvents = firstVisit ? floor.firstArrive : floor.eachArrive
+    if (arrivalEvents && arrivalEvents.length > 0) {
+      eventMachine.start(arrivalEvents as Event[], {
         floorId: floor.floorId,
-        x: state.position.x,
-        y: state.position.y,
+        x: latestState.position.x,
+        y: latestState.position.y,
         eventIndex: 0,
-        eventCount: floor.firstArrive.length,
+        eventCount: arrivalEvents.length,
       })
     }
+    this.runAutoEvents()
   }
 
   changeFloor(
@@ -359,9 +534,7 @@ export class GameScene extends Phaser.Scene {
     direction: 'up' | 'down' | 'left' | 'right'
   ) {
     this.cameraSystem.fadeOut(300).once('camerafadeoutcomplete', () => {
-      this.loadFloor(nextFloor)
-      this.heroSprite.setPosition(position.x, position.y)
-      this.heroSprite.setDirection(direction)
+      dispatch({ type: 'ENTER_FLOOR', floorId: nextFloor.floorId, position, direction })
       this.cameraSystem.fadeIn(300)
     })
   }

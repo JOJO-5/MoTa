@@ -46,6 +46,20 @@ export interface GameState {
   ui: UiSnapshot
   /** Tiles picked up / cleared per floor: floorId -> ["x,y", ...] */
   collectedTiles: Record<string, string[]>
+  /** Floors that have been entered, in first-visit order. */
+  visitedFloors: string[]
+  /** Runtime tile changes keyed by floor and coordinate; source JSON stays immutable. */
+  tileOverrides: Record<string, Record<string, TileOverride>>
+}
+
+export type RuntimeTileValue = number | string | null
+
+export interface TileOverride {
+  map?: RuntimeTileValue
+  bgmap?: RuntimeTileValue
+  fgmap?: RuntimeTileValue
+  hidden?: boolean
+  opacity?: number
 }
 
 export interface BattleSnapshot {
@@ -65,6 +79,10 @@ export type GameAction =
   | { type: 'SET_FLOOR'; floorId: string }
   | { type: 'SET_POSITION'; position: Position }
   | { type: 'SET_DIRECTION'; direction: Direction }
+  | { type: 'ENTER_FLOOR'; floorId: string; position?: Position; direction?: Direction }
+  | { type: 'MARK_FLOOR_VISITED'; floorId: string }
+  | { type: 'SET_TILE_OVERRIDE'; floorId: string; x: number; y: number; override: TileOverride }
+  | { type: 'CLEAR_TILE_OVERRIDE'; floorId: string; x: number; y: number }
   | { type: 'SET_FLAG'; name: string; value: unknown }
   | { type: 'SET_VALUE'; name: string; value: number }
   | { type: 'ADD_ITEM'; itemId: string }

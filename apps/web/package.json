@@ -9,18 +9,20 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@modern-mota/core": "workspace:*",
     "@modern-mota/data": "workspace:*",
+    "@modern-mota/persistence": "workspace:*",
     "@modern-mota/render": "workspace:*",
     "@modern-mota/ui": "workspace:*",
-    "@modern-mota/persistence": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.52.0",
     "@testing-library/jest-dom": "^6.4.0",
     "@testing-library/react": "^14.2.0",
     "@types/react": "^18.2.0",
