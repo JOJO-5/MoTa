@@ -1,9 +1,11 @@
 interface Props {
   onStart: () => void
+  onContinue: () => void
   onSettings: () => void
+  hasSave: boolean
 }
 
-export function MainMenu({ onStart, onSettings }: Props) {
+export function MainMenu({ onStart, onContinue, onSettings, hasSave }: Props) {
   const baseUrl =
     (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env?.BASE_URL ?? './'
 
@@ -34,7 +36,7 @@ export function MainMenu({ onStart, onSettings }: Props) {
             <span>开始攀登</span>
             <small>ENTER</small>
           </button>
-          <button className="menu-button" onClick={() => alert('存档功能即将接入')}>
+          <button className="menu-button" onClick={onContinue} disabled={!hasSave}>
             <span>继续游戏</span>
             <small>LOAD</small>
           </button>

@@ -23,7 +23,7 @@ export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
   private cameraSystem!: CameraSystem
   private heroSprite!: HeroSprite
-  private keyboardInput!: KeyboardInput
+  private keyboardInput: KeyboardInput | null = null
   private gameLoop: GameLoop | null = null
   private unsubscribers: (() => void)[] = []
   private currentFloor: Floor | null = null
@@ -105,6 +105,9 @@ export class GameScene extends Phaser.Scene {
 
     // Cleanup on scene shutdown
     this.events.once('shutdown', () => {
+      this.shutdown()
+    })
+    this.events.once('destroy', () => {
       this.shutdown()
     })
 
@@ -258,7 +261,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Trigger tile events (items, enemies, npcs)
-    this.triggerEventsAtPosition(pos.x, pos.y)
+    const handledByFloorEvent = this.triggerEventsAtPosition(pos.x, pos.y)
+    if (handledByFloorEvent) return
 
     // Step-on interactions: pick up items, fight enemies
     if (!towerData) return
@@ -281,8 +285,11 @@ export class GameScene extends Phaser.Scene {
 
     if (result) {
       dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
-      if (result.consumed && entry.cls === 'enemys') {
-        const afterBattle = this.currentFloor.afterBattle?.[`${pos.x},${pos.y}`]
+      if (result.consumed && result.kind === 'enemy') {
+        const afterBattle = [
+          ...(result.afterBattle ?? []),
+          ...(this.currentFloor.afterBattle?.[`${pos.x},${pos.y}`] ?? []),
+        ]
         if (afterBattle?.length) {
           eventMachine.start(afterBattle as Event[], {
             floorId: this.currentFloor.floorId,
@@ -433,22 +440,30 @@ export class GameScene extends Phaser.Scene {
     this.unsubscribers.forEach((unsub) => unsub())
     this.unsubscribers = []
     this.keyboardInput?.destroy()
+    this.keyboardInput = null
     this.gameLoop?.stop()
     this.gameLoop = null
+    if (typeof window !== 'undefined') {
+      const globals = window as unknown as Record<string, unknown>
+      if (globals.__gameScene === this) globals.__gameScene = undefined
+    }
   }
 
   private triggerEventsAtPosition(x: number, y: number): boolean {
     if (!this.currentFloor) return false
-    const tileEvents = (this.currentFloor.events as Record<string, Event[]> | undefined)?.[
-      `${x},${y}`
-    ]
-    if (!tileEvents || tileEvents.length === 0) return false
+    const tileEvents = (
+      this.currentFloor.events as
+        Record<string, Event[] | { data?: Event[]; enable?: boolean; trigger?: string }> | undefined
+    )?.[`${x},${y}`]
+    const events = Array.isArray(tileEvents) ? tileEvents : tileEvents?.data
+    const enabled = Array.isArray(tileEvents) || tileEvents?.enable !== false
+    if (!tileEvents || !enabled || !events || events.length === 0) return false
     eventMachine.start(tileEvents, {
       floorId: this.currentFloor.floorId,
       x,
       y,
       eventIndex: 0,
-      eventCount: tileEvents.length,
+      eventCount: events.length,
     })
     return true
   }

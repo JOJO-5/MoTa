@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { gameStore, dispatch, pickUpItem, battleEnemy, interactWithTile } from '../index.js'
+import {
+  gameStore,
+  dispatch,
+  eventMachine,
+  pickUpItem,
+  battleEnemy,
+  interactWithTile,
+} from '../index.js'
 import type { RawItem, RawEnemy } from './tile-interactions.js'
 
 const ITEMS: Record<string, RawItem> = {
@@ -15,15 +22,58 @@ const ENEMIES: Record<string, RawEnemy> = {
   greenSlime: { name: '绿色史莱姆', hp: 15, atk: 2, def: 0, money: 0, exp: 1 },
   wolf: { name: '恶狼', hp: 50, atk: 25, def: 0, money: 3, exp: 2 },
   dragon: { name: '巨龙', hp: 99999, atk: 999, def: 999, money: 0, exp: 0 },
+  poisonSlime: {
+    name: '毒史莱姆',
+    hp: 1,
+    atk: 0,
+    def: 0,
+    money: 7,
+    exp: 4,
+    special: [12],
+  },
+  curseSlime: {
+    name: '诅咒史莱姆',
+    hp: 1,
+    atk: 0,
+    def: 0,
+    money: 7,
+    exp: 4,
+    special: [14],
+  },
+  regenerator: {
+    name: '再生怪',
+    hp: 1,
+    atk: 0,
+    def: 0,
+    money: 0,
+    exp: 0,
+    special: [32],
+    afterBattle: [{ type: 'setBlock', number: 'secondForm' }],
+  },
 }
 
 const MAPS = {
   '21': { cls: 'items', id: 'yellowKey' },
   '201': { cls: 'enemys', id: 'greenSlime' },
+  '301': { cls: 'enemy48', id: 'greenSlime' },
+  '478': {
+    cls: 'animates',
+    id: 'IceNet',
+    script: 'core.status.hero.hp -= 50',
+  },
+  '495': {
+    cls: 'terrains',
+    id: 'T495',
+    event: [
+      { type: 'setValue', name: 'status:hp', operator: '+=', value: '4000' },
+      { type: 'hide', remove: true },
+    ],
+  },
 }
 
 describe('tile-interactions', () => {
   beforeEach(() => {
+    eventMachine.stop()
     dispatch({ type: 'RESET' })
   })
 
@@ -43,10 +93,9 @@ describe('tile-interactions', () => {
     expect(hero.hp).toBe(hpBefore)
   })
 
-  it('heals with potions without exceeding max HP', () => {
-    dispatch({ type: 'SET_HERO', hero: { hp: 10 } })
+  it('adds potion health beyond the display baseline like the source game', () => {
     pickUpItem('redPotion', ITEMS)
-    expect(gameStore.getState().state.hero.hp).toBe(35)
+    expect(gameStore.getState().state.hero.hp).toBe(1025)
   })
 
   it('equips weapons and shields', () => {
@@ -75,6 +124,28 @@ describe('tile-interactions', () => {
     expect(gameStore.getState().state.hero.hp).toBe(0)
   })
 
+  it('applies poison after a victorious poison battle', () => {
+    const result = battleEnemy('poisonSlime', ENEMIES)
+
+    expect(result?.consumed).toBe(true)
+    expect(gameStore.getState().state.flags.poison).toBe(true)
+  })
+
+  it('grants no money or experience after a victorious curse battle', () => {
+    const result = battleEnemy('curseSlime', ENEMIES)
+
+    expect(result?.consumed).toBe(true)
+    expect(gameStore.getState().state.flags.curse).toBe(true)
+    expect(gameStore.getState().state.hero.money).toBe(0)
+    expect(gameStore.getState().state.hero.exp).toBe(0)
+  })
+
+  it('returns enemy after-battle actions for the scene to execute', () => {
+    const result = battleEnemy('regenerator', ENEMIES)
+
+    expect(result?.afterBattle).toEqual([{ type: 'setBlock', number: 'secondForm' }])
+  })
+
   it('does not consume an enemy when neither side can damage the other', () => {
     const result = battleEnemy('purpleBowman', {
       ...ENEMIES,
@@ -90,6 +161,30 @@ describe('tile-interactions', () => {
     const result = interactWithTile('MT0', 7, 4, 201, MAPS, ITEMS, ENEMIES)
     expect(result?.consumed).toBe(true)
     expect(gameStore.getState().state.collectedTiles.MT0).toContain('7,4')
+  })
+
+  it('fights and clears 48px enemies with the same rules as normal enemies', () => {
+    const result = interactWithTile('JX1', 10, 3, 301, MAPS, ITEMS, ENEMIES)
+
+    expect(result?.consumed).toBe(true)
+    expect((result as { kind?: string })?.kind).toBe('enemy')
+    expect(gameStore.getState().state.hero.exp).toBe(1)
+    expect(gameStore.getState().state.collectedTiles.JX1).toContain('10,3')
+  })
+
+  it('runs embedded map events and lets them hide their own tile', () => {
+    const result = interactWithTile('JX2', 1, 4, 495, MAPS, ITEMS, ENEMIES)
+
+    expect(result?.consumed).toBe(true)
+    expect(gameStore.getState().state.hero.hp).toBe(5000)
+    expect(gameStore.getState().state.tileOverrides.JX2['1,4']).toMatchObject({ hidden: true })
+  })
+
+  it('applies scripted cold-water damage when the hero has no amulet', () => {
+    const result = interactWithTile('JX10', 7, 3, 478, MAPS, ITEMS, ENEMIES)
+
+    expect(result?.consumed).toBe(false)
+    expect(gameStore.getState().state.hero.hp).toBe(950)
   })
 
   it('increments a key and records its coordinate after pickup', () => {

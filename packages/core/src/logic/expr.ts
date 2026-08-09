@@ -139,6 +139,29 @@ export function evaluate(expression: string): number | boolean | string | null {
         }
         return null
       }
+      case 'CallExpression': {
+        const callee = node.callee as JsepNode
+        if (callee?.type !== 'MemberExpression') return null
+        const object = callee.object as JsepNode
+        const property = callee.property as JsepNode
+        if (object?.type !== 'Identifier' || object.name !== 'core') return null
+        const name = String(property?.name ?? '')
+        const args = Array.isArray(node.arguments)
+          ? (node.arguments as JsepNode[]).map((argument) => evalNode(argument))
+          : []
+        const itemId = String(args[0] ?? '')
+        if (name === 'hasEquip') {
+          return (
+            Object.values(State.hero.equipment).includes(itemId) ||
+            State.hero.items.includes(itemId) ||
+            Number(State.values[`item:${itemId}`]) > 0
+          )
+        }
+        if (name === 'hasItem') {
+          return State.hero.items.includes(itemId) || Number(State.values[`item:${itemId}`]) > 0
+        }
+        return null
+      }
       default:
         return null
     }

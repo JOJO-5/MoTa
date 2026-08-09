@@ -15,7 +15,7 @@ export type EventContext = {
 export type EventMachineState = 'idle' | 'running' | 'waiting' | 'done' | 'error'
 
 export interface EventMachine {
-  start(events: Event[], context: EventContext): void
+  start(events: Event[] | LegacyEventContainer, context: EventContext): void
   pause(): void
   resume(): void
   stop(): void
@@ -29,6 +29,12 @@ type LegacyEvent = {
   [key: string]: unknown
 }
 
+export type LegacyEventContainer = {
+  data?: Event[]
+  enable?: boolean
+  trigger?: string
+}
+
 type PendingChoice = {
   choices: Array<{ text: string; action: Event[] }>
   index: number
@@ -39,9 +45,24 @@ let currentContext: EventContext | null = null
 let generator: Generator<unknown, void, unknown> | null = null
 let pendingChoice: PendingChoice | null = null
 const queuedStarts: Array<{ events: Event[]; context: EventContext }> = []
+const LEGACY_KEY_IDS = new Set([
+  'yellowKey',
+  'blueKey',
+  'redKey',
+  'greenKey',
+  'steelKey',
+  'bigKey',
+  'specialKey',
+])
 
 function asLegacyEvent(event: Event): LegacyEvent | null {
   return typeof event === 'object' && event !== null ? (event as LegacyEvent) : null
+}
+
+function normalizeEventInput(events: Event[] | LegacyEventContainer): Event[] {
+  if (Array.isArray(events)) return events
+  if (events?.enable === false) return []
+  return Array.isArray(events?.data) ? events.data : []
 }
 
 function parseLegacyValue(raw: unknown): unknown {
@@ -62,7 +83,9 @@ function readLegacyValue(name: string): unknown {
     return State.hero[name.slice(7) as keyof HeroSnapshot] ?? 0
   }
   if (name.startsWith('item:')) {
-    return State.values[name] ?? (State.hero.items.includes(name.slice(5)) ? 1 : 0)
+    const itemId = name.slice(5)
+    if (LEGACY_KEY_IDS.has(itemId)) return State.hero.keys[itemId] ?? 0
+    return State.values[name] ?? (State.hero.items.includes(itemId) ? 1 : 0)
   }
   return State.values[name] ?? 0
 }
@@ -88,6 +111,21 @@ function writeLegacyValue(name: string, value: unknown) {
     const key = name.slice(7) as keyof HeroSnapshot
     if (['hp', 'hpMax', 'atk', 'def', 'mdef', 'money', 'exp', 'level'].includes(key)) {
       dispatch({ type: 'SET_HERO', hero: { [key]: Number(value) || 0 } })
+      return
+    }
+  }
+  if (name.startsWith('item:')) {
+    const itemId = name.slice(5)
+    if (LEGACY_KEY_IDS.has(itemId)) {
+      dispatch({
+        type: 'SET_HERO',
+        hero: {
+          keys: {
+            ...State.hero.keys,
+            [itemId]: Math.max(0, Number(value) || 0),
+          },
+        },
+      })
       return
     }
   }
@@ -131,6 +169,24 @@ function applyTileOverride(
 function formatChoices(text: string, choices: PendingChoice['choices'], index: number) {
   const title = text ? `${text}\n\n` : ''
   return `${title}${choices.map((choice, i) => `${i === index ? '▶' : ' '} ${i + 1}. ${choice.text}`).join('\n')}`
+}
+
+type LegacyShop = {
+  id: string
+  text?: string
+  choices?: Array<{ text?: string; need?: string; action?: Event[] }>
+}
+
+function renderLegacyText(raw: unknown): string {
+  return String(raw ?? '')
+    .replace(/^\t?\[[^\]]*\]/, '')
+    .replace(/\$\{([^}]+)\}/g, (_match, expression: string) => String(evaluate(expression) ?? 0))
+}
+
+function findLegacyShop(shopId: string): LegacyShop | null {
+  const towerData = (globalThis as Record<string, unknown>).__towerData as
+    { shops?: LegacyShop[] } | null | undefined
+  return towerData?.shops?.find((shop) => shop.id === shopId) ?? null
 }
 
 function* processEvents(events: Event[], context: EventContext): Generator<unknown, void, unknown> {
@@ -260,8 +316,29 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       case 'battle': {
         const enemy = State.enemys?.[String(raw.id ?? '')]
         if (enemy) {
-          startBattle(enemy)
+          const battle = startBattle(enemy)
           endBattle()
+          if (battle.outcome !== 'victory') {
+            dispatch({
+              type: 'SET_UI',
+              ui: {
+                floorMsg:
+                  battle.outcome === 'stalemate'
+                    ? `${enemy.name} 当前无法被有效攻击`
+                    : `你被 ${enemy.name} 击败了…`,
+              },
+            })
+            return
+          }
+          if (!State.flags.curse) {
+            dispatch({
+              type: 'SET_HERO',
+              hero: {
+                money: State.hero.money + enemy.money,
+                exp: State.hero.exp + enemy.exp,
+              },
+            })
+          }
         }
         break
       }
@@ -297,14 +374,44 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
         break
       }
       case 'win':
-      case 'lose':
-      case 'openShop': {
+      case 'lose': {
         dispatch({ type: 'SET_UI', ui: { modal: String(raw.reason ?? raw.id ?? '事件已触发') } })
         yield 'dialog'
         break
       }
+      case 'openShop': {
+        const shop = findLegacyShop(String(raw.id ?? ''))
+        if (!shop) {
+          dispatch({ type: 'SET_UI', ui: { floorMsg: `商店 ${String(raw.id ?? '')} 尚未配置` } })
+          break
+        }
+        const choices = (shop.choices ?? [])
+          .filter((choice) => !choice.need || Boolean(evaluate(choice.need)))
+          .map((choice) => ({
+            text: renderLegacyText(choice.text),
+            action: Array.isArray(choice.action) ? choice.action : [],
+          }))
+        if (choices.length === 0) {
+          dispatch({ type: 'SET_UI', ui: { floorMsg: '当前资源不足，无法购买' } })
+          break
+        }
+        yield* processEvents(
+          [
+            {
+              type: 'choices',
+              text: renderLegacyText(shop.text),
+              choices,
+            } as Event,
+          ],
+          context
+        )
+        break
+      }
       case 'exit': {
         return
+      }
+      case 'comment': {
+        break
       }
       case 'setBlock': {
         const value = blockValue(raw)
@@ -397,7 +504,6 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       case 'setText':
       case 'move':
       case 'input':
-      case 'comment':
       case 'function':
         console.warn(
           `[event-machine] legacy event ${raw.type} is deferred to the render bridge`,
@@ -413,11 +519,12 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
 
 export const eventMachine: EventMachine = {
   start(events, context) {
+    const normalized = normalizeEventInput(events)
     if (machineState === 'running' || machineState === 'waiting') {
-      queuedStarts.push({ events, context })
+      queuedStarts.push({ events: normalized, context })
       return
     }
-    startSequence(events, context)
+    startSequence(normalized, context)
   },
   pause() {
     if (machineState === 'running') {

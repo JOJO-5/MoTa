@@ -81,6 +81,48 @@ describe('startBattle', () => {
     expect(State.hero.hp).toBe(100)
     expect(State.battle?.enemyHp).toBe(1030)
   })
+
+  it('honors numeric magic attack, multi-hit, first-strike and dark specials', () => {
+    const fight = (special: number[]) => {
+      dispatch({ type: 'SET_HERO', hero: { hp: 100, atk: 20, def: 5, mdef: 0 } })
+      return startBattle({
+        ...mockEnemy,
+        id: `special-${special.join('-')}`,
+        hp: 20,
+        atk: 10,
+        def: 10,
+        special,
+      } as Enemy)
+    }
+
+    expect(fight([2]).heroHp).toBe(90)
+    expect(fight([4]).heroHp).toBe(90)
+    expect(fight([1]).heroHp).toBe(90)
+    expect(fight([31]).heroHp).toBe(85)
+  })
+
+  it('treats numeric solid defense as hero attack minus one', () => {
+    dispatch({ type: 'SET_HERO', hero: { hp: 100, atk: 20, def: 20 } })
+    const result = startBattle({
+      ...mockEnemy,
+      id: 'solid-enemy',
+      hp: 2,
+      atk: 10,
+      def: 0,
+      special: [3],
+    } as Enemy)
+
+    expect(result.outcome).toBe('victory')
+    expect(result.turns).toBe(2)
+  })
+
+  it('blocks mysterious enemies until the hero owns the cross', () => {
+    const mysterious = { ...mockEnemy, id: 'mysterious', hp: 1, def: 0, special: [20] } as Enemy
+
+    expect(startBattle(mysterious).outcome).toBe('stalemate')
+    dispatch({ type: 'ADD_ITEM', itemId: 'cross' })
+    expect(startBattle(mysterious).outcome).toBe('victory')
+  })
 })
 
 describe('endBattle', () => {

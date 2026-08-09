@@ -1,0 +1,651 @@
+[
+  {
+    "id": "shop1",
+    "text": "\t[自动售货机,A365]你好，这里是自动售货机，\n花费${20+flag:shop1}金币可以为您提升：",
+    "textInList": "主塔5F自动售货机",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "生命值200点",
+        "need": "status:money>=20+flag:shop1",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "20+flag:shop1"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop1",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:hp",
+            "operator": "+=",
+            "value": "200"
+          }
+        ]
+      },
+      {
+        "text": "攻击力3点",
+        "need": "status:money>=20+flag:shop1",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "20+flag:shop1"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop1",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:atk",
+            "operator": "+=",
+            "value": "3"
+          }
+        ]
+      },
+      {
+        "text": "防御力3点",
+        "need": "status:money>=20+flag:shop1",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "20+flag:shop1"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop1",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:def",
+            "operator": "+=",
+            "value": "3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pzfshop1",
+    "text": "\t[自动售货机,A365]你好，这里是自动售货机，\n花费${20+2*flag:shop1}金币可以买到：",
+    "textInList": "主塔5F道具售货机",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "破墙镐",
+        "need": "status:money>=20+2*flag:shop1",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "20+2*flag:shop1"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop1",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "item:pickaxe",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "爆裂卷轴",
+        "need": "status:money>=20+2*flag:shop1",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "20+2*flag:shop1"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop1",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "item:bomb",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "圆转飞行器",
+        "need": "status:money>=20+2*flag:shop1",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "20+2*flag:shop1"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop1",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "item:centerFly",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shop2",
+    "text": "\t[自动售货机,A365]你好，这里是自动售货机，\n花费${40+2*flag:shop2}金币可以为您提升：",
+    "textInList": "镜像21F自动售货机",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "生命值500点",
+        "need": "status:money>=40+2*flag:shop2",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "40+2*flag:shop2"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop2",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:hp",
+            "operator": "+=",
+            "value": "500"
+          }
+        ]
+      },
+      {
+        "text": "攻击力6点",
+        "need": "status:money>=40+2*flag:shop2",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "40+2*flag:shop2"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop2",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:atk",
+            "operator": "+=",
+            "value": "6"
+          }
+        ]
+      },
+      {
+        "text": "防御力6点",
+        "need": "status:money>=40+2*flag:shop2",
+        "action": [
+          {
+            "type": "comment",
+            "text": "新版商店中需要手动扣减金币和增加访问次数"
+          },
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "40+2*flag:shop2"
+          },
+          {
+            "type": "setValue",
+            "name": "flag:shop2",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:def",
+            "operator": "+=",
+            "value": "6"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "expshop1",
+    "text": "\t[经验交换机,A459]你好，这里是经验交换机，\n用一定数额的经验可以换取：",
+    "textInList": "主塔7F经验交换机",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "1个等级（70经验）",
+        "need": "status:exp>=70",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:exp",
+            "operator": "-=",
+            "value": "70"
+          },
+          {
+            "type": "setValue",
+            "name": "status:lv",
+            "operator": "+=",
+            "value": "1"
+          },
+          {
+            "type": "setValue",
+            "name": "status:hp",
+            "operator": "+=",
+            "value": "400"
+          },
+          {
+            "type": "setValue",
+            "name": "status:atk",
+            "operator": "+=",
+            "value": "3"
+          },
+          {
+            "type": "setValue",
+            "name": "status:def",
+            "operator": "+=",
+            "value": "3"
+          }
+        ]
+      },
+      {
+        "text": "2点攻击（25经验）",
+        "need": "status:exp>=25",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:exp",
+            "operator": "-=",
+            "value": "25"
+          },
+          {
+            "type": "setValue",
+            "name": "status:atk",
+            "operator": "+=",
+            "value": "2"
+          }
+        ]
+      },
+      {
+        "text": "2点防御（25经验）",
+        "need": "status:exp>=25",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:exp",
+            "operator": "-=",
+            "value": "25"
+          },
+          {
+            "type": "setValue",
+            "name": "status:def",
+            "operator": "+=",
+            "value": "2"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "expshop2",
+    "text": "\t[经验交换机,A459]你好，这里是经验交换机，\n用一定数额的经验可以换取：",
+    "textInList": "镜像17F经验交换机",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "3个等级（190经验）",
+        "need": "status:exp>=190",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:exp",
+            "operator": "-=",
+            "value": "190"
+          },
+          {
+            "type": "setValue",
+            "name": "status:lv",
+            "operator": "+=",
+            "value": "3"
+          },
+          {
+            "type": "setValue",
+            "name": "status:hp",
+            "operator": "+=",
+            "value": "1000"
+          },
+          {
+            "type": "setValue",
+            "name": "status:atk",
+            "operator": "+=",
+            "value": "10"
+          },
+          {
+            "type": "setValue",
+            "name": "status:def",
+            "operator": "+=",
+            "value": "10"
+          }
+        ]
+      },
+      {
+        "text": "5点攻击（50经验）",
+        "need": "status:exp>=50",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:exp",
+            "operator": "-=",
+            "value": "50"
+          },
+          {
+            "type": "setValue",
+            "name": "status:atk",
+            "operator": "+=",
+            "value": "5"
+          }
+        ]
+      },
+      {
+        "text": "5点防御（50经验）",
+        "need": "status:exp>=50",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:exp",
+            "operator": "-=",
+            "value": "50"
+          },
+          {
+            "type": "setValue",
+            "name": "status:def",
+            "operator": "+=",
+            "value": "5"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buykeyshop",
+    "text": "\t[自动交易商店,A460]你好，你想买入什么钥匙吗？",
+    "textInList": "镜像21F自动交易商店",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "黄铜钥匙（50金币）",
+        "need": "status:money>=50",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "50"
+          },
+          {
+            "type": "setValue",
+            "name": "item:yellowKey",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "水晶钥匙（200金币）",
+        "need": "status:money>=200",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "200"
+          },
+          {
+            "type": "setValue",
+            "name": "item:blueKey",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "珊瑚钥匙（1000金币）",
+        "need": "status:money>=1000",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "1000"
+          },
+          {
+            "type": "setValue",
+            "name": "item:redKey",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "salekeyshop",
+    "text": "\t[自动交易商店,A461]你好，你想卖出什么钥匙吗？",
+    "textInList": "镜像18F自动交易商店",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "黄铜钥匙（10金币）",
+        "need": "item:yellowKey>=1",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "+=",
+            "value": "10"
+          },
+          {
+            "type": "setValue",
+            "name": "item:yellowKey",
+            "operator": "-=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "水晶钥匙（40金币）",
+        "need": "item:blueKey>=1",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "+=",
+            "value": "40"
+          },
+          {
+            "type": "setValue",
+            "name": "item:blueKey",
+            "operator": "-=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "珊瑚钥匙（500金币）",
+        "need": "item:redKey>=1",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "+=",
+            "value": "500"
+          },
+          {
+            "type": "setValue",
+            "name": "item:redKey",
+            "operator": "-=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "青铜钥匙（1500金币）",
+        "need": "item:greenKey>=1",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "+=",
+            "value": "1500"
+          },
+          {
+            "type": "setValue",
+            "name": "item:greenKey",
+            "operator": "-=",
+            "value": "1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "witch",
+    "text": "\t[小魔女,N414]你好，需要我帮你调制什么药水？",
+    "textInList": "镜像25F小魔女",
+    "mustEnable": true,
+    "disablePreview": false,
+    "choices": [
+      {
+        "text": "火酒（200金币）",
+        "need": "status:money>=200",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "200"
+          },
+          {
+            "type": "setValue",
+            "name": "item:weakWine",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "抗毒剂（200金币）",
+        "need": "status:money>=200",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "200"
+          },
+          {
+            "type": "setValue",
+            "name": "item:poisonWine",
+            "operator": "+=",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "text": "特级元气水（1000金币）",
+        "need": "status:money>=1000",
+        "condition": "flag:pzf!=1",
+        "action": [
+          {
+            "type": "setValue",
+            "name": "status:money",
+            "operator": "-=",
+            "value": "1000"
+          },
+          {
+            "type": "setValue",
+            "name": "status:hp",
+            "operator": "+=",
+            "value": "8000"
+          }
+        ]
+      }
+    ]
+  }
+]

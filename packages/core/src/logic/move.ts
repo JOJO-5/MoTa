@@ -11,9 +11,20 @@ export type MapBlockInfo = {
 
 /** Blocking terrain ids that don't carry doorInfo in this project. */
 const BLOCKING_TERRAIN_IDS = new Set([
-  'sWallT', 'sWallL', 'sWallR', 'sWallB',
-  'sWallTL', 'sWallTR', 'sWallBL', 'sWallBR',
-  'sWallTB', 'sWallLR', 'sWallBLR', 'sWallTLR', 'sWallTBR', 'sWallTBL',
+  'sWallT',
+  'sWallL',
+  'sWallR',
+  'sWallB',
+  'sWallTL',
+  'sWallTR',
+  'sWallBL',
+  'sWallBR',
+  'sWallTB',
+  'sWallLR',
+  'sWallBLR',
+  'sWallTLR',
+  'sWallTBR',
+  'sWallTBL',
 ])
 
 /**
@@ -65,14 +76,23 @@ export function moveHero(
   floor: Pick<Floor, 'map' | 'cannotMove' | 'changeFloor'>,
   maps?: Record<string, MapBlockInfo> | null
 ): boolean {
+  if (State.hero.hp <= 0) return false
   const { position } = State
   const nextPos: Position = { ...position }
 
   switch (direction) {
-    case 'up': nextPos.y -= 1; break
-    case 'down': nextPos.y += 1; break
-    case 'left': nextPos.x -= 1; break
-    case 'right': nextPos.x += 1; break
+    case 'up':
+      nextPos.y -= 1
+      break
+    case 'down':
+      nextPos.y += 1
+      break
+    case 'left':
+      nextPos.x -= 1
+      break
+    case 'right':
+      nextPos.x += 1
+      break
   }
 
   const floorMap = floor.map
@@ -98,5 +118,8 @@ export function moveHero(
 
   dispatch({ type: 'SET_POSITION', position: nextPos })
   dispatch({ type: 'SET_DIRECTION', direction })
+  if (State.flags.poison) {
+    dispatch({ type: 'SET_HERO', hero: { hp: Math.max(0, State.hero.hp - 10) } })
+  }
   return true
 }

@@ -6,6 +6,7 @@ import type { Event } from '@modern-mota/data'
 describe('eventMachine', () => {
   beforeEach(() => {
     eventMachine.stop()
+    delete (globalThis as Record<string, unknown>).__towerData
     dispatch({ type: 'LOAD_STATE', state: createInitialState('MT0', 6, 6) })
   })
 
@@ -103,6 +104,19 @@ describe('eventMachine', () => {
     expect(State.values['item:oldKey']).toBe(1)
   })
 
+  it('routes legacy key item values to the door key counters', () => {
+    eventMachine.start(
+      [
+        { type: 'setValue', name: 'item:yellowKey', operator: '+=', value: '2' },
+        { type: 'setValue', name: 'item:yellowKey', operator: '-=', value: '1' },
+      ] as Event[],
+      { floorId: 'MT5', x: 2, y: 1, eventIndex: 0, eventCount: 2 }
+    )
+
+    expect(State.hero.keys.yellowKey).toBe(1)
+    expect(State.values['item:yellowKey']).toBeUndefined()
+  })
+
   it('runs a legacy choice branch selected by the mobile/keyboard action flow', () => {
     const events = [
       {
@@ -166,5 +180,114 @@ describe('eventMachine', () => {
     expect(State.tileOverrides.MT0['5,6']).toMatchObject({ hidden: false })
     expect(State.tileOverrides.MT0['7,8']).toMatchObject({ opacity: 0.4 })
     expect(State.tileOverrides.MT0['9,10']).toMatchObject({ map: 0 })
+  })
+
+  it('executes floor events wrapped in the original data container', () => {
+    eventMachine.start(
+      {
+        trigger: 'action',
+        enable: true,
+        data: [{ type: 'setFlag', name: 'wrappedEventRan', value: true }],
+      } as never,
+      { floorId: 'JX1', x: 3, y: 4, eventIndex: 0, eventCount: 1 }
+    )
+
+    expect(State.flags.wrappedEventRan).toBe(true)
+  })
+
+  it('stops scripted boss progression when the battle is not won', () => {
+    dispatch({
+      type: 'SET_ENEMYS',
+      enemys: {
+        boss: {
+          id: 'boss',
+          name: 'Boss',
+          hp: 9999,
+          atk: 999,
+          def: 999,
+          money: 10,
+          exp: 5,
+          special: [],
+          priority: 0,
+        },
+      },
+    })
+    eventMachine.start(
+      [
+        { type: 'battle', id: 'boss' },
+        { type: 'setFlag', name: 'bossDefeated', value: true },
+      ] as Event[],
+      { floorId: 'JX1', x: 7, y: 4, eventIndex: 0, eventCount: 2 }
+    )
+
+    expect(State.flags.bossDefeated).toBeUndefined()
+    expect(State.hero.hp).toBe(0)
+  })
+
+  it('awards scripted battle rewards before continuing the event', () => {
+    dispatch({
+      type: 'SET_ENEMYS',
+      enemys: {
+        boss: {
+          id: 'boss',
+          name: 'Boss',
+          hp: 1,
+          atk: 0,
+          def: 0,
+          money: 10,
+          exp: 5,
+          special: [],
+          priority: 0,
+        },
+      },
+    })
+    eventMachine.start(
+      [
+        { type: 'battle', id: 'boss' },
+        { type: 'setFlag', name: 'bossDefeated', value: true },
+      ] as Event[],
+      { floorId: 'JX1', x: 7, y: 4, eventIndex: 0, eventCount: 2 }
+    )
+
+    expect(State.flags.bossDefeated).toBe(true)
+    expect(State.hero.money).toBe(10)
+    expect(State.hero.exp).toBe(5)
+  })
+
+  it('opens a legacy shop and executes the selected affordable purchase', () => {
+    dispatch({ type: 'SET_HERO', hero: { money: 30 } })
+    ;(globalThis as Record<string, unknown>).__towerData = {
+      shops: [
+        {
+          id: 'shop1',
+          text: '花费${20+flag:shop1}金币提升能力：',
+          choices: [
+            {
+              text: '攻击力3点',
+              need: 'status:money>=20+flag:shop1',
+              action: [
+                { type: 'setValue', name: 'status:money', operator: '-=', value: '20+flag:shop1' },
+                { type: 'setValue', name: 'flag:shop1', operator: '+=', value: '1' },
+                { type: 'setValue', name: 'status:atk', operator: '+=', value: '3' },
+              ],
+            },
+          ],
+        },
+      ],
+    }
+
+    eventMachine.start([{ type: 'openShop', id: 'shop1', open: true }] as Event[], {
+      floorId: 'MT5',
+      x: 2,
+      y: 1,
+      eventIndex: 0,
+      eventCount: 1,
+    })
+
+    expect(State.ui.modal).toContain('花费20金币')
+    expect(State.ui.modal).toContain('攻击力3点')
+    eventMachine.resume()
+    expect(State.hero.money).toBe(10)
+    expect(State.hero.atk).toBe(13)
   })
 })

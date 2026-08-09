@@ -85,4 +85,13 @@ describe('expression evaluator', () => {
     dispatch({ type: 'SET_FLAG', name: 'hard', value: 2 })
     expect(evaluate('flag:hard===2')).toBe(true)
   })
+
+  it('supports legacy equipment checks used by the upgrade chain', () => {
+    dispatch({ type: 'SET_HERO', hero: { equipment: { weapon: 'sword1' } } })
+    expect(evaluate("core.hasEquip('sword1')")).toBe(true)
+    expect(evaluate("core.hasEquip('shield1')")).toBe(false)
+
+    dispatch({ type: 'SET_VALUE', name: 'item:shield1', value: 1 })
+    expect(evaluate("core.hasEquip('shield1')")).toBe(true)
+  })
 })

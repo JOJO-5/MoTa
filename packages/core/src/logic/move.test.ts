@@ -58,4 +58,18 @@ describe('moveHero', () => {
     expect(success).toBe(true)
     expect(State.position).toEqual({ x: 1, y: 0 })
   })
+
+  it('deducts poison damage after each successful step', () => {
+    dispatch({ type: 'SET_FLAG', name: 'poison', value: true })
+
+    expect(moveHero('up', floor, maps)).toBe(true)
+    expect(State.hero.hp).toBe(990)
+  })
+
+  it('does not let a defeated hero continue walking', () => {
+    dispatch({ type: 'SET_HERO', hero: { hp: 0 } })
+
+    expect(moveHero('up', floor, maps)).toBe(false)
+    expect(State.position).toEqual({ x: 1, y: 1 })
+  })
 })

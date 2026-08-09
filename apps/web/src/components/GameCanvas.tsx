@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
-import { createGame } from '@modern-mota/render'
-import type { Direction } from '@modern-mota/core'
+import { createGame, saveGame } from '@modern-mota/render'
+import { gameStore, type Direction } from '@modern-mota/core'
 
 interface Props {
   onBackToMenu: () => void
@@ -10,6 +10,7 @@ interface Props {
 export function GameCanvas({ onBackToMenu }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const gameRef = useRef<ReturnType<typeof createGame> | null>(null)
+  const [saveNotice, setSaveNotice] = useState<string | null>(null)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -23,7 +24,9 @@ export function GameCanvas({ onBackToMenu }: Props) {
   }, [])
 
   const moveFromTouch = (direction: Direction) => {
-    const scene = (window as unknown as { __gameScene?: { tryMove?: (direction: Direction) => void } }).__gameScene
+    const scene = (
+      window as unknown as { __gameScene?: { tryMove?: (direction: Direction) => void } }
+    ).__gameScene
     scene?.tryMove?.(direction)
   }
 
@@ -37,22 +40,72 @@ export function GameCanvas({ onBackToMenu }: Props) {
     event.stopPropagation()
   }
 
+  const saveCurrentGame = () => {
+    const saved = saveGame(0, gameStore.getState().state)
+    setSaveNotice(saved ? '已保存' : '保存失败')
+  }
+
   return (
     <div className="game-screen">
       <div className="game-container" ref={containerRef} />
       <div className="mobile-controls" aria-label="手机操作">
         <div className="mobile-dpad" aria-label="方向控制">
-          <button aria-label="向上移动" onPointerDown={(event) => { preventTouchScroll(event); moveFromTouch('up') }}>▲</button>
-          <button aria-label="向左移动" onPointerDown={(event) => { preventTouchScroll(event); moveFromTouch('left') }}>◀</button>
-          <button aria-label="向下移动" onPointerDown={(event) => { preventTouchScroll(event); moveFromTouch('down') }}>▼</button>
-          <button aria-label="向右移动" onPointerDown={(event) => { preventTouchScroll(event); moveFromTouch('right') }}>▶</button>
+          <button
+            aria-label="向上移动"
+            onPointerDown={(event) => {
+              preventTouchScroll(event)
+              moveFromTouch('up')
+            }}
+          >
+            ▲
+          </button>
+          <button
+            aria-label="向左移动"
+            onPointerDown={(event) => {
+              preventTouchScroll(event)
+              moveFromTouch('left')
+            }}
+          >
+            ◀
+          </button>
+          <button
+            aria-label="向下移动"
+            onPointerDown={(event) => {
+              preventTouchScroll(event)
+              moveFromTouch('down')
+            }}
+          >
+            ▼
+          </button>
+          <button
+            aria-label="向右移动"
+            onPointerDown={(event) => {
+              preventTouchScroll(event)
+              moveFromTouch('right')
+            }}
+          >
+            ▶
+          </button>
         </div>
-        <button className="mobile-action" aria-label="确认或继续" onPointerDown={(event) => { preventTouchScroll(event); actionFromTouch() }}>A</button>
+        <button
+          className="mobile-action"
+          aria-label="确认或继续"
+          onPointerDown={(event) => {
+            preventTouchScroll(event)
+            actionFromTouch()
+          }}
+        >
+          A
+        </button>
       </div>
       <div className="game-hud-top">
         <button className="back-btn" aria-label="返回主菜单" onClick={onBackToMenu}>
           ←
         </button>
+        <button className="save-btn" aria-label="保存游戏" onClick={saveCurrentGame}>
+          保存
+        </button>
+        {saveNotice && <span className="save-notice">{saveNotice}</span>}
       </div>
     </div>
   )

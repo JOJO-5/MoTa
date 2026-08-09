@@ -7,10 +7,10 @@ export class Hud {
   private keysEl: HTMLElement
   private itemsEl: HTMLElement
 
-  constructor() {
+  constructor(host: HTMLElement = document.body) {
     this.container = document.createElement('div')
     this.container.className = 'mota-hud'
-    document.body.appendChild(this.container)
+    host.appendChild(this.container)
 
     this.statsEl = document.createElement('div')
     this.statsEl.className = 'mota-hud__stats'

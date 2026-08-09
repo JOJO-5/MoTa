@@ -14,7 +14,7 @@ export class GameLoop {
 
   constructor(_scene: GameScene, container: HTMLElement) {
     this.uiLayer = new UiLayer(container)
-    this.hud = new Hud()
+    this.hud = new Hud(container)
     this.running = true
     this.tick()
   }

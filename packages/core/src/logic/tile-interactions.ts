@@ -1,5 +1,8 @@
 import { dispatch, State } from '../state/store.js'
 import { startBattle } from './battle.js'
+import { hasSpecial } from './battle-utils.js'
+import { eventMachine } from './event-machine.js'
+import type { Event } from '@modern-mota/data'
 
 /**
  * Raw item entry as exported from the original mota-js project (items.json).
@@ -29,12 +32,17 @@ export interface RawEnemy {
   money: number
   exp: number
   point?: number
-  special?: number | string[]
+  special?: number | Array<number | string>
+  beforeBattle?: Event[]
+  afterBattle?: Event[]
 }
 
 export interface RawMapEntry {
   cls?: string
   id?: string
+  name?: string
+  event?: Event[]
+  script?: string
 }
 
 /** Gem values copied from the original project's data.js `values` table. */
@@ -60,6 +68,8 @@ export interface TileInteractionResult {
   message: string
   /** Whether the tile should be cleared from the map. */
   consumed: boolean
+  kind?: 'item' | 'enemy' | 'map-event'
+  afterBattle?: Event[]
 }
 
 /** Resolve and apply one map tile interaction, including its collection state. */
@@ -77,18 +87,73 @@ export function interactWithTile(
   const entry = maps?.[String(tileId)]
   if (!entry?.id) return null
 
-  const result =
-    entry.cls === 'items'
-      ? pickUpItem(entry.id, itemsData)
-      : entry.cls === 'enemys'
-        ? battleEnemy(entry.id, enemysData)
-        : null
+  let result: TileInteractionResult | null
+  if (entry.cls === 'items') {
+    const pickedUp = pickUpItem(entry.id, itemsData)
+    result = pickedUp ? { ...pickedUp, kind: 'item' } : null
+  } else if (entry.cls === 'enemys' || entry.cls === 'enemy48') {
+    const battle = battleEnemy(entry.id, enemysData)
+    result = battle ? { ...battle, kind: 'enemy' } : null
+  } else {
+    result = interactWithEmbeddedMapEvent(floorId, x, y, entry)
+  }
 
   if (result?.consumed) {
     dispatch({ type: 'COLLECT_TILE', floorId, x, y })
   }
 
   return result
+}
+
+function hasItem(itemId: string): boolean {
+  return State.hero.items.includes(itemId) || Number(State.values[`item:${itemId}`]) > 0
+}
+
+function interactWithEmbeddedMapEvent(
+  floorId: string,
+  x: number,
+  y: number,
+  entry: RawMapEntry
+): TileInteractionResult | null {
+  if (Array.isArray(entry.event) && entry.event.length > 0) {
+    eventMachine.start(entry.event, {
+      floorId,
+      x,
+      y,
+      eventIndex: 0,
+      eventCount: entry.event.length,
+    })
+    const consumed = entry.event.some(
+      (event) =>
+        typeof event === 'object' &&
+        event !== null &&
+        (event as { type?: string; remove?: boolean }).type === 'hide' &&
+        (event as { remove?: boolean }).remove !== false
+    )
+    return { message: entry.name ?? entry.id ?? '', consumed, kind: 'map-event' }
+  }
+
+  if (!entry.script || !entry.id) return null
+  if (entry.id === 'lavaNet') {
+    dispatch({ type: 'SET_HERO', hero: { hp: Math.max(0, State.hero.hp - 50) } })
+    return { message: '经过熔岩，受到伤害50点', consumed: false, kind: 'map-event' }
+  }
+  if (entry.id === 'IceNet') {
+    if (!hasItem('amulet')) {
+      dispatch({ type: 'SET_HERO', hero: { hp: Math.max(0, State.hero.hp - 50) } })
+      return { message: '经过过冷水，受到伤害50点', consumed: false, kind: 'map-event' }
+    }
+    return { message: '护身符抵消了过冷水', consumed: false, kind: 'map-event' }
+  }
+  if (entry.id === 'poisonNet' || entry.id === 'weakNet' || entry.id === 'curseNet') {
+    if (!hasItem('amulet')) {
+      const debuff = entry.id.replace('Net', '')
+      dispatch({ type: 'SET_FLAG', name: debuff, value: true })
+      return { message: `陷入${entry.name ?? debuff}状态`, consumed: false, kind: 'map-event' }
+    }
+    return { message: '护身符抵消了异常状态', consumed: false, kind: 'map-event' }
+  }
+  return null
 }
 
 /**
@@ -126,7 +191,7 @@ export function pickUpItem(
 
   const potionHp = POTION_VALUES[itemId]
   if (potionHp !== undefined) {
-    dispatch({ type: 'SET_HERO', hero: { hp: Math.min(hero.hpMax, hero.hp + potionHp) } })
+    dispatch({ type: 'SET_HERO', hero: { hp: hero.hp + potionHp } })
     return { message: `获得${name}（回复 ${potionHp} HP）`, consumed: true }
   }
 
@@ -173,9 +238,39 @@ export function battleEnemy(
     return { message: `你被 ${name} 击败了…`, consumed: false }
   }
 
-  dispatch({
-    type: 'SET_HERO',
-    hero: { money: hero.money + enemy.money, exp: hero.exp + enemy.exp },
-  })
-  return { message: `击败${name}（💰+${enemy.money} ⭐+${enemy.exp}）`, consumed: true }
+  if (hasSpecial(enemy as never, 12)) {
+    dispatch({ type: 'SET_FLAG', name: 'poison', value: true })
+  }
+  if (hasSpecial(enemy as never, 13) && !State.flags.weak) {
+    const atkLoss = Math.max(1, Math.floor(State.hero.atk * 0.1))
+    const defLoss = Math.max(1, Math.floor(State.hero.def * 0.1))
+    dispatch({ type: 'SET_FLAG', name: 'weak', value: true })
+    dispatch({ type: 'SET_VALUE', name: '__weakAtkLoss', value: atkLoss })
+    dispatch({ type: 'SET_VALUE', name: '__weakDefLoss', value: defLoss })
+    dispatch({
+      type: 'SET_HERO',
+      hero: {
+        atk: Math.max(0, State.hero.atk - atkLoss),
+        def: Math.max(0, State.hero.def - defLoss),
+      },
+    })
+  }
+  if (hasSpecial(enemy as never, 14)) {
+    dispatch({ type: 'SET_FLAG', name: 'curse', value: true })
+  }
+  if (hasSpecial(enemy as never, 19) || hasSpecial(enemy as never, 29)) {
+    dispatch({ type: 'SET_HERO', hero: { hp: 0 } })
+  }
+
+  if (!State.flags.curse) {
+    dispatch({
+      type: 'SET_HERO',
+      hero: { money: State.hero.money + enemy.money, exp: State.hero.exp + enemy.exp },
+    })
+  }
+  return {
+    message: `击败${name}（💰+${State.flags.curse ? 0 : enemy.money} ⭐+${State.flags.curse ? 0 : enemy.exp}）`,
+    consumed: true,
+    afterBattle: enemy.afterBattle,
+  }
 }
