@@ -3,6 +3,7 @@ import { formatKeyCounts } from './keys.js'
 
 export class UiLayer {
   private container: HTMLElement
+  private topRail: HTMLElement
   private hpBar: HTMLElement
   private floorNameEl: HTMLElement
   private msgBox: HTMLElement
@@ -14,6 +15,10 @@ export class UiLayer {
     this.container = document.createElement('div')
     this.container.className = 'mota-ui-layer'
     container.appendChild(this.container)
+
+    this.topRail = document.createElement('div')
+    this.topRail.className = 'mota-ui-top-rail'
+    this.container.appendChild(this.topRail)
 
     this.hpBar = this.createHpBar()
     this.floorNameEl = this.createFloorName()
@@ -29,7 +34,7 @@ export class UiLayer {
       <div class="mota-hp-fill"></div>
       <div class="mota-hp-text">1000/1000</div>
     `
-    this.container.appendChild(hpBar)
+    this.topRail.appendChild(hpBar)
     return hpBar
   }
 
@@ -37,7 +42,7 @@ export class UiLayer {
     const el = document.createElement('div')
     el.className = 'mota-floor-name'
     el.textContent = '第 1 层'
-    this.container.appendChild(el)
+    this.topRail.appendChild(el)
     return el
   }
 

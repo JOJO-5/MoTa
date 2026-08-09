@@ -22,10 +22,13 @@ export class HeroSprite {
     this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
     this.direction = 'down'
 
+    const beacon = scene.add
+      .rectangle(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE - 3, TILE_SIZE - 3, 0x22d3ee, 0.16)
+      .setStrokeStyle(2, 0x8af6ff, 1)
     const shadow = scene.add
       .ellipse(TILE_SIZE / 2, TILE_SIZE - 4, 23, 8, 0x02050a, 0.78)
       .setStrokeStyle(1, 0x35e4ff, 0.75)
-    this.container.add(shadow)
+    this.container.add([beacon, shadow])
 
     if (scene.textures.exists('modern-hero')) {
       this.sprite = scene.add
@@ -46,6 +49,28 @@ export class HeroSprite {
       this.sprite = scene.add.image(0, -8, 'hero', initialFrame).setOrigin(0, 0)
     }
     this.container.add(this.sprite)
+
+    const playerLabel = scene.add
+      .text(TILE_SIZE / 2, -20, '你', {
+        color: '#07111f',
+        backgroundColor: '#8af6ff',
+        fontFamily: '"Microsoft YaHei", sans-serif',
+        fontSize: '9px',
+        fontStyle: 'bold',
+        padding: { x: 4, y: 1 },
+      })
+      .setOrigin(0.5, 1)
+    this.container.add(playerLabel)
+
+    scene.tweens.add({
+      targets: beacon,
+      alpha: 0.42,
+      scale: 1.06,
+      duration: 680,
+      ease: 'Sine.InOut',
+      yoyo: true,
+      repeat: -1,
+    })
 
     scene.tweens.add({
       targets: shadow,
