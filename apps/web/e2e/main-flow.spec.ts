@@ -6,7 +6,7 @@ type Step = { direction: Direction; x: number; y: number }
 async function startGame(page: Page) {
   await page.goto('/')
   await page.locator('.menu-button--primary').click()
-  await expect(page.locator('canvas')).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForFunction(() =>
     Boolean((window as unknown as { __gameScene?: unknown }).__gameScene)
   )
@@ -137,6 +137,14 @@ async function routeToFloor(page: Page, targetFloorId: string): Promise<Step[]> 
         const x = node.x + step.dx
         const y = node.y + step.dy
         const key = `${x},${y}`
+        if (
+          startsOnStair &&
+          x === current.position.x &&
+          y === current.position.y &&
+          node.path.length > 0
+        ) {
+          return [...node.path, { direction: step.direction, x, y }]
+        }
         if (seen.has(key) || !canEnter(x, y)) continue
         seen.add(key)
         queue.push({ x, y, path: [...node.path, { direction: step.direction, x, y }] })
