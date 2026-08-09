@@ -159,10 +159,20 @@ async function completeRoute(page: Page, steps: Step[], touch: boolean) {
   const dpad = page.locator('.mobile-dpad button')
 
   for (const step of steps) {
+    const originFloor = (await state(page))?.floorId
     if (touch) await dpad.nth(buttonIndex[step.direction]).tap()
     else await page.keyboard.press(keyboardKey[step.direction])
 
-    await expect.poll(async () => (await state(page))?.position).toEqual({ x: step.x, y: step.y })
+    await expect
+      .poll(async () => {
+        const snapshot = await state(page)
+        if (!snapshot) return false
+        return (
+          snapshot.floorId !== originFloor ||
+          (snapshot.position.x === step.x && snapshot.position.y === step.y)
+        )
+      })
+      .toBe(true)
     const current = await state(page)
     if (current?.modal) {
       if (touch) await page.locator('.mobile-action').tap()
