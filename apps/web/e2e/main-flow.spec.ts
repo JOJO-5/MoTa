@@ -216,9 +216,11 @@ test('desktop keyboard can enter MT1 and return to MT0 with one atomic landing s
   await expect.poll(async () => (await state(page))?.visitedFloors).toEqual(['MT0', 'MT1'])
 })
 
-test('desktop enters MT2 on its declared stair and keeps the sage visible after talking', async ({
-  page,
-}) => {
+test('desktop enters MT2 on its declared stair', async ({ page }, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'desktop-chromium',
+    'This scenario requires the desktop project'
+  )
   await startGame(page)
   const toMt1 = await routeToFloor(page, 'MT1')
   await completeRoute(page, toMt1, false)
@@ -226,15 +228,21 @@ test('desktop enters MT2 on its declared stair and keeps the sage visible after 
   await completeRoute(page, toMt2, false)
   await expect.poll(async () => (await state(page))?.floorId).toBe('MT2')
   await expect.poll(async () => (await state(page))?.position).toEqual({ x: 13, y: 13 })
+})
 
+test('desktop keeps the sage visible after the first conversation', async ({ page }, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'desktop-chromium',
+    'This scenario requires the desktop project'
+  )
+  await startGame(page)
   await page.evaluate(() => {
     const win = window as unknown as {
       __gameStore: { getState: () => { dispatch: (action: unknown) => void } }
       __gameScene: { tryMove: (direction: 'up' | 'down' | 'left' | 'right') => void }
     }
     win.__gameStore.getState().dispatch({
-      type: 'ENTER_FLOOR',
-      floorId: 'MT0',
+      type: 'SET_POSITION',
       position: { x: 13, y: 4 },
     })
     win.__gameScene.tryMove('up')
