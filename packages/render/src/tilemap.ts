@@ -75,6 +75,28 @@ export class TileMapLayer {
       }
     }
 
+    // Paint all blocking map cells from one continuous generated wall texture.
+    // This keeps adjacent walls visually connected instead of rendering every
+    // collision cell as an isolated UI-like card.
+    if (this.scene.textures.exists('modern-wall-texture')) {
+      const maskShape = this.scene.make.graphics({}, false)
+      maskShape.fillStyle(0xffffff, 1)
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          if ((map[y]?.[x] ?? 0) !== 0) {
+            maskShape.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+          }
+        }
+      }
+      const wallTexture = this.scene.add
+        .tileSprite(0, 0, cols * TILE_SIZE, rows * TILE_SIZE, 'modern-wall-texture')
+        .setOrigin(0, 0)
+        .setAlpha(0.98)
+        .setDepth(0)
+      wallTexture.setMask(new Phaser.Display.Masks.GeometryMask(this.scene, maskShape))
+      this.sprites.push(maskShape, wallTexture)
+    }
+
     // Pass 2: background layer overrides (only non-zero entries)
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
@@ -122,7 +144,11 @@ export class TileMapLayer {
   }
 
   private drawTile(tileId: number, px: number, py: number, opacity = 1) {
-    const modern = drawModernTile(this.scene, resolveModernTileKind(tileId, this.mapsData), px, py, opacity)
+    const kind = resolveModernTileKind(tileId, this.mapsData)
+    // The generated wall texture above owns wall presentation. Keep this
+    // fallback for scenes/tests that do not load the asset bundle.
+    if (kind.kind === 'wall' && this.scene.textures.exists('modern-wall-texture')) return
+    const modern = drawModernTile(this.scene, kind, px, py, opacity)
     modern.setDepth(1)
     this.sprites.push(modern)
   }

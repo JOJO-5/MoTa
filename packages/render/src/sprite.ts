@@ -3,7 +3,15 @@ import { TILE_SIZE } from './constants.js'
 import { HERO_FRAMES, HERO_COLS, ICONS } from './icons.js'
 import type { Direction } from '@modern-mota/core'
 
-const MODERN_HERO_CROP = { x: 306, y: 206, width: 714, height: 794 }
+// Tight alpha bounds of modern-hero-v2.png. The source is a single portrait,
+// not a sprite sheet; keeping the crop tight prevents the character becoming
+// a tiny cyan shape inside a large transparent canvas on mobile.
+const MODERN_HERO_CROP = { x: 237, y: 196, width: 602, height: 1103 }
+const MODERN_HERO_SIZE = { width: 28, height: 52 }
+const MODERN_HERO_SCALE = {
+  x: MODERN_HERO_SIZE.width / MODERN_HERO_CROP.width,
+  y: MODERN_HERO_SIZE.height / MODERN_HERO_CROP.height,
+}
 
 export class HeroSprite {
   public container: Phaser.GameObjects.Container
@@ -24,7 +32,7 @@ export class HeroSprite {
           MODERN_HERO_CROP.width,
           MODERN_HERO_CROP.height
         )
-        .setDisplaySize(44, 49)
+        .setScale(MODERN_HERO_SCALE.x, MODERN_HERO_SCALE.y)
     } else {
       // Keep a safe fallback for standalone scene tests that do not preload
       // the modern asset bundle.
@@ -37,7 +45,10 @@ export class HeroSprite {
   setDirection(direction: Direction) {
     this.direction = direction
     if (this.sprite.texture.key === 'modern-hero') {
-      this.sprite.setScale(direction === 'left' ? -1 : 1, 1)
+      this.sprite.setScale(
+        direction === 'left' ? -MODERN_HERO_SCALE.x : MODERN_HERO_SCALE.x,
+        MODERN_HERO_SCALE.y
+      )
       return
     }
     const dirData = HERO_FRAMES[direction]

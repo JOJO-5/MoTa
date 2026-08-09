@@ -212,6 +212,8 @@ export function drawModernTile(
     return graphics
   }
 
-  drawRune(graphics, px, py, 0x67e8f9)
+  // Unknown legacy-only decoration should fall back to the generated floor.
+  // Drawing a bright rune here made old background tiles look like cyan
+  // crosses and obscured the actual player on mobile screens.
   return graphics
 }

@@ -48,10 +48,11 @@ export class BootScene extends Phaser.Scene {
     // Load ground texture for background
     this.load.image('ground', `${CONTENT_BASE}/materials/ground.png`)
 
-    // Modern gameplay skin. The floor and hero are generated pixel assets;
+    // Modern gameplay skin. The floor, wall and hero are generated pixel assets;
     // legacy data IDs continue to drive collisions, events and progression.
-    this.load.image('modern-floor-texture', `${CONTENT_BASE}/materials/modern-floor-texture-v1.png`)
-    this.load.image('modern-hero', `${CONTENT_BASE}/materials/modern-hero-v1.png`)
+    this.load.image('modern-floor-texture', `${CONTENT_BASE}/materials/modern-floor-texture-v2.png`)
+    this.load.image('modern-wall-texture', `${CONTENT_BASE}/materials/modern-wall-texture-v2.png`)
+    this.load.image('modern-hero', `${CONTENT_BASE}/materials/modern-hero-v2.png`)
 
     // Generate a 1x1 white pixel texture for fallback
     const g = this.make.graphics({ x: 0, y: 0 })
