@@ -15,12 +15,27 @@ export type ExpressionContext = {
   values: Record<string, number>
   items: Record<string, number>
   status: Record<string, unknown>
+  core: {
+    status: Record<string, unknown>
+  }
 }
 
 export function getContext(): ExpressionContext {
   const { hero, flags, values } = State
   const items: Record<string, number> = {}
   for (const itemId of hero.items) items[itemId] = 1
+  // The original mota-js keeps the selected difficulty in core.status.hard,
+  // while the exported 2014 events use numeric flag:hard for map branches.
+  // The web entry currently starts directly in the tower without a difficulty
+  // picker, so keep the legacy high-tier NPC entry available by default.
+  const hardFlag = flags.hard ?? values.hard
+  const hard = hardFlag === 1 || hardFlag === 'Starter'
+    ? 'Starter'
+    : hardFlag === 2 || hardFlag === 'Basic'
+      ? 'Basic'
+      : hardFlag === 3 || hardFlag === 'Premium' || hardFlag === undefined
+        ? 'Premium'
+        : hardFlag
   return {
     hero: {
       hp: hero.hp,
@@ -35,6 +50,7 @@ export function getContext(): ExpressionContext {
     values,
     items,
     status: { ...hero },
+    core: { status: { hard } },
   }
 }
 
@@ -76,6 +92,7 @@ export function evaluate(expression: string): number | boolean | string | null {
         if (name === 'flags') return ctx.flags
         if (name === 'items') return ctx.items
         if (name === 'status') return ctx.status
+        if (name === 'core') return ctx.core
         if (name in ctx.flags) return ctx.flags[name]
         if (name in ctx.values) return ctx.values[name]
         return null
@@ -86,12 +103,12 @@ export function evaluate(expression: string): number | boolean | string | null {
         const op = node.operator as string
         if (op === '&&') return Boolean(left) && Boolean(right)
         if (op === '||') return Boolean(left) || Boolean(right)
+        if (op === '==') return left === right
+        if (op === '!=') return left !== right
         if (typeof left === 'string' || typeof right === 'string') {
           if (op === '+') return String(left) + String(right)
           return null
         }
-        if (op === '==') return left === right
-        if (op === '!=') return left !== right
         if (op === '<') return (left as number) < (right as number)
         if (op === '<=') return (left as number) <= (right as number)
         if (op === '>') return (left as number) > (right as number)

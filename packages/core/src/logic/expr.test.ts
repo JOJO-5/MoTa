@@ -71,4 +71,11 @@ describe('expression evaluator', () => {
     expect(evaluate('hero.atk')).toBe(20)
     expect(evaluate('hero.mdef')).toBe(5)
   })
+
+  it('supports legacy core.status.hard conditions', () => {
+    expect(evaluate("core.status.hard == 'Premium'")).toBe(true)
+    dispatch({ type: 'SET_FLAG', name: 'hard', value: 2 })
+    expect(evaluate("core.status.hard == 'Basic'")).toBe(true)
+    expect(evaluate("core.status.hard == 'Premium'")).toBe(false)
+  })
 })

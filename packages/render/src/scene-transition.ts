@@ -71,10 +71,8 @@ export class GameScene extends Phaser.Scene {
         this.tryMove(direction)
       },
       () => {
-        // Advance modal dialogs (original mota-js style: press to continue)
-        if (eventMachine.getState() === 'waiting') {
-          eventMachine.resume()
-        }
+        // Advance dialogs or interact with the tile directly in front of hero.
+        this.tryAction()
       }
     )
 
@@ -119,7 +117,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   tryAction() {
-    if (eventMachine.getState() === 'waiting') eventMachine.resume()
+    if (eventMachine.getState() === 'waiting') {
+      eventMachine.resume()
+      return
+    }
+    if (gameStore.getState().state.ui.modal) return
+    this.triggerEventsAtFacing()
+  }
+
+  /** Trigger the legacy event attached to the tile directly in front of hero. */
+  private triggerEventsAtFacing() {
+    const { state } = gameStore.getState()
+    const target = { ...state.position }
+    if (state.direction === 'up') target.y--
+    if (state.direction === 'down') target.y++
+    if (state.direction === 'left') target.x--
+    if (state.direction === 'right') target.x++
+    this.triggerEventsAtPosition(target.x, target.y)
   }
 
   /** Open legacy mota-js doors when the player taps into them. */
@@ -196,16 +210,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Trigger tile events (items, enemies, npcs)
-    const tileEvents = (this.currentFloor.events as Record<string, Event[]> | undefined)?.[key]
-    if (tileEvents && tileEvents.length > 0) {
-      eventMachine.start(tileEvents, {
-        floorId: this.currentFloor.floorId,
-        x: pos.x,
-        y: pos.y,
-        eventIndex: 0,
-        eventCount: tileEvents.length,
-      })
-    }
+    this.triggerEventsAtPosition(pos.x, pos.y)
 
     // Step-on interactions: pick up items, fight enemies
     if (!towerData) return
@@ -298,6 +303,20 @@ export class GameScene extends Phaser.Scene {
     this.keyboardInput?.destroy()
     this.gameLoop?.stop()
     this.gameLoop = null
+  }
+
+  private triggerEventsAtPosition(x: number, y: number): boolean {
+    if (!this.currentFloor) return false
+    const tileEvents = (this.currentFloor.events as Record<string, Event[]> | undefined)?.[`${x},${y}`]
+    if (!tileEvents || tileEvents.length === 0) return false
+    eventMachine.start(tileEvents, {
+      floorId: this.currentFloor.floorId,
+      x,
+      y,
+      eventIndex: 0,
+      eventCount: tileEvents.length,
+    })
+    return true
   }
 
   loadFloor(floor: Floor) {
