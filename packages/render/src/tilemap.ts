@@ -30,7 +30,7 @@ const BLANK_FRAME_CACHE = new Map<number, boolean>()
 
 export class TileMapLayer {
   private scene: Phaser.Scene
-  private sprites: Phaser.GameObjects.Image[] = []
+  private sprites: Phaser.GameObjects.GameObject[] = []
   private mapsData: MapsData
 
   constructor(scene: Phaser.Scene) {
@@ -44,7 +44,8 @@ export class TileMapLayer {
     fgmap: number[][] | null,
     defaultGround: string | null = null,
     collectedTiles: string[] = [],
-    opacities: Record<string, number> = {}
+    opacities: Record<string, number> = {},
+    stairPoints: Array<[number, number]> = []
   ) {
     this.destroy()
 
@@ -94,6 +95,21 @@ export class TileMapLayer {
         if (fgId !== 0)
           this.drawTile(fgId, x * TILE_SIZE, y * TILE_SIZE, opacities[`${x},${y}`] ?? 1)
       }
+    }
+
+    // Legacy maps often use a subtle stair sprite. Keep the original art but
+    // add a crisp gold frame so the next-floor entrance is discoverable on a
+    // phone-sized canvas.
+    for (const [x, y] of stairPoints) {
+      const marker = this.scene.add.graphics()
+      const px = x * TILE_SIZE
+      const py = y * TILE_SIZE
+      marker.lineStyle(2, 0xffd166, 0.95)
+      marker.strokeRoundedRect(px + 3, py + 3, TILE_SIZE - 6, TILE_SIZE - 6, 5)
+      marker.fillStyle(0xffd166, 0.9)
+      marker.fillTriangle(px + 16, py + 7, px + 8, py + 17, px + 24, py + 17)
+      marker.setDepth(2)
+      this.sprites.push(marker)
     }
   }
 

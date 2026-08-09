@@ -17,6 +17,7 @@ import {
   evaluate,
 } from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
+import { getStairPoints, resolveStairLanding } from './floor-transition.js'
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
@@ -332,21 +333,10 @@ export class GameScene extends Phaser.Scene {
       return { floorId: nextFloorId, loc: [loc[0] as number, loc[1] as number] }
     }
 
-    // No loc: land on the complementary stair tile of the target floor.
-    // upFloor stairs (87) lead to a downFloor (88) landing and vice versa.
-    const stair = changeFloor.stair as string | undefined
-    const targetTile = stair === 'upFloor' ? 88 : stair === 'downFloor' ? 87 : null
     const target = towerData.floors[nextFloorId]
-    for (let y = 0; y < target.map.length; y++) {
-      for (let x = 0; x < (target.map[0]?.length ?? 0); x++) {
-        if (
-          targetTile !== null
-            ? target.map[y][x] === targetTile
-            : target.map[y][x] === 87 || target.map[y][x] === 88
-        ) {
-          return { floorId: nextFloorId, loc: [x, y] }
-        }
-      }
+    const landing = resolveStairLanding(target, changeFloor.stair as string | undefined, target.map)
+    if (landing) {
+      return { floorId: nextFloorId, loc: landing }
     }
     // Fallback: keep current position
     return { floorId: nextFloorId }
@@ -382,7 +372,8 @@ export class GameScene extends Phaser.Scene {
       runtimeFgMap,
       this.currentFloor.defaultGround || null,
       collected,
-      getTileOpacities(this.currentFloor.floorId, state)
+      getTileOpacities(this.currentFloor.floorId, state),
+      getStairPoints(this.currentFloor.changeFloor as Record<string, unknown> | undefined)
     )
     // Keep hero above freshly added tiles
     this.heroSprite?.container.setDepth(10)
@@ -504,7 +495,8 @@ export class GameScene extends Phaser.Scene {
       runtimeFgMap,
       floor.defaultGround || null,
       collected,
-      getTileOpacities(floor.floorId, state)
+      getTileOpacities(floor.floorId, state),
+      getStairPoints(floor.changeFloor as Record<string, unknown> | undefined)
     )
     console.log('[GameScene] TileMapLayer done, rows:', floor.map.length)
 

@@ -187,8 +187,10 @@ async function completeRoute(page: Page, steps: Step[], touch: boolean) {
       .toBe(true)
     const current = await state(page)
     if (current?.modal) {
-      if (touch) await page.locator('.mobile-action').tap()
-      else await page.keyboard.press('Enter')
+      for (let i = 0; i < 20 && (await state(page))?.modal; i++) {
+        if (touch) await page.locator('.mobile-action').tap()
+        else await page.keyboard.press('Enter')
+      }
       await expect.poll(async () => (await state(page))?.modal).toBeNull()
     }
   }
@@ -212,6 +214,46 @@ test('desktop keyboard can enter MT1 and return to MT0 with one atomic landing s
   await expect.poll(async () => (await state(page))?.floorId).toBe('MT0')
   await expect.poll(async () => (await state(page))?.position).toEqual({ x: 7, y: 2 })
   await expect.poll(async () => (await state(page))?.visitedFloors).toEqual(['MT0', 'MT1'])
+})
+
+test('desktop enters MT2 on its declared stair and keeps the sage visible after talking', async ({
+  page,
+}) => {
+  await startGame(page)
+  const toMt1 = await routeToFloor(page, 'MT1')
+  await completeRoute(page, toMt1, false)
+  const toMt2 = await routeToFloor(page, 'MT2')
+  await completeRoute(page, toMt2, false)
+  await expect.poll(async () => (await state(page))?.floorId).toBe('MT2')
+  await expect.poll(async () => (await state(page))?.position).toEqual({ x: 13, y: 13 })
+
+  await page.evaluate(() => {
+    const win = window as unknown as {
+      __gameStore: { getState: () => { dispatch: (action: unknown) => void } }
+      __gameScene: { tryMove: (direction: 'up' | 'down' | 'left' | 'right') => void }
+    }
+    win.__gameStore.getState().dispatch({
+      type: 'ENTER_FLOOR',
+      floorId: 'MT0',
+      position: { x: 13, y: 4 },
+    })
+    win.__gameScene.tryMove('up')
+  })
+  await expect.poll(async () => (await state(page))?.modal).not.toBeNull()
+  for (let i = 0; i < 20 && (await state(page))?.modal; i++) await page.keyboard.press('Enter')
+  await expect.poll(async () => (await state(page))?.modal).toBeNull()
+
+  const afterSage = await page.evaluate(() => {
+    const snapshot = (
+      window as unknown as { __gameStore: { getState: () => { state: unknown } } }
+    ).__gameStore.getState().state as {
+      flags: Record<string, unknown>
+      tileOverrides: Record<string, Record<string, { hidden?: boolean }>>
+    }
+    return { sageTalked: snapshot.flags.sageTalked, sage: snapshot.tileOverrides.MT0?.['13,3'] }
+  })
+  expect(afterSage.sageTalked).toBe(true)
+  expect(afterSage.sage?.hidden).not.toBe(true)
 })
 
 test('Pixel 7 touch controls stay below the game and can enter MT1', async ({ page }, testInfo) => {

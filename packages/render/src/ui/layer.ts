@@ -8,6 +8,7 @@ export class UiLayer {
   private msgBox: HTMLElement
   private statusEl: HTMLElement
   private modalEl: HTMLElement
+  private modalTextEl!: HTMLElement
 
   constructor(container: HTMLElement) {
     this.container = document.createElement('div')
@@ -59,18 +60,25 @@ export class UiLayer {
     const el = document.createElement('div')
     el.className = 'mota-modal'
     el.style.display = 'none'
+    this.modalTextEl = document.createElement('div')
+    this.modalTextEl.className = 'mota-modal__text'
+    el.appendChild(this.modalTextEl)
+    const hint = document.createElement('div')
+    hint.className = 'mota-modal__hint'
+    hint.textContent = 'Enter / A 继续'
+    el.appendChild(hint)
     this.container.appendChild(el)
     return el
   }
 
   showModal(text: string) {
-    this.modalEl.textContent = text
+    this.modalTextEl.textContent = text
     this.modalEl.style.display = 'block'
   }
 
   hideModal() {
     this.modalEl.style.display = 'none'
-    this.modalEl.textContent = ''
+    this.modalTextEl.textContent = ''
   }
 
   updateHero(hero: HeroSnapshot) {
