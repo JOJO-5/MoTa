@@ -30,3 +30,19 @@ describe('2014 entrance sage event', () => {
     ).toBe(true)
   })
 })
+
+describe('Magictower2014 gameplay baseline', () => {
+  it('keeps the full source floor order while the render skin stays replaceable', () => {
+    const data = JSON.parse(
+      readFileSync(new URL('../../../content/mota-2014/data.json', import.meta.url), 'utf8')
+    ) as { floorIds: string[]; startFloorId: string }
+    const manifest = JSON.parse(
+      readFileSync(new URL('../../../content/mota-2014/baseline-manifest.json', import.meta.url), 'utf8')
+    ) as { floorCount: number; mainFloorIds: string[]; startFloorId: string; skin: string }
+
+    expect(data.floorIds).toEqual(manifest.mainFloorIds)
+    expect(data.floorIds).toHaveLength(manifest.floorCount)
+    expect(data.startFloorId).toBe(manifest.startFloorId)
+    expect(manifest.skin).toBe('modern-v1')
+  })
+})

@@ -1,0 +1,19 @@
+{
+  "sourceProject": "Magictower2014",
+  "sourceRoot": "Magictower2014/魔塔2014/project",
+  "sourceData": "data.js",
+  "floorCount": 65,
+  "mainFloorIds": [
+    "JX1", "JX2", "JX3", "JX4", "JX5", "JX6", "JX7", "JX8",
+    "JX9", "JX10", "JX11", "JX12", "JX13", "JX14", "JX15", "JX16",
+    "JX17", "JX18", "JX19", "JX20", "JX21", "JX22", "JX23", "JX24",
+    "JXZTFG", "MT0", "MT1", "MT2", "MT3", "MT4", "MT5", "MT6",
+    "MT7", "MT8", "MT9", "MT10", "MT11", "MT12", "MT13", "MT14",
+    "MT15", "MT16", "MT17", "MT18", "MT19", "MT20", "MT21", "MT22",
+    "MT23", "MT24", "MT25", "MT26", "MTSMFG", "SM1", "SM2", "SM3",
+    "SM4", "SM5", "SM6", "SM7", "SM8", "SM9", "SM10", "Dark1", "Dark2"
+  ],
+  "startFloorId": "MT0",
+  "skin": "modern-v1",
+  "gameplayDataPolicy": "Keep floor maps, events, enemy stats, item effects and floor transitions from the source baseline; replace only presentation assets."
+}

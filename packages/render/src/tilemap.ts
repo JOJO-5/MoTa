@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { TILE_SIZE } from './constants.js'
-import { getTileSprite, SHEET_CONFIG } from './icons.js'
+import { drawModernTile, resolveModernTileKind } from './modern-theme.js'
 
 /** Maps data from maps.json: tileId → { cls, id } */
 type MapsData = Record<string, { cls: string; id: string }>
@@ -26,7 +26,6 @@ const AUTOTILE_KEYS: Record<string, string> = {
 }
 
 const DEFAULT_AUTOTILE = 'autotile_0'
-const BLANK_FRAME_CACHE = new Map<number, boolean>()
 
 export class TileMapLayer {
   private scene: Phaser.Scene
@@ -53,17 +52,26 @@ export class TileMapLayer {
     const cols = map[0]?.length ?? 0
     const collected = new Set(collectedTiles)
 
-    // Pass 1: default ground layer (fills the entire floor)
-    const groundKey = defaultGround
-      ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE)
-      : DEFAULT_AUTOTILE
-    const groundTexture = this.scene.textures.exists(groundKey) ? groundKey : DEFAULT_AUTOTILE
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        const img = this.scene.add
-          .image(x * TILE_SIZE, y * TILE_SIZE, groundTexture)
-          .setOrigin(0, 0)
-        this.sprites.push(img)
+    // Pass 1: use a generated modern texture as the floor foundation. The
+    // legacy map IDs remain untouched; this layer is purely visual.
+    if (this.scene.textures.exists('modern-floor-texture')) {
+      const floor = this.scene.add
+        .tileSprite(0, 0, cols * TILE_SIZE, rows * TILE_SIZE, 'modern-floor-texture')
+        .setOrigin(0, 0)
+        .setDepth(-5)
+      this.sprites.push(floor)
+    } else {
+      const groundKey = defaultGround
+        ? (AUTOTILE_KEYS[defaultGround] ?? DEFAULT_AUTOTILE)
+        : DEFAULT_AUTOTILE
+      const groundTexture = this.scene.textures.exists(groundKey) ? groundKey : DEFAULT_AUTOTILE
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const img = this.scene.add
+            .image(x * TILE_SIZE, y * TILE_SIZE, groundTexture)
+            .setOrigin(0, 0)
+          this.sprites.push(img)
+        }
       }
     }
 
@@ -114,105 +122,9 @@ export class TileMapLayer {
   }
 
   private drawTile(tileId: number, px: number, py: number, opacity = 1) {
-    const spriteInfo = getTileSprite(tileId, this.mapsData)
-    if (!spriteInfo) {
-      this.drawFallback(px, py, opacity)
-      return
-    }
-
-    const { sheet, frame } = spriteInfo
-
-    // Autotiles: use individual image textures
-    if (sheet === 'autotile') {
-      const entry = this.mapsData[String(tileId)]
-      const atKey = entry ? (AUTOTILE_KEYS[entry.id] ?? DEFAULT_AUTOTILE) : DEFAULT_AUTOTILE
-      const textureKey = this.scene.textures.exists(atKey) ? atKey : DEFAULT_AUTOTILE
-      const img = this.scene.add.image(px, py, textureKey).setOrigin(0, 0).setAlpha(opacity)
-      this.sprites.push(img)
-      return
-    }
-
-    // Standard sprite sheets: use frame index
-    const textureKey = sheet as string
-    if (!this.scene.textures.exists(textureKey)) {
-      this.drawFallback(px, py, opacity)
-      return
-    }
-
-    if (sheet === 'tileset' && this.isBlankTilesetFrame(frame)) {
-      this.drawFallback(px, py, opacity)
-      return
-    }
-
-    // Tall sprites (npc48/enemy48) are 48px high; bottom-align to the 32px cell.
-    const frameHeight = SHEET_CONFIG[sheet]?.frameHeight ?? 32
-    const dy = frameHeight > 32 ? py - (frameHeight - 32) : py
-
-    const img = this.scene.add.image(px, dy, textureKey, frame).setOrigin(0, 0).setAlpha(opacity)
-    this.sprites.push(img)
-  }
-
-  private drawFallback(px: number, py: number, opacity = 1) {
-    if (!this.scene.textures.exists('__legacy-fallback')) return
-    const img = this.scene.add.image(px, py, '__legacy-fallback').setOrigin(0, 0).setAlpha(opacity)
-    this.sprites.push(img)
-  }
-
-  /** Detect transparent/solid-black legacy frames and replace them visually. */
-  private isBlankTilesetFrame(frameIndex: number) {
-    const cached = BLANK_FRAME_CACHE.get(frameIndex)
-    if (cached !== undefined) return cached
-
-    let blank = false
-    try {
-      const frame = this.scene.textures.getFrame('tileset', frameIndex)
-      const source = frame.source.image
-      if (
-        typeof document !== 'undefined' &&
-        (source instanceof HTMLImageElement || source instanceof HTMLCanvasElement)
-      ) {
-        const canvas = document.createElement('canvas')
-        canvas.width = frame.cutWidth
-        canvas.height = frame.cutHeight
-        const context = canvas.getContext('2d')
-        if (context) {
-          context.drawImage(
-            source,
-            frame.cutX,
-            frame.cutY,
-            frame.cutWidth,
-            frame.cutHeight,
-            0,
-            0,
-            frame.cutWidth,
-            frame.cutHeight
-          )
-          const pixels = context.getImageData(0, 0, frame.cutWidth, frame.cutHeight).data
-          let opaque = 0
-          let visible = 0
-          let luminance = 0
-          for (let i = 0; i < pixels.length; i += 4) {
-            const alpha = pixels[i + 3]
-            if (alpha > 20) {
-              opaque++
-              const light = pixels[i] + pixels[i + 1] + pixels[i + 2]
-              luminance += light
-              if (light > 24) visible++
-            }
-          }
-          const total = frame.cutWidth * frame.cutHeight
-          blank =
-            opaque < total * 0.08 ||
-            (opaque > total * 0.75 && luminance / opaque < 24 && visible < total * 0.08)
-        }
-      }
-    } catch {
-      // A protected/cross-origin image should keep the original frame.
-      blank = false
-    }
-
-    BLANK_FRAME_CACHE.set(frameIndex, blank)
-    return blank
+    const modern = drawModernTile(this.scene, resolveModernTileKind(tileId, this.mapsData), px, py, opacity)
+    modern.setDepth(1)
+    this.sprites.push(modern)
   }
 
   destroy() {
