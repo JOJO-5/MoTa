@@ -2,6 +2,7 @@ import { dispatch, State } from '../state/store.js'
 import { previewBattle, startBattle } from './battle.js'
 import { hasSpecial } from './battle-utils.js'
 import { eventMachine } from './event-machine.js'
+import { grantItem } from './item-effects.js'
 import type { Event } from '@modern-mota/data'
 
 /**
@@ -46,23 +47,6 @@ export interface RawMapEntry {
 }
 
 /** Gem values copied from the original project's data.js `values` table. */
-const GEM_VALUES: Record<string, { atk?: number; def?: number; mdef?: number }> = {
-  redGem: { atk: 1 },
-  blueGem: { def: 1 },
-  greenGem: { mdef: 2 },
-  yellowGem: { atk: 1, def: 1 },
-}
-
-/** Potion values copied from the original project's data.js `values` table. */
-const POTION_VALUES: Record<string, number> = {
-  redPotion: 25,
-  bluePotion: 50,
-  yellowPotion: 100,
-  greenPotion: 250,
-}
-
-const KEY_IDS = new Set(['yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey', 'bigKey'])
-
 export interface TileInteractionResult {
   /** Short message shown to the player (floor message box). */
   message: string
@@ -168,50 +152,8 @@ export function pickUpItem(
   const item = itemsData?.[itemId]
   if (!item) return null
 
-  const { hero } = State
-  const name = item.name ?? itemId
-
-  if (KEY_IDS.has(itemId)) {
-    dispatch({
-      type: 'SET_HERO',
-      hero: { keys: { ...hero.keys, [itemId]: (hero.keys[itemId] ?? 0) + 1 } },
-    })
-    return { message: `获得钥匙 ×1`, consumed: true }
-  }
-
-  const gem = GEM_VALUES[itemId]
-  if (gem) {
-    const heroPatch: Record<string, number> = {}
-    if (gem.atk) heroPatch.atk = hero.atk + gem.atk
-    if (gem.def) heroPatch.def = hero.def + gem.def
-    if (gem.mdef) heroPatch.mdef = hero.mdef + gem.mdef
-    dispatch({ type: 'SET_HERO', hero: heroPatch })
-    return { message: `获得${name}（攻击+${gem.atk ?? 0} 防御+${gem.def ?? 0}）`, consumed: true }
-  }
-
-  const potionHp = POTION_VALUES[itemId]
-  if (potionHp !== undefined) {
-    dispatch({ type: 'SET_HERO', hero: { hp: hero.hp + potionHp } })
-    return { message: `获得${name}（回复 ${potionHp} HP）`, consumed: true }
-  }
-
-  if (item.cls === 'equips' && item.equip?.value) {
-    const value = item.equip.value
-    const heroPatch: Record<string, number> = {}
-    if (value.atk) heroPatch.atk = hero.atk + value.atk
-    if (value.def) heroPatch.def = hero.def + value.def
-    if (value.mdef) heroPatch.mdef = hero.mdef + value.mdef
-    dispatch({ type: 'SET_HERO', hero: heroPatch })
-    const equipment = { ...hero.equipment }
-    if (item.equip.type === 0) equipment.weapon = itemId
-    else if (item.equip.type === 1) equipment.shield = itemId
-    else equipment.accessory = itemId
-    dispatch({ type: 'SET_HERO', hero: { equipment } })
-    return { message: `装备${name}`, consumed: true }
-  }
-
-  dispatch({ type: 'ADD_ITEM', itemId })
-  return { message: `获得${name}`, consumed: true }
+  const result = grantItem(itemId, itemsData)
+  return result.applied ? { message: result.message, consumed: true } : null
 }
 
 /**

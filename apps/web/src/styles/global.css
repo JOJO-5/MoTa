@@ -222,6 +222,22 @@ body {
   width: 160px;
 }
 
+.setting-row--disabled {
+  color: #8d969e;
+}
+
+.setting-value {
+  color: #f3c85b;
+  font-size: 12px;
+}
+
+.settings-hint {
+  margin: 18px 0 0;
+  color: #8d969e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .close-btn {
   margin-top: 16px;
   padding: 10px 24px;

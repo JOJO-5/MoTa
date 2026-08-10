@@ -1,6 +1,7 @@
 import { dispatch, State } from '../state/store.js'
 import { evaluate } from './expr.js'
 import { startBattle, endBattle } from './battle.js'
+import { setLegacyItemCount, type ItemEffectData } from './item-effects.js'
 import type { Event } from '@modern-mota/data'
 import type { Direction, HeroSnapshot, RuntimeTileValue, TileOverride } from '../types.js'
 
@@ -128,6 +129,15 @@ function writeLegacyValue(name: string, value: unknown) {
       })
       return
     }
+    const towerData = (globalThis as Record<string, unknown>).__towerData as
+      | {
+          items?: Record<string, ItemEffectData>
+        }
+      | undefined
+    if (towerData?.items?.[itemId]) {
+      setLegacyItemCount(itemId, Number(value) || 0, towerData.items)
+      return
+    }
   }
   dispatch({ type: 'SET_VALUE', name, value: Number(value) || 0 })
 }
@@ -163,6 +173,57 @@ function applyTileOverride(
 ) {
   for (const [x, y] of locations) {
     dispatch({ type: 'SET_TILE_OVERRIDE', floorId, x, y, override })
+  }
+}
+
+function parseMoveSteps(raw: unknown): Array<{ dx: number; dy: number }> {
+  if (!Array.isArray(raw)) return []
+  const directions: Record<string, { dx: number; dy: number }> = {
+    up: { dx: 0, dy: -1 },
+    down: { dx: 0, dy: 1 },
+    left: { dx: -1, dy: 0 },
+    right: { dx: 1, dy: 0 },
+  }
+  return raw.flatMap((step) => {
+    if (typeof step !== 'string') return []
+    const [name, countRaw] = step.split(':')
+    const vector = directions[name]
+    if (!vector) return []
+    const count = Math.max(0, Number(countRaw ?? 1) || 0)
+    return Array.from({ length: count }, () => vector)
+  })
+}
+
+function moveLegacyBlock(raw: LegacyEvent, context: EventContext) {
+  const floorId = String(raw.floorId ?? context.floorId)
+  const loc = Array.isArray(raw.loc) ? raw.loc : [context.x, context.y]
+  let x = Number(loc[0])
+  let y = Number(loc[1])
+  if (!Number.isInteger(x) || !Number.isInteger(y)) return
+
+  const towerData = (globalThis as Record<string, unknown>).__towerData as
+    | {
+        floors?: Record<string, { map?: number[][] }>
+        maps?: Record<string, { id?: string }>
+      }
+    | undefined
+  const floorMap = towerData?.floors?.[floorId]?.map
+  const mapIdAt = (px: number, py: number): RuntimeTileValue => {
+    const tileId = floorMap?.[py]?.[px]
+    if (tileId === undefined) return 0
+    return towerData?.maps?.[String(tileId)]?.id ?? tileId
+  }
+
+  for (const { dx, dy } of parseMoveSteps(raw.steps)) {
+    applyTileOverride(floorId, [[x, y]], { hidden: true })
+    const nextX = x + dx
+    const nextY = y + dy
+    applyTileOverride(floorId, [[nextX, nextY]], {
+      map: mapIdAt(x, y),
+      hidden: false,
+    })
+    x = nextX
+    y = nextY
   }
 }
 
@@ -474,8 +535,15 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
         break
       }
       case 'setFloor': {
-        const floorId = String(raw.floorId ?? raw.name ?? '')
-        if (floorId) dispatch({ type: 'ENTER_FLOOR', floorId })
+        const floorId = String(raw.floorId ?? context.floorId)
+        const name = String(raw.name ?? '')
+        if (name)
+          dispatch({
+            type: 'SET_FLOOR_PROPERTY',
+            floorId,
+            name,
+            value: parseLegacyValue(raw.value),
+          })
         break
       }
       case 'turnBlock': {
@@ -502,13 +570,15 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
       case 'animate':
       case 'setCurtain':
       case 'setText':
-      case 'move':
       case 'input':
       case 'function':
         console.warn(
           `[event-machine] legacy event ${raw.type} is deferred to the render bridge`,
           raw
         )
+        break
+      case 'move':
+        moveLegacyBlock(raw, context)
         break
       default:
         console.warn(`[event-machine] unknown legacy event ${raw.type}`, raw)

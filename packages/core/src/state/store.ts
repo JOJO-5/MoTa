@@ -44,6 +44,7 @@ export const createInitialState = (floorId: string, x: number, y: number): GameS
   collectedTiles: {},
   visitedFloors: [],
   tileOverrides: {},
+  floorProperties: {},
 })
 
 interface StoreState {
@@ -90,6 +91,12 @@ function createStore() {
             case 'CLEAR_TILE_OVERRIDE': {
               const floorOverrides = s.state.tileOverrides[action.floorId]
               if (floorOverrides) delete floorOverrides[`${action.x},${action.y}`]
+              break
+            }
+            case 'SET_FLOOR_PROPERTY': {
+              const properties = s.state.floorProperties[action.floorId] ?? {}
+              properties[action.name] = action.value
+              s.state.floorProperties[action.floorId] = properties
               break
             }
             case 'SET_FLAG':
@@ -165,6 +172,10 @@ function createStore() {
               s.state.collectedTiles =
                 action.state.collectedTiles && typeof action.state.collectedTiles === 'object'
                   ? action.state.collectedTiles
+                  : {}
+              s.state.floorProperties =
+                action.state.floorProperties && typeof action.state.floorProperties === 'object'
+                  ? action.state.floorProperties
                   : {}
               break
             case 'RESET':

@@ -351,7 +351,10 @@ export class GameScene extends Phaser.Scene {
   /** Open legacy mota-js doors when the player taps into them. */
   private tryOpenDoor(
     direction: 'up' | 'down' | 'left' | 'right',
-    maps: Record<string, { cls: string; id: string; trigger?: string; doorInfo?: unknown }>
+    maps: Record<
+      string,
+      { cls: string; id: string; name?: string; trigger?: string; doorInfo?: unknown }
+    >
   ) {
     if (!this.currentFloor) return
     const { state } = gameStore.getState()
@@ -392,7 +395,7 @@ export class GameScene extends Phaser.Scene {
       y: next.y,
       override: { map: 0, hidden: false },
     })
-    dispatch({ type: 'SET_UI', ui: { floorMsg: `${entry.id} 已开启` } })
+    dispatch({ type: 'SET_UI', ui: { floorMsg: `${entry.name ?? entry.id}已开启` } })
     this.rerenderTiles()
     const afterOpen = this.currentFloor.afterOpenDoor?.[`${next.x},${next.y}`]
     if (afterOpen?.length) {
@@ -700,6 +703,21 @@ export class GameScene extends Phaser.Scene {
 
     if (result.effect.type === 'show-enemy-guide') {
       this.showCurrentFloorEnemies(runtimeMap, towerData.maps, towerData.enemys)
+      return
+    }
+
+    if (result.effect.type === 'clear-flags') {
+      for (const flag of result.effect.flags)
+        dispatch({ type: 'SET_FLAG', name: flag, value: false })
+      if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
+      return
+    }
+
+    if (result.effect.type === 'teleport') {
+      dispatch({ type: 'SET_POSITION', position: result.effect.position })
+      if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
+      this.rerenderTiles()
+      this.runAutoEvents()
       return
     }
 

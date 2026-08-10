@@ -9,4 +9,6 @@ export * from './logic/event-machine.js' // Added
 export * from './logic/tile-interactions.js'
 export * from './logic/floor-state.js'
 export * from './logic/item-use.js'
+export * from './logic/item-effects.js'
+export * from './logic/step-hazards.js'
 export const CORE_VERSION = '0.1.0'

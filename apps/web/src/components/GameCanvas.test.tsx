@@ -1,13 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { gameStore } from '@modern-mota/core'
+import { dispatch, gameStore } from '@modern-mota/core'
 import { GameCanvas } from './GameCanvas'
 
-const { saveGame } = vi.hoisted(() => ({ saveGame: vi.fn(() => true) }))
+const { saveGame, canSaveGame } = vi.hoisted(() => ({
+  saveGame: vi.fn(() => true),
+  canSaveGame: vi.fn(
+    (state: { battle: unknown; ui: { modal: string | null } }) => !state.battle && !state.ui.modal
+  ),
+}))
 
 vi.mock('@modern-mota/render', () => ({
   createGame: vi.fn(() => ({ destroy: vi.fn() })),
   saveGame,
+  canSaveGame,
 }))
 
 afterEach(() => {
@@ -25,6 +31,18 @@ describe('GameCanvas', () => {
 
     expect(saveGame).toHaveBeenCalledWith(0, gameStore.getState().state)
     expect(screen.getByText('已保存')).toBeVisible()
+  })
+
+  it('blocks saving while a dialog is open and explains why', () => {
+    dispatch({ type: 'SET_UI', ui: { modal: '当前对话' } })
+    render(<GameCanvas onBackToMenu={vi.fn()} onRestart={vi.fn()} />)
+
+    const saveButton = screen.getByRole('button', { name: /保存游戏/i })
+    expect(saveButton).toBeDisabled()
+    expect(screen.getByText('请结束当前对话后再保存')).toBeVisible()
+    fireEvent.click(saveButton)
+    expect(saveGame).not.toHaveBeenCalled()
+    dispatch({ type: 'SET_UI', ui: { modal: null } })
   })
 
   it('repeats mobile movement while a direction button is held', () => {

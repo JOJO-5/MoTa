@@ -66,6 +66,125 @@ describe('moveHero', () => {
     expect(State.hero.hp).toBe(990)
   })
 
+  it('applies a zone special when stepping into the enemy range', () => {
+    const floorWithZone = {
+      map: [
+        [0, 201, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ],
+      cannotMove: {},
+    }
+    const enemyMaps = { '201': { cls: 'enemys', id: 'watcherSlime' } }
+    dispatch({
+      type: 'SET_ENEMYS',
+      enemys: {
+        watcherSlime: {
+          id: 'watcherSlime',
+          name: '邪眼史莱姆',
+          hp: 1,
+          atk: 0,
+          def: 0,
+          money: 0,
+          exp: 0,
+          special: [15],
+          zone: 100,
+          zoneSquare: true,
+        } as never,
+      },
+    })
+    dispatch({ type: 'SET_POSITION', position: { x: 0, y: 1 } })
+
+    expect(moveHero('right', floorWithZone, enemyMaps)).toBe(true)
+    expect(State.hero.hp).toBe(900)
+  })
+
+  it('halves HP when stepping between two matching guard monsters', () => {
+    const floorWithBetween = {
+      map: [
+        [0, 0, 0],
+        [201, 0, 201],
+        [0, 0, 0],
+      ],
+      cannotMove: {},
+    }
+    const enemyMaps = { '201': { cls: 'enemys', id: 'guard' } }
+    dispatch({
+      type: 'SET_ENEMYS',
+      enemys: {
+        guard: {
+          id: 'guard',
+          name: '守卫',
+          hp: 1,
+          atk: 0,
+          def: 0,
+          money: 0,
+          exp: 0,
+          special: [16],
+        } as never,
+      },
+    })
+    dispatch({ type: 'SET_POSITION', position: { x: 1, y: 0 } })
+
+    expect(moveHero('down', floorWithBetween, enemyMaps)).toBe(true)
+    expect(State.hero.hp).toBe(500)
+  })
+
+  it('damages the hero and pushes a repulse monster back one tile', () => {
+    const floorWithRepulse = {
+      map: [
+        [0, 0, 0],
+        [0, 201, 0],
+        [0, 0, 0],
+      ],
+      cannotMove: {},
+    }
+    const enemyMaps = { '201': { cls: 'enemys', id: 'redPriest' } }
+    dispatch({
+      type: 'SET_ENEMYS',
+      enemys: {
+        redPriest: {
+          id: 'redPriest',
+          name: '炎术师',
+          hp: 1,
+          atk: 0,
+          def: 0,
+          money: 0,
+          exp: 0,
+          special: [18],
+          repulse: 50,
+        } as never,
+      },
+    })
+    dispatch({ type: 'SET_POSITION', position: { x: 0, y: 2 } })
+
+    expect(moveHero('right', floorWithRepulse, enemyMaps)).toBe(true)
+    expect(State.hero.hp).toBe(950)
+    expect(State.tileOverrides.MT0['1,1']).toMatchObject({ hidden: true })
+    expect(State.tileOverrides.MT0['1,0']).toMatchObject({ map: 'redPriest', hidden: false })
+  })
+
+  it('does not push a repulse monster into a wall', () => {
+    const floorWithWall = {
+      map: [
+        [0, 10030, 0],
+        [0, 201, 0],
+        [0, 0, 0],
+      ],
+      cannotMove: {},
+    }
+    const enemyMaps = {
+      '10030': { cls: 'terrains', id: 'sWallT' },
+      '201': { cls: 'enemys', id: 'redPriest' },
+    }
+    dispatch({ type: 'SET_ENEMYS', enemys: { redPriest: { special: [18], repulse: 50 } } })
+    dispatch({ type: 'SET_POSITION', position: { x: 0, y: 2 } })
+
+    expect(moveHero('right', floorWithWall, enemyMaps)).toBe(true)
+    expect(State.hero.hp).toBe(950)
+    expect(State.tileOverrides.MT0?.['1,0']).toBeUndefined()
+  })
+
   it('does not let a defeated hero continue walking', () => {
     dispatch({ type: 'SET_HERO', hero: { hp: 0 } })
 

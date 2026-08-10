@@ -35,4 +35,35 @@ describe('GameScene floor events', () => {
     expect(State.ui.modal).toBeNull()
     expect(eventMachine.getState()).toBe('idle')
   })
+
+  it('uses a Chinese door name in the successful opening message', () => {
+    dispatch({ type: 'SET_POSITION', position: { x: 0, y: 0 } })
+    dispatch({ type: 'SET_HERO', hero: { keys: { yellowKey: 1 } } })
+    const scene = new GameScene() as unknown as {
+      currentFloor: Record<string, unknown>
+      tryOpenDoor: (direction: string, maps: Record<string, unknown>) => void
+      rerenderTiles: () => void
+    }
+    scene.currentFloor = {
+      floorId: 'JX1',
+      map: [[0, 20]],
+      bgmap: [],
+      fgmap: [],
+      afterOpenDoor: {},
+      changeFloor: {},
+      defaultGround: '',
+    }
+    scene.rerenderTiles = vi.fn()
+    scene.tryOpenDoor('right', {
+      '20': {
+        cls: 'animates',
+        id: 'yellowDoor',
+        name: '黄门',
+        trigger: 'openDoor',
+        doorInfo: { keys: { yellowKey: 1 } },
+      },
+    })
+
+    expect(State.ui.floorMsg).toBe('黄门已开启')
+  })
 })

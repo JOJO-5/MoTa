@@ -50,6 +50,8 @@ export interface GameState {
   visitedFloors: string[]
   /** Runtime tile changes keyed by floor and coordinate; source JSON stays immutable. */
   tileOverrides: Record<string, Record<string, TileOverride>>
+  /** Runtime floor properties changed by legacy setFloor events. */
+  floorProperties: Record<string, Record<string, unknown>>
 }
 
 export type RuntimeTileValue = number | string | null
@@ -93,6 +95,7 @@ export type GameAction =
   | { type: 'MARK_FLOOR_VISITED'; floorId: string }
   | { type: 'SET_TILE_OVERRIDE'; floorId: string; x: number; y: number; override: TileOverride }
   | { type: 'CLEAR_TILE_OVERRIDE'; floorId: string; x: number; y: number }
+  | { type: 'SET_FLOOR_PROPERTY'; floorId: string; name: string; value: unknown }
   | { type: 'SET_FLAG'; name: string; value: unknown }
   | { type: 'SET_VALUE'; name: string; value: number }
   | { type: 'ADD_ITEM'; itemId: string }

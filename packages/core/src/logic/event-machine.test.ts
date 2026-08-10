@@ -117,6 +117,25 @@ describe('eventMachine', () => {
     expect(State.values['item:yellowKey']).toBeUndefined()
   })
 
+  it('routes legacy equipment values through the equipment stat resolver', () => {
+    ;(globalThis as Record<string, unknown>).__towerData = {
+      items: {
+        sword1: { cls: 'equips', name: '铁剑', equip: { type: 0, value: { atk: 8 } } },
+        sword2: { cls: 'equips', name: '银光剑', equip: { type: 0, value: { atk: 26 } } },
+      },
+    }
+    eventMachine.start(
+      [
+        { type: 'setValue', name: 'item:sword1', operator: '+=', value: 1 },
+        { type: 'setValue', name: 'item:sword2', operator: '+=', value: 1 },
+      ] as Event[],
+      { floorId: 'MT11', x: 7, y: 1, eventIndex: 0, eventCount: 2 }
+    )
+
+    expect(State.hero.atk).toBe(36)
+    expect(State.hero.equipment.weapon).toBe('sword2')
+  })
+
   it('runs a legacy choice branch selected by the mobile/keyboard action flow', () => {
     const events = [
       {
@@ -180,6 +199,39 @@ describe('eventMachine', () => {
     expect(State.tileOverrides.MT0['5,6']).toMatchObject({ hidden: false })
     expect(State.tileOverrides.MT0['7,8']).toMatchObject({ opacity: 0.4 })
     expect(State.tileOverrides.MT0['9,10']).toMatchObject({ map: 0 })
+  })
+
+  it('moves a runtime actor and preserves the destination after a legacy move event', () => {
+    ;(globalThis as Record<string, unknown>).__towerData = {
+      floors: {
+        JX21: { map: Array.from({ length: 15 }, (_, y) => (y === 13 ? [0, 0, 0, 0, 473] : [])) },
+      },
+      maps: { '473': { id: 'N473' } },
+    }
+    eventMachine.start(
+      [
+        {
+          type: 'move',
+          loc: [4, 13],
+          keep: true,
+          steps: ['right:1'],
+        },
+      ] as Event[],
+      { floorId: 'JX21', x: 4, y: 13, eventIndex: 0, eventCount: 1 }
+    )
+
+    expect(State.tileOverrides.JX21['4,13']).toMatchObject({ hidden: true })
+    expect(State.tileOverrides.JX21['5,13']).toMatchObject({ map: 'N473', hidden: false })
+  })
+
+  it('updates a floor property without changing the current floor', () => {
+    eventMachine.start(
+      [{ type: 'setFloor', name: 'canFlyFrom', floorId: 'MT25', value: true }] as Event[],
+      { floorId: 'MT25', x: 4, y: 4, eventIndex: 0, eventCount: 1 }
+    )
+
+    expect(State.floorId).toBe('MT0')
+    expect(State.floorProperties?.MT25?.canFlyFrom).toBe(true)
   })
 
   it('executes floor events wrapped in the original data container', () => {

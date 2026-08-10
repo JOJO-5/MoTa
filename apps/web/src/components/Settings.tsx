@@ -13,17 +13,18 @@ export function Settings({ onClose }: Props) {
       >
         <div className="modal__eyebrow">SYSTEM / CONFIG</div>
         <h2 id="settings-title">游戏设置</h2>
-        <div className="setting-row">
-          <label htmlFor="bgm-volume">BGM 音量</label>
-          <input id="bgm-volume" type="range" min="0" max="100" defaultValue="50" />
-        </div>
-        <div className="setting-row">
-          <label htmlFor="sfx-volume">SFX 音量</label>
-          <input id="sfx-volume" type="range" min="0" max="100" defaultValue="70" />
-        </div>
-        <div className="setting-row">
-          <label htmlFor="show-minimap">显示小地图</label>
-          <input id="show-minimap" type="checkbox" defaultChecked />
+        <div className="settings-status" role="status">
+          <div className="setting-row setting-row--disabled">
+            <span>BGM / SFX 音量</span>
+            <span className="setting-value">音频功能开发中</span>
+          </div>
+          <div className="setting-row setting-row--disabled">
+            <span>显示小地图</span>
+            <span className="setting-value">小地图功能开发中</span>
+          </div>
+          <p className="settings-hint">
+            当前版本的运行时尚未接入音频和小地图设置，相关控件将在功能接入后开放。
+          </p>
         </div>
         <button className="close-btn" onClick={onClose}>
           返回主菜单
