@@ -22,6 +22,7 @@ import { GameLoop } from './game-loop.js'
 import { getStairPoints, resolveStairLanding } from './floor-transition.js'
 import { formatKeyRequirement } from './ui/keys.js'
 import { TILE_SIZE } from './constants.js'
+import { buildRoutePoints } from './path-visual.js'
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
@@ -33,6 +34,8 @@ export class GameScene extends Phaser.Scene {
   private currentFloor: Floor | null = null
   private pathQueue: Direction[] = []
   private pathTimer: Phaser.Time.TimerEvent | null = null
+  private pathGuide: Phaser.GameObjects.Container | null = null
+  private pathGuideTween: Phaser.Tweens.Tween | null = null
 
   constructor() {
     super('GameScene')
@@ -188,7 +191,8 @@ export class GameScene extends Phaser.Scene {
 
     this.cancelPath()
     this.pathQueue = path
-    this.runNextPathStep()
+    this.renderPathGuide(state.position, path)
+    this.pathTimer = this.time.delayedCall(90, () => this.runNextPathStep())
     return true
   }
 
@@ -210,7 +214,10 @@ export class GameScene extends Phaser.Scene {
   private runNextPathStep() {
     this.pathTimer = null
     const direction = this.pathQueue.shift()
-    if (!direction || !this.currentFloor) return
+    if (!direction || !this.currentFloor) {
+      this.clearPathGuide()
+      return
+    }
 
     const before = gameStore.getState().state
     const floorId = before.floorId
@@ -229,14 +236,83 @@ export class GameScene extends Phaser.Scene {
       return
     }
     if (this.pathQueue.length > 0) {
+      this.renderPathGuide(after.position, this.pathQueue)
       this.pathTimer = this.time.delayedCall(105, () => this.runNextPathStep())
+    } else {
+      this.clearPathGuide()
     }
+  }
+
+  private renderPathGuide(start: { x: number; y: number }, path: Direction[]) {
+    this.clearPathGuide()
+    const points = buildRoutePoints(start, path)
+    if (points.length === 0) return
+
+    const route = this.add.graphics()
+    const center = (coordinate: number) => coordinate * TILE_SIZE + TILE_SIZE / 2
+
+    // A dark outline keeps the route readable on both floor and wall textures.
+    route.lineStyle(5, 0x24180f, 0.58)
+    route.beginPath()
+    route.moveTo(center(start.x), center(start.y))
+    for (const point of points) route.lineTo(center(point.x), center(point.y))
+    route.strokePath()
+
+    route.lineStyle(2, 0xf2ba54, 0.9)
+    route.beginPath()
+    route.moveTo(center(start.x), center(start.y))
+    for (const point of points) route.lineTo(center(point.x), center(point.y))
+    route.strokePath()
+
+    route.fillStyle(0xffd77b, 0.95)
+    route.fillCircle(center(start.x), center(start.y), 2)
+    for (const point of points) {
+      const x = center(point.x)
+      const y = center(point.y)
+      const vector = {
+        x: point.direction === 'left' ? -1 : point.direction === 'right' ? 1 : 0,
+        y: point.direction === 'up' ? -1 : point.direction === 'down' ? 1 : 0,
+      }
+      const perpendicular = { x: -vector.y, y: vector.x }
+      const tip = { x: x + vector.x * 6, y: y + vector.y * 6 }
+      const back = { x: x - vector.x * 4, y: y - vector.y * 4 }
+      route.lineStyle(2, 0xffdc83, 0.95)
+      route.lineBetween(back.x + perpendicular.x * 4, back.y + perpendicular.y * 4, tip.x, tip.y)
+      route.lineBetween(tip.x, tip.y, back.x - perpendicular.x * 4, back.y - perpendicular.y * 4)
+    }
+
+    const destination = points.at(-1)!
+    const target = this.add.graphics().setPosition(center(destination.x), center(destination.y))
+    target.fillStyle(0xf2ba54, 0.16)
+    target.fillCircle(0, 0, 13)
+    target.lineStyle(2, 0xffdc83, 0.95)
+    target.strokeRect(-11, -11, 22, 22)
+    target.lineStyle(1, 0x5b381b, 0.95)
+    target.strokeRect(-14, -14, 28, 28)
+
+    this.pathGuide = this.add.container(0, 0, [route, target]).setDepth(3)
+    this.pathGuideTween = this.tweens.add({
+      targets: target,
+      alpha: { from: 0.58, to: 1 },
+      scale: { from: 0.94, to: 1.06 },
+      duration: 360,
+      yoyo: true,
+      repeat: -1,
+    })
+  }
+
+  private clearPathGuide() {
+    this.pathGuideTween?.remove()
+    this.pathGuideTween = null
+    this.pathGuide?.destroy(true)
+    this.pathGuide = null
   }
 
   private cancelPath() {
     this.pathTimer?.remove(false)
     this.pathTimer = null
     this.pathQueue = []
+    this.clearPathGuide()
   }
 
   tryAction() {
@@ -568,6 +644,7 @@ export class GameScene extends Phaser.Scene {
 
   loadFloor(floor: Floor) {
     console.log('[GameScene] loadFloor', floor.floorId)
+    this.cancelPath()
     this.currentFloor = floor
     const previousState = gameStore.getState().state
     const firstVisit = !(previousState.visitedFloors ?? []).includes(floor.floorId)
