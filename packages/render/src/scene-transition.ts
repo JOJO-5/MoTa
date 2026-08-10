@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import type { Floor, Event } from '@modern-mota/data'
+import type { Floor, Event, Enemy } from '@modern-mota/data'
 import { TileMapLayer } from './tilemap.js'
 import { CameraSystem } from './camera.js'
 import { HeroSprite } from './sprite.js'
@@ -16,6 +16,8 @@ import {
   getTileOpacities,
   evaluate,
   findPath,
+  previewBattle,
+  resolveItemUse,
   type Direction,
 } from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
@@ -23,6 +25,7 @@ import { getStairPoints, resolveStairLanding } from './floor-transition.js'
 import { formatKeyRequirement } from './ui/keys.js'
 import { TILE_SIZE } from './constants.js'
 import { buildRoutePoints } from './path-visual.js'
+import { EnemyGuide, type EnemyGuideEntry } from './enemy-guide.js'
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
@@ -36,6 +39,7 @@ export class GameScene extends Phaser.Scene {
   private pathTimer: Phaser.Time.TimerEvent | null = null
   private pathGuide: Phaser.GameObjects.Container | null = null
   private pathGuideTween: Phaser.Tweens.Tween | null = null
+  private enemyGuide: EnemyGuide | null = null
 
   constructor() {
     super('GameScene')
@@ -134,6 +138,7 @@ export class GameScene extends Phaser.Scene {
   tryMove(direction: Direction, fromPath = false) {
     if (!fromPath) this.cancelPath()
     if (gameStore.getState().state.battle) return
+    if (this.enemyGuide?.isVisible()) return
     if (eventMachine.getState() === 'waiting') {
       eventMachine.moveChoice(direction)
       return
@@ -167,7 +172,13 @@ export class GameScene extends Phaser.Scene {
   navigateToTile(x: number, y: number) {
     if (!this.currentFloor) return false
     const { state } = gameStore.getState()
-    if (state.battle || state.ui.modal || eventMachine.getState() === 'waiting') return false
+    if (
+      state.battle ||
+      state.ui.modal ||
+      this.enemyGuide?.isVisible() ||
+      eventMachine.getState() === 'waiting'
+    )
+      return false
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
       maps: Record<
         string,
@@ -317,6 +328,7 @@ export class GameScene extends Phaser.Scene {
 
   tryAction() {
     if (gameStore.getState().state.battle) return
+    if (this.enemyGuide?.isVisible()) return
     if (eventMachine.getState() === 'waiting') {
       eventMachine.resume()
       return
@@ -611,6 +623,8 @@ export class GameScene extends Phaser.Scene {
     this.keyboardInput = null
     this.input.off('pointerdown', this.handlePointerDown, this)
     this.cancelPath()
+    this.enemyGuide?.hide()
+    this.enemyGuide = null
     this.gameLoop?.stop()
     this.gameLoop = null
     if (typeof window !== 'undefined') {
@@ -642,9 +656,130 @@ export class GameScene extends Phaser.Scene {
     return true
   }
 
+  useItem(itemId: string) {
+    this.cancelPath()
+    if (!this.currentFloor) return
+    const { state } = gameStore.getState()
+    if (state.battle || state.ui.modal || eventMachine.getState() === 'waiting') {
+      dispatch({ type: 'SET_UI', ui: { floorMsg: '当前状态不能使用道具' } })
+      return
+    }
+    const count = Math.max(
+      Number(state.values[`item:${itemId}`]) || 0,
+      state.hero.items.includes(itemId) ? 1 : 0
+    )
+    if (count <= 0) {
+      dispatch({ type: 'SET_UI', ui: { floorMsg: '行囊中没有这个道具' } })
+      return
+    }
+
+    const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      maps: Record<
+        string,
+        { cls: string; id: string; canBreak?: boolean; name?: string; canPass?: boolean }
+      >
+      items: Record<string, { name?: string; text?: string; cls?: string }>
+      enemys: Record<string, Enemy & { notBomb?: boolean; afterBattle?: Event[] }>
+    } | null
+    if (!towerData) return
+
+    const runtimeMap = getRuntimeMap(
+      this.currentFloor.floorId,
+      this.currentFloor.map,
+      state,
+      towerData.maps
+    )
+    const result = resolveItemUse(itemId, {
+      state,
+      map: runtimeMap,
+      maps: towerData.maps,
+      enemys: towerData.enemys,
+    })
+    dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
+    if (!result.ok || !result.effect) return
+
+    if (result.effect.type === 'show-enemy-guide') {
+      this.showCurrentFloorEnemies(runtimeMap, towerData.maps, towerData.enemys)
+      return
+    }
+
+    const followUpEvents: Event[] = []
+    for (const position of result.effect.tiles) {
+      const tileId = runtimeMap[position.y]?.[position.x]
+      const entry = tileId === undefined ? undefined : towerData.maps[String(tileId)]
+      if (entry?.id && (entry.cls === 'enemys' || entry.cls === 'enemy48')) {
+        followUpEvents.push(...(towerData.enemys[entry.id]?.afterBattle ?? []))
+        followUpEvents.push(
+          ...(this.currentFloor.afterBattle?.[`${position.x},${position.y}`] ?? [])
+        )
+      }
+      dispatch({
+        type: 'SET_TILE_OVERRIDE',
+        floorId: this.currentFloor.floorId,
+        x: position.x,
+        y: position.y,
+        override: { map: 0, hidden: true },
+      })
+      dispatch({
+        type: 'COLLECT_TILE',
+        floorId: this.currentFloor.floorId,
+        x: position.x,
+        y: position.y,
+      })
+    }
+    if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
+    this.rerenderTiles()
+    this.runAutoEvents()
+
+    if (followUpEvents.length > 0) {
+      eventMachine.start(followUpEvents, {
+        floorId: this.currentFloor.floorId,
+        x: state.position.x,
+        y: state.position.y,
+        eventIndex: 0,
+        eventCount: followUpEvents.length,
+      })
+    }
+  }
+
+  private showCurrentFloorEnemies(
+    runtimeMap: Array<Array<number | string | null>>,
+    maps: Record<string, { cls?: string; id?: string }>,
+    enemies: Record<string, Enemy>
+  ) {
+    const visibleEnemies: EnemyGuideEntry[] = []
+    const seen = new Set<string>()
+    for (const row of runtimeMap) {
+      for (const tileId of row) {
+        const entry = tileId === null ? undefined : maps[String(tileId)]
+        if (!entry?.id || seen.has(entry.id) || (entry.cls !== 'enemys' && entry.cls !== 'enemy48'))
+          continue
+        const enemy = enemies[entry.id]
+        if (!enemy) continue
+        seen.add(entry.id)
+        const preview = previewBattle(enemy)
+        visibleEnemies.push({
+          id: entry.id,
+          name: enemy.name,
+          hp: enemy.hp,
+          atk: enemy.atk,
+          def: enemy.def,
+          money: enemy.money,
+          exp: enemy.exp,
+          damage: preview.damage,
+          outcome: preview.outcome,
+        })
+      }
+    }
+    const host = (this.game.canvas?.parentElement as HTMLElement | null) ?? document.body
+    this.enemyGuide ??= new EnemyGuide(host)
+    this.enemyGuide.showFloor(visibleEnemies)
+  }
+
   loadFloor(floor: Floor) {
     console.log('[GameScene] loadFloor', floor.floorId)
     this.cancelPath()
+    this.enemyGuide?.hide()
     this.currentFloor = floor
     const previousState = gameStore.getState().state
     const firstVisit = !(previousState.visitedFloors ?? []).includes(floor.floorId)

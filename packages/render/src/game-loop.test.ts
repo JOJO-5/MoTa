@@ -32,6 +32,7 @@ describe('GameLoop battle presentation', () => {
   afterEach(() => {
     loop?.stop()
     loop = null
+    delete (globalThis as Record<string, unknown>).__towerData
     vi.unstubAllGlobals()
   })
 
@@ -44,5 +45,22 @@ describe('GameLoop battle presentation', () => {
     expect(battle?.textContent).toContain('战斗胜利')
     expect(battle?.querySelector('.mota-battle__enemy-portrait')).not.toBeNull()
     expect(battle?.querySelector('.mota-battle__hero-portrait')).not.toBeNull()
+  })
+
+  it('connects inventory buttons to the active game scene', () => {
+    const host = document.createElement('div')
+    const useItem = vi.fn()
+    ;(globalThis as Record<string, unknown>).__towerData = {
+      floors: { MT1: { name: '主塔 1 层' } },
+      items: {
+        pickaxe: { cls: 'tools', name: '破墙镐', text: '可以破坏勇士面前的墙' },
+      },
+    }
+    dispatch({ type: 'ADD_ITEM', itemId: 'pickaxe' })
+
+    loop = new GameLoop({ useItem } as never, host)
+    ;(host.querySelector('[data-item-id="pickaxe"]') as HTMLButtonElement).click()
+
+    expect(useItem).toHaveBeenCalledWith('pickaxe')
   })
 })

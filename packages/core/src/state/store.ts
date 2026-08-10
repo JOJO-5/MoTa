@@ -97,15 +97,40 @@ function createStore() {
               break
             case 'SET_VALUE':
               s.state.values[action.name] = action.value
+              if (action.name.startsWith('item:')) {
+                const itemId = action.name.slice('item:'.length)
+                if (action.value > 0 && !s.state.hero.items.includes(itemId)) {
+                  s.state.hero.items.push(itemId)
+                } else if (action.value <= 0) {
+                  s.state.hero.items = s.state.hero.items.filter((id) => id !== itemId)
+                }
+              }
               break
-            case 'ADD_ITEM':
+            case 'ADD_ITEM': {
+              const countKey = `item:${action.itemId}`
+              const currentCount = Math.max(
+                Number(s.state.values[countKey]) || 0,
+                s.state.hero.items.includes(action.itemId) ? 1 : 0
+              )
               if (!s.state.hero.items.includes(action.itemId)) {
                 s.state.hero.items.push(action.itemId)
               }
+              s.state.values[countKey] = currentCount + 1
               break
-            case 'REMOVE_ITEM':
-              s.state.hero.items = s.state.hero.items.filter((i) => i !== action.itemId)
+            }
+            case 'REMOVE_ITEM': {
+              const countKey = `item:${action.itemId}`
+              const currentCount = Math.max(
+                Number(s.state.values[countKey]) || 0,
+                s.state.hero.items.includes(action.itemId) ? 1 : 0
+              )
+              const nextCount = Math.max(0, currentCount - 1)
+              s.state.values[countKey] = nextCount
+              if (nextCount === 0) {
+                s.state.hero.items = s.state.hero.items.filter((i) => i !== action.itemId)
+              }
               break
+            }
             case 'USE_KEY':
               if (s.state.hero.keys[action.keyType] !== undefined) {
                 s.state.hero.keys[action.keyType]--

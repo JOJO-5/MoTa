@@ -84,6 +84,34 @@ describe('GameState', () => {
     expect(store.hero.items.filter((i) => i === 'redKey').length).toBe(1)
   })
 
+  it('tracks repeated usable items and removes only one copy at a time', () => {
+    gameStore.getState().dispatch({ type: 'LOAD_STATE', state: createInitialState('MT0', 6, 6) })
+
+    gameStore.getState().dispatch({ type: 'ADD_ITEM', itemId: 'bomb' })
+    gameStore.getState().dispatch({ type: 'ADD_ITEM', itemId: 'bomb' })
+
+    expect(gameStore.getState().state.hero.items.filter((id) => id === 'bomb')).toHaveLength(1)
+    expect(gameStore.getState().state.values['item:bomb']).toBe(2)
+
+    gameStore.getState().dispatch({ type: 'REMOVE_ITEM', itemId: 'bomb' })
+    expect(gameStore.getState().state.hero.items).toContain('bomb')
+    expect(gameStore.getState().state.values['item:bomb']).toBe(1)
+
+    gameStore.getState().dispatch({ type: 'REMOVE_ITEM', itemId: 'bomb' })
+    expect(gameStore.getState().state.hero.items).not.toContain('bomb')
+    expect(gameStore.getState().state.values['item:bomb']).toBe(0)
+  })
+
+  it('keeps legacy item counts and the visible inventory in sync', () => {
+    gameStore.getState().dispatch({ type: 'LOAD_STATE', state: createInitialState('MT0', 6, 6) })
+
+    gameStore.getState().dispatch({ type: 'SET_VALUE', name: 'item:pickaxe', value: 2 })
+    expect(gameStore.getState().state.hero.items).toContain('pickaxe')
+
+    gameStore.getState().dispatch({ type: 'SET_VALUE', name: 'item:pickaxe', value: 0 })
+    expect(gameStore.getState().state.hero.items).not.toContain('pickaxe')
+  })
+
   it('USE_KEY decrements key count', () => {
     store.hero.keys.redKey = 3
     const dispatch = makeDispatch(store)

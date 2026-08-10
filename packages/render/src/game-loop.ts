@@ -14,9 +14,9 @@ export class GameLoop {
   private lastMsg = ''
   private lastMsgAt = 0
 
-  constructor(_scene: GameScene, container: HTMLElement) {
+  constructor(scene: GameScene, container: HTMLElement) {
     this.uiLayer = new UiLayer(container)
-    this.hud = new Hud(container)
+    this.hud = new Hud(container, (itemId) => scene.useItem(itemId))
     this.battleOverlay = new BattleOverlay(container)
     this.running = true
     this.tick()
@@ -34,13 +34,14 @@ export class GameLoop {
 
     this.uiLayer.updateHero(hero)
     this.uiLayer.updateStatus(hero)
-    this.hud.update(hero)
     this.battleOverlay.update(battle, hero, battle ? state.enemys[battle.enemyId] : undefined)
 
     // Show current floor name (e.g. 魔塔 0 层 / 第 1 层)
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
       floors: Record<string, { name?: string; title?: string }>
+      items?: Record<string, { cls?: string; name?: string; text?: string }>
     } | null
+    this.hud.update(hero, towerData?.items, state.values)
     const floor = towerData?.floors?.[floorId]
     this.uiLayer.updateFloorName(floor?.name || floorId)
 
