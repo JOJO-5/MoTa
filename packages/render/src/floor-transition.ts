@@ -33,18 +33,19 @@ function asStairLocation(value: unknown): StairLocation | undefined {
  */
 export function resolveStairLanding(
   target: StairMetadata,
-  sourceStair: string | undefined,
+  destinationStair: string | undefined,
   map: number[][]
 ): StairLocation | undefined {
   const declaredLanding =
-    sourceStair === 'downFloor'
-      ? asStairLocation(target.upFloor)
-      : sourceStair === 'upFloor'
-        ? asStairLocation(target.downFloor)
+    destinationStair === 'downFloor'
+      ? asStairLocation(target.downFloor)
+      : destinationStair === 'upFloor'
+        ? asStairLocation(target.upFloor)
         : undefined
   if (declaredLanding) return declaredLanding
 
-  const targetTile = sourceStair === 'downFloor' ? 87 : sourceStair === 'upFloor' ? 88 : null
+  const targetTile =
+    destinationStair === 'downFloor' ? 88 : destinationStair === 'upFloor' ? 87 : null
   if (targetTile === null) return undefined
 
   for (let y = 0; y < map.length; y++) {

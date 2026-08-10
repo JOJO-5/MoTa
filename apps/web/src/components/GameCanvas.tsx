@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
 import { createGame, saveGame } from '@modern-mota/render'
 import { gameStore, type Direction } from '@modern-mota/core'
+import { useGameState } from './useGameState'
 
 interface Props {
   onBackToMenu: () => void
+  onRestart: () => void
 }
 
-export function GameCanvas({ onBackToMenu }: Props) {
+export function GameCanvas({ onBackToMenu, onRestart }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const gameRef = useRef<ReturnType<typeof createGame> | null>(null)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
+  const gameState = useGameState()
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -107,6 +110,26 @@ export function GameCanvas({ onBackToMenu }: Props) {
         </button>
         {saveNotice && <span className="save-notice">{saveNotice}</span>}
       </div>
+      {gameState.hero.hp <= 0 && (
+        <div
+          className="death-overlay"
+          role="dialog"
+          aria-labelledby="death-title"
+          aria-modal="true"
+        >
+          <div className="death-panel">
+            <p className="death-panel__eyebrow">RUN ENDED</p>
+            <h2 id="death-title">挑战失败</h2>
+            <p>勇者已经倒下。本次挑战已经结束，你可以立即从主塔入口重新开始。</p>
+            <div className="death-panel__actions">
+              <button className="death-panel__restart" onClick={onRestart}>
+                重新开始
+              </button>
+              <button onClick={onBackToMenu}>返回主菜单</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

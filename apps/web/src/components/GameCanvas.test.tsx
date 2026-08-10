@@ -17,7 +17,7 @@ afterEach(() => {
 
 describe('GameCanvas', () => {
   it('saves the current run from an in-game button', () => {
-    render(<GameCanvas onBackToMenu={vi.fn()} />)
+    render(<GameCanvas onBackToMenu={vi.fn()} onRestart={vi.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: /保存游戏/i }))
 

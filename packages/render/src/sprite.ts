@@ -19,7 +19,9 @@ export class HeroSprite {
   private direction: Direction
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE)
+    // The modern portrait is taller than one tile, so its head overlaps the
+    // cell above. Keep the hero above every map layer from the first paint.
+    this.container = scene.add.container(x * TILE_SIZE, y * TILE_SIZE).setDepth(10)
     this.direction = 'down'
 
     const beacon = scene.add

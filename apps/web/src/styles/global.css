@@ -124,6 +124,70 @@ body {
   text-shadow: 0 1px 2px #000;
 }
 
+.death-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2, 6, 13, 0.88);
+  backdrop-filter: blur(5px);
+}
+
+.death-panel {
+  width: min(340px, 100%);
+  padding: 26px 24px 22px;
+  border: 1px solid rgba(243, 200, 91, 0.72);
+  background: linear-gradient(150deg, #111c2b, #070c14 72%);
+  color: #d9e2e5;
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+}
+
+.death-panel__eyebrow {
+  margin: 0 0 8px;
+  color: #68e1ec;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+}
+
+.death-panel h2 {
+  margin: 0 0 14px;
+  color: #f3c85b;
+  font-size: 26px;
+}
+
+.death-panel > p:not(.death-panel__eyebrow) {
+  margin: 0;
+  color: #b8c4cc;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.death-panel__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.death-panel__actions button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #65717b;
+  background: #101925;
+  color: #d9e2e5;
+  cursor: pointer;
+}
+
+.death-panel__actions .death-panel__restart {
+  border-color: #f3c85b;
+  background: #5b4212;
+  color: #fff2c7;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

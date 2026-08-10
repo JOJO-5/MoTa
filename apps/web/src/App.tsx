@@ -5,7 +5,7 @@ import { Settings } from './components/Settings'
 import { DevTools } from './components/DevTools'
 import { Demo } from './components/Demo'
 import { initTower, listSaves, loadGame } from '@modern-mota/render'
-import { dispatch } from '@modern-mota/core'
+import { dispatch, eventMachine } from '@modern-mota/core'
 import './styles/global.css'
 
 export type Screen = 'menu' | 'game' | 'settings' | 'save'
@@ -43,6 +43,7 @@ export function App() {
   }, [screen, towerReady, loadError, loadSlotId])
 
   const backToMenu = () => {
+    eventMachine.stop()
     setTowerReady(false)
     setLoadError(null)
     setLoadSlotId(null)
@@ -55,9 +56,18 @@ export function App() {
     .sort((a, b) => b.timestamp - a.timestamp)[0]
 
   const startNewGame = () => {
+    eventMachine.stop()
     dispatch({ type: 'RESET' })
     setLoadSlotId(null)
     setScreen('game')
+  }
+
+  const restartGame = () => {
+    eventMachine.stop()
+    dispatch({ type: 'RESET' })
+    setLoadSlotId(null)
+    setLoadError(null)
+    setTowerReady(false)
   }
 
   const continueGame = () => {
@@ -79,7 +89,7 @@ export function App() {
       {screen === 'settings' && <Settings onClose={() => setScreen('menu')} />}
       {screen === 'game' &&
         (towerReady ? (
-          <GameCanvas onBackToMenu={backToMenu} />
+          <GameCanvas onBackToMenu={backToMenu} onRestart={restartGame} />
         ) : loadError ? (
           <div
             className="game-screen"

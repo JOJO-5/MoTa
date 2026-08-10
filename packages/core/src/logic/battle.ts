@@ -1,5 +1,6 @@
 import { dispatch, State } from '../state/store.js'
 import type { Enemy } from '@modern-mota/data'
+import type { HeroSnapshot } from '../types.js'
 import { calcHeroDamage, calcEnemyDamage, hasSpecial, resolveEnemyStats } from './battle-utils.js'
 
 export function calculateDamage(attackerAtk: number, defenderDef: number): number {
@@ -13,10 +14,12 @@ export interface BattleResult {
   enemyHp: number
   heroHp: number
   turns: number
+  /** Total HP the hero would lose; null means the battle cannot progress. */
+  damage: number | null
 }
 
-export function startBattle(enemy: Enemy): BattleResult {
-  const { hero } = State
+/** Calculate a battle without mutating game state. */
+export function previewBattle(enemy: Enemy, hero: HeroSnapshot = State.hero): BattleResult {
   const legacy = enemy as Enemy & {
     vampire?: number
     add?: boolean
@@ -27,9 +30,13 @@ export function startBattle(enemy: Enemy): BattleResult {
   }
 
   if (hasSpecial(enemy, 20) && !hero.items.includes('cross')) {
-    const result = { outcome: 'stalemate' as const, enemyHp: enemy.hp, heroHp: hero.hp, turns: 0 }
-    dispatch({ type: 'SET_BATTLE', battle: { enemyId: enemy.id, enemyHp: enemy.hp, turns: 0 } })
-    return result
+    return {
+      outcome: 'stalemate',
+      enemyHp: enemy.hp,
+      heroHp: hero.hp,
+      turns: 0,
+      damage: null,
+    }
   }
 
   const resolved = resolveEnemyStats(hero, enemy)
@@ -45,19 +52,16 @@ export function startBattle(enemy: Enemy): BattleResult {
   const enemyDamage = calcEnemyDamage(hero, enemy)
   if (heroDamage <= 0) {
     if (enemyDamage <= 0) {
-      const result = {
+      return {
         outcome: 'stalemate' as const,
         enemyHp,
         heroHp: hero.hp,
         turns: 1,
+        damage: null,
       }
-      dispatch({ type: 'SET_BATTLE', battle: { enemyId: enemy.id, enemyHp, turns: 1 } })
-      return result
     }
     const turns = Math.ceil(hero.hp / enemyDamage)
-    dispatch({ type: 'SET_HERO', hero: { hp: 0 } })
-    dispatch({ type: 'SET_BATTLE', battle: { enemyId: enemy.id, enemyHp, turns } })
-    return { outcome: 'defeat', enemyHp, heroHp: 0, turns }
+    return { outcome: 'defeat', enemyHp, heroHp: 0, turns, damage: turns * enemyDamage }
   }
 
   const turns = Math.ceil(enemyHp / heroDamage)
@@ -81,13 +85,27 @@ export function startBattle(enemy: Enemy): BattleResult {
   const outcome: BattleOutcome = currentHeroHp > 0 ? 'victory' : 'defeat'
   const currentEnemyHp = outcome === 'victory' ? 0 : enemyHp
 
-  dispatch({ type: 'SET_HERO', hero: { hp: currentHeroHp } })
+  return {
+    outcome,
+    enemyHp: currentEnemyHp,
+    heroHp: currentHeroHp,
+    turns,
+    damage: Math.floor(totalDamage),
+  }
+}
+
+/** Apply a battle result. Callers may preview first when defeat must be blocked. */
+export function startBattle(enemy: Enemy): BattleResult {
+  const result = previewBattle(enemy)
+
+  if (result.outcome !== 'stalemate') {
+    dispatch({ type: 'SET_HERO', hero: { hp: result.heroHp } })
+  }
   dispatch({
     type: 'SET_BATTLE',
-    battle: { enemyId: enemy.id, enemyHp: currentEnemyHp, turns },
+    battle: { enemyId: enemy.id, enemyHp: result.enemyHp, turns: result.turns },
   })
-
-  return { outcome, enemyHp: currentEnemyHp, heroHp: currentHeroHp, turns }
+  return result
 }
 
 export function endBattle(): void {

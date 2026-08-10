@@ -1,5 +1,5 @@
 import { dispatch, State } from '../state/store.js'
-import { startBattle } from './battle.js'
+import { previewBattle, startBattle } from './battle.js'
 import { hasSpecial } from './battle-utils.js'
 import { eventMachine } from './event-machine.js'
 import type { Event } from '@modern-mota/data'
@@ -215,8 +215,8 @@ export function pickUpItem(
 }
 
 /**
- * Fight an enemy tile. Runs the battle simulation; on victory the enemy is
- * cleared and money/exp are awarded. On defeat the hero's HP is clamped to 0.
+ * Fight an enemy tile. Impossible battles are rejected without changing HP,
+ * matching the original game's canBattle guard.
  */
 export function battleEnemy(
   enemyId: string,
@@ -226,17 +226,19 @@ export function battleEnemy(
   if (!enemy) return null
 
   const name = enemy.name ?? enemyId
+  const preview = previewBattle({ ...enemy, id: enemyId } as never)
+  if (preview.outcome !== 'victory') {
+    const reason =
+      preview.damage === null
+        ? '无法造成有效伤害'
+        : `预计受到 ${preview.damage} 伤害，当前 HP ${State.hero.hp}`
+    return { message: `你打不过 ${name}（${reason}）`, consumed: false }
+  }
   const battle = startBattle({ ...enemy, id: enemyId } as never)
 
   const { hero } = State
   dispatch({ type: 'SET_BATTLE', battle: null })
-  if (battle.outcome === 'stalemate') {
-    return { message: `${name} 当前无法被有效攻击`, consumed: false }
-  }
-  if (hero.hp <= 0) {
-    dispatch({ type: 'SET_HERO', hero: { hp: 0 } })
-    return { message: `你被 ${name} 击败了…`, consumed: false }
-  }
+  if (battle.outcome !== 'victory' || hero.hp <= 0) return null
 
   if (hasSpecial(enemy as never, 12)) {
     dispatch({ type: 'SET_FLAG', name: 'poison', value: true })

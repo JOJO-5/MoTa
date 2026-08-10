@@ -143,9 +143,10 @@ export class GameScene extends Phaser.Scene {
         maps
       ),
     }
+    const previousPosition = { ...gameStore.getState().state.position }
     const moved = moveHero(direction, runtimeFloor, maps)
     if (moved) {
-      this.triggerEventsAtHero()
+      this.triggerEventsAtHero(previousPosition)
     } else {
       this.tryOpenDoor(direction, maps)
     }
@@ -229,7 +230,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private triggerEventsAtHero() {
+  private triggerEventsAtHero(previousPosition?: { x: number; y: number }) {
     if (!this.currentFloor) return
     const { state } = gameStore.getState()
     const pos = state.position
@@ -284,6 +285,9 @@ export class GameScene extends Phaser.Scene {
     )
 
     if (result) {
+      if (result.kind === 'enemy' && !result.consumed && previousPosition) {
+        dispatch({ type: 'SET_POSITION', position: previousPosition })
+      }
       dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
       if (result.consumed && result.kind === 'enemy') {
         const afterBattle = [
@@ -308,7 +312,7 @@ export class GameScene extends Phaser.Scene {
   /**
    * Resolve a changeFloor entry: expand :next/:before floorId aliases and
    * fill in the landing position when `loc` is missing (matching the
-   * original mota-js behaviour of landing on the complementary stair).
+   * original mota-js behaviour of honoring its declared destination stair).
    */
   private resolveChangeFloor(
     changeFloor: Record<string, unknown>

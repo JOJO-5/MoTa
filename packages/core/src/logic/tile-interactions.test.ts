@@ -118,10 +118,13 @@ describe('tile-interactions', () => {
     expect(gameStore.getState().state.battle).toBeNull()
   })
 
-  it('loses a hopeless battle and does not clear the tile', () => {
+  it('warns about a hopeless battle without taking HP or clearing the tile', () => {
     const result = battleEnemy('dragon', ENEMIES)
+
     expect(result?.consumed).toBe(false)
-    expect(gameStore.getState().state.hero.hp).toBe(0)
+    expect(result?.message).toContain('你打不过')
+    expect(result?.message).toContain('当前 HP 1000')
+    expect(gameStore.getState().state.hero.hp).toBe(1000)
   })
 
   it('applies poison after a victorious poison battle', () => {
