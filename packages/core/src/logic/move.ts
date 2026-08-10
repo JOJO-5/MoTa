@@ -71,6 +71,63 @@ function isCannotMove(
   return blocked.some((d) => d === direction)
 }
 
+const PATH_DIRECTIONS: Array<{ direction: Direction; dx: number; dy: number }> = [
+  { direction: 'up', dx: 0, dy: -1 },
+  { direction: 'down', dx: 0, dy: 1 },
+  { direction: 'left', dx: -1, dy: 0 },
+  { direction: 'right', dx: 1, dy: 0 },
+]
+
+export function findPath(
+  start: Position,
+  target: Position,
+  floor: Pick<Floor, 'map' | 'cannotMove' | 'changeFloor'>,
+  maps?: Record<string, MapBlockInfo> | null,
+  options: { allowBlockedTarget?: boolean } = {}
+): Direction[] | null {
+  const rows = floor.map.length
+  const cols = floor.map[0]?.length ?? 0
+  if (
+    start.x < 0 ||
+    start.y < 0 ||
+    target.x < 0 ||
+    target.y < 0 ||
+    start.x >= cols ||
+    target.x >= cols ||
+    start.y >= rows ||
+    target.y >= rows
+  ) {
+    return null
+  }
+  if (start.x === target.x && start.y === target.y) return []
+
+  const queue: Array<{ position: Position; path: Direction[] }> = [{ position: start, path: [] }]
+  const visited = new Set([`${start.x},${start.y}`])
+
+  for (let index = 0; index < queue.length; index++) {
+    const current = queue[index]
+    for (const { direction, dx, dy } of PATH_DIRECTIONS) {
+      if (isCannotMove(floor, current.position.x, current.position.y, direction)) continue
+      const next = { x: current.position.x + dx, y: current.position.y + dy }
+      if (next.x < 0 || next.y < 0 || next.x >= cols || next.y >= rows) continue
+      const key = `${next.x},${next.y}`
+      if (visited.has(key)) continue
+
+      const isTarget = next.x === target.x && next.y === target.y
+      const isStair = floor.changeFloor?.[key] != null
+      const blocked = !isStair && isBlocked(floor.map[next.y][next.x], maps)
+      if (blocked && !(isTarget && options.allowBlockedTarget)) continue
+
+      const path = [...current.path, direction]
+      if (isTarget) return path
+      visited.add(key)
+      queue.push({ position: next, path })
+    }
+  }
+
+  return null
+}
+
 export function moveHero(
   direction: Direction,
   floor: Pick<Floor, 'map' | 'cannotMove' | 'changeFloor'>,

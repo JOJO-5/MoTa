@@ -25,11 +25,11 @@ export class HeroSprite {
     this.direction = 'down'
 
     const beacon = scene.add
-      .rectangle(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE - 3, TILE_SIZE - 3, 0x22d3ee, 0.16)
-      .setStrokeStyle(2, 0x8af6ff, 1)
+      .rectangle(TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE - 3, TILE_SIZE - 3, 0xe4b85b, 0.16)
+      .setStrokeStyle(2, 0xffdc7a, 1)
     const shadow = scene.add
       .ellipse(TILE_SIZE / 2, TILE_SIZE - 4, 23, 8, 0x02050a, 0.78)
-      .setStrokeStyle(1, 0x35e4ff, 0.75)
+      .setStrokeStyle(1, 0xe0a642, 0.78)
     this.container.add([beacon, shadow])
 
     if (scene.textures.exists('modern-hero')) {
@@ -54,8 +54,8 @@ export class HeroSprite {
 
     const playerLabel = scene.add
       .text(TILE_SIZE / 2, -20, '你', {
-        color: '#07111f',
-        backgroundColor: '#8af6ff',
+        color: '#241309',
+        backgroundColor: '#ffcf6a',
         fontFamily: '"Microsoft YaHei", sans-serif',
         fontSize: '9px',
         fontStyle: 'bold',

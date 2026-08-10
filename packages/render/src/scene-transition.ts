@@ -15,9 +15,13 @@ import {
   resolveRuntimeTileValue,
   getTileOpacities,
   evaluate,
+  findPath,
+  type Direction,
 } from '@modern-mota/core'
 import { GameLoop } from './game-loop.js'
 import { getStairPoints, resolveStairLanding } from './floor-transition.js'
+import { formatKeyRequirement } from './ui/keys.js'
+import { TILE_SIZE } from './constants.js'
 
 export class GameScene extends Phaser.Scene {
   private tileMap!: TileMapLayer
@@ -27,6 +31,8 @@ export class GameScene extends Phaser.Scene {
   private gameLoop: GameLoop | null = null
   private unsubscribers: (() => void)[] = []
   private currentFloor: Floor | null = null
+  private pathQueue: Direction[] = []
+  private pathTimer: Phaser.Time.TimerEvent | null = null
 
   constructor() {
     super('GameScene')
@@ -98,6 +104,7 @@ export class GameScene extends Phaser.Scene {
         this.tryAction()
       }
     )
+    this.input.on('pointerdown', this.handlePointerDown, this)
 
     // Mount DOM UI layer (HP bar, floor name, messages) inside the game container
     const container = (this.game.canvas?.parentElement as HTMLElement | null) ?? document.body
@@ -121,7 +128,8 @@ export class GameScene extends Phaser.Scene {
     loadFloorFromState()
   }
 
-  tryMove(direction: 'up' | 'down' | 'left' | 'right') {
+  tryMove(direction: Direction, fromPath = false) {
+    if (!fromPath) this.cancelPath()
     if (gameStore.getState().state.battle) return
     if (eventMachine.getState() === 'waiting') {
       eventMachine.moveChoice(direction)
@@ -151,6 +159,84 @@ export class GameScene extends Phaser.Scene {
     } else {
       this.tryOpenDoor(direction, maps)
     }
+  }
+
+  navigateToTile(x: number, y: number) {
+    if (!this.currentFloor) return false
+    const { state } = gameStore.getState()
+    if (state.battle || state.ui.modal || eventMachine.getState() === 'waiting') return false
+    const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      maps: Record<
+        string,
+        { cls: string; id: string; canPass?: boolean; trigger?: string; doorInfo?: unknown }
+      >
+    } | null
+    const maps = towerData?.maps ?? {}
+    const runtimeFloor = {
+      ...this.currentFloor,
+      map: getRuntimeMap(this.currentFloor.floorId, this.currentFloor.map, state, maps),
+    }
+    const targetTile = runtimeFloor.map[y]?.[x]
+    const targetEntry = targetTile === undefined ? undefined : maps[String(targetTile)]
+    const path = findPath(state.position, { x, y }, runtimeFloor, maps, {
+      allowBlockedTarget: targetEntry?.trigger === 'openDoor',
+    })
+    if (!path) {
+      dispatch({ type: 'SET_UI', ui: { floorMsg: '这里无法到达' } })
+      return false
+    }
+
+    this.cancelPath()
+    this.pathQueue = path
+    this.runNextPathStep()
+    return true
+  }
+
+  private readonly handlePointerDown = (pointer: Phaser.Input.Pointer) => {
+    if (!this.currentFloor) return
+    const camera = this.cameras.main
+    if (
+      pointer.x < camera.x ||
+      pointer.y < camera.y ||
+      pointer.x >= camera.x + camera.width ||
+      pointer.y >= camera.y + camera.height
+    ) {
+      return
+    }
+    const world = camera.getWorldPoint(pointer.x, pointer.y)
+    this.navigateToTile(Math.floor(world.x / TILE_SIZE), Math.floor(world.y / TILE_SIZE))
+  }
+
+  private runNextPathStep() {
+    this.pathTimer = null
+    const direction = this.pathQueue.shift()
+    if (!direction || !this.currentFloor) return
+
+    const before = gameStore.getState().state
+    const floorId = before.floorId
+    const position = { ...before.position }
+    this.tryMove(direction, true)
+    const after = gameStore.getState().state
+    const moved = after.position.x !== position.x || after.position.y !== position.y
+    if (
+      !moved ||
+      after.floorId !== floorId ||
+      after.battle ||
+      after.ui.modal ||
+      eventMachine.getState() === 'waiting'
+    ) {
+      this.cancelPath()
+      return
+    }
+    if (this.pathQueue.length > 0) {
+      this.pathTimer = this.time.delayedCall(105, () => this.runNextPathStep())
+    }
+  }
+
+  private cancelPath() {
+    this.pathTimer?.remove(false)
+    this.pathTimer = null
+    this.pathQueue = []
   }
 
   tryAction() {
@@ -196,7 +282,7 @@ export class GameScene extends Phaser.Scene {
 
     const required = Object.entries(doorInfo.keys ?? {}).find(([, count]) => count > 0)
     if (required && (state.hero.keys[required[0]] ?? 0) < required[1]) {
-      dispatch({ type: 'SET_UI', ui: { floorMsg: `需要${required[0]}×${required[1]}` } })
+      dispatch({ type: 'SET_UI', ui: { floorMsg: formatKeyRequirement(required[0], required[1]) } })
       return
     }
     if (required) {
@@ -447,6 +533,8 @@ export class GameScene extends Phaser.Scene {
     this.unsubscribers = []
     this.keyboardInput?.destroy()
     this.keyboardInput = null
+    this.input.off('pointerdown', this.handlePointerDown, this)
+    this.cancelPath()
     this.gameLoop?.stop()
     this.gameLoop = null
     if (typeof window !== 'undefined') {

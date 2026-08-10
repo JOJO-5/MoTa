@@ -57,8 +57,8 @@ export class BootScene extends Phaser.Scene {
 
     // Modern gameplay skin. The floor, wall and hero are generated pixel assets;
     // legacy data IDs continue to drive collisions, events and progression.
-    this.load.image('modern-floor-texture', `${CONTENT_BASE}/materials/modern-floor-texture-v2.png`)
-    this.load.image('modern-wall-texture', `${CONTENT_BASE}/materials/modern-wall-texture-v2.png`)
+    this.load.image('modern-floor-texture', `${CONTENT_BASE}/materials/modern-floor-texture-v3.png`)
+    this.load.image('modern-wall-texture', `${CONTENT_BASE}/materials/modern-wall-texture-v3.png`)
     this.load.image('modern-hero', `${CONTENT_BASE}/materials/modern-hero-v3.png`)
     this.load.spritesheet('modern-enemies', `${CONTENT_BASE}/materials/modern-enemies-v1.png`, {
       frameWidth: 256,

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { moveHero } from './move.js'
+import { findPath, moveHero } from './move.js'
 import { dispatch, State, createInitialState } from '../state/store.js'
 
 describe('moveHero', () => {
@@ -71,5 +71,57 @@ describe('moveHero', () => {
 
     expect(moveHero('up', floor, maps)).toBe(false)
     expect(State.position).toEqual({ x: 1, y: 1 })
+  })
+
+  it('finds a shortest walkable route around walls', () => {
+    const route = findPath(
+      { x: 0, y: 0 },
+      { x: 2, y: 0 },
+      {
+        map: [
+          [0, 10030, 0],
+          [0, 0, 0],
+        ],
+        cannotMove: {},
+      },
+      maps
+    )
+
+    expect(route).toEqual(['down', 'right', 'right', 'up'])
+  })
+
+  it('can route up to a blocked interaction target without crossing it', () => {
+    const route = findPath(
+      { x: 0, y: 1 },
+      { x: 2, y: 1 },
+      {
+        map: [
+          [0, 0, 0],
+          [0, 0, 10030],
+        ],
+        cannotMove: {},
+      },
+      maps,
+      { allowBlockedTarget: true }
+    )
+
+    expect(route).toEqual(['right', 'right'])
+  })
+
+  it('returns null when no legal route exists', () => {
+    const route = findPath(
+      { x: 0, y: 0 },
+      { x: 2, y: 0 },
+      {
+        map: [
+          [0, 10030, 0],
+          [0, 10030, 0],
+        ],
+        cannotMove: {},
+      },
+      maps
+    )
+
+    expect(route).toBeNull()
   })
 })

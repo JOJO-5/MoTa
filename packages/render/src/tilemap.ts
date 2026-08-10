@@ -39,25 +39,44 @@ export class TileMapLayer {
     const cols = map[0]?.length ?? 0
     const collected = new Set(collectedTiles)
 
-    // Pass 1: a low-noise tactical grid. Large generated textures looked like
-    // collision geometry after being squeezed into 32px cells, so the board is
-    // intentionally code-drawn and stable at every viewport size.
+    // Pass 1: a warm, subdued dungeon floor. The generated texture supplies
+    // hand-made material variation while the code-drawn grid keeps movement
+    // cells obvious at phone size.
     const floor = this.scene.add.graphics().setDepth(-5)
-    floor.fillStyle(0x0b1422, 1)
+    floor.fillStyle(0x21150e, 1)
     floor.fillRect(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
+    this.sprites.push(floor)
+
+    if (this.scene.textures.exists('modern-floor-texture')) {
+      const floorTexture = this.scene.add
+        .tileSprite(
+          (cols * TILE_SIZE) / 2,
+          (rows * TILE_SIZE) / 2,
+          cols * TILE_SIZE,
+          rows * TILE_SIZE,
+          'modern-floor-texture'
+        )
+        .setAlpha(0.62)
+        .setDepth(-4)
+      this.sprites.push(floorTexture)
+    }
+
+    const grid = this.scene.add.graphics().setDepth(-3)
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const px = x * TILE_SIZE
         const py = y * TILE_SIZE
-        floor.fillStyle((x + y) % 2 === 0 ? 0x111e30 : 0x0f1b2b, 1)
-        floor.fillRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
-        floor.lineStyle(1, 0x2d405d, 0.42)
-        floor.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
-        floor.fillStyle(0x6f91b8, 0.28)
-        floor.fillRect(px + 4, py + 4, 2, 2)
+        grid.fillStyle((x + y) % 2 === 0 ? 0x4b321e : 0x2e2117, 0.12)
+        grid.fillRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+        grid.lineStyle(1, 0x9a7444, 0.2)
+        grid.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
+        if ((x * 5 + y * 3) % 11 === 0) {
+          grid.fillStyle(0x87904c, 0.32)
+          grid.fillRect(px + 5, py + 24, 3, 2)
+        }
       }
     }
-    this.sprites.push(floor)
+    this.sprites.push(grid)
 
     // Pass 2: background layer overrides (only non-zero entries)
     for (let y = 0; y < rows; y++) {
@@ -143,6 +162,21 @@ export class TileMapLayer {
 
     const kind = resolveModernTileKind(tileId, this.mapsData)
 
+    if (kind.kind === 'wall' && this.scene.textures.exists('modern-wall-texture')) {
+      const cellX = Math.floor(px / TILE_SIZE)
+      const cellY = Math.floor(py / TILE_SIZE)
+      const cropX = Math.abs((cellX * 53 + cellY * 29) % (256 - TILE_SIZE))
+      const cropY = Math.abs((cellX * 31 + cellY * 47) % (256 - TILE_SIZE))
+      const wallTexture = this.scene.add
+        .image(px, py, 'modern-wall-texture')
+        .setOrigin(0, 0)
+        .setCrop(cropX, cropY, TILE_SIZE, TILE_SIZE)
+        .setDisplaySize(TILE_SIZE, TILE_SIZE)
+        .setAlpha(opacity)
+        .setDepth(1)
+      this.sprites.push(wallTexture)
+    }
+
     // Enemies and NPCs need silhouette detail at a glance. Use the restored
     // authored sprite art, framed by a semantic base that remains readable on
     // the new low-noise board.
@@ -152,8 +186,8 @@ export class TileMapLayer {
     const hasLegacyCharacter = Boolean(legacy && this.scene.textures.exists(legacy.sheet))
     if ((kind.kind === 'enemy' || kind.kind === 'npc') && (hasModernEnemy || hasLegacyCharacter)) {
       const frame = this.scene.add.graphics().setAlpha(opacity).setDepth(2)
-      const accent = kind.kind === 'enemy' ? 0xff5d73 : 0x4de1ff
-      frame.fillStyle(0x050a12, 0.82)
+      const accent = kind.kind === 'enemy' ? 0xd95c4f : 0xe0b85b
+      frame.fillStyle(0x24150e, 0.82)
       frame.fillEllipse(px + 4, py + 22, TILE_SIZE - 8, 9)
       frame.lineStyle(2, accent, 0.82)
       frame.strokeCircle(px + 16, py + 16, 14)
@@ -193,7 +227,7 @@ export class TileMapLayer {
             ? 0x59b8ff
             : kind.variant === 'red-key'
               ? 0xff667a
-              : 0x7ce7ff
+              : 0xe0b85b
       plate.fillStyle(accent, 0.14)
       plate.fillCircle(px + 16, py + 16, 14)
       plate.lineStyle(1, accent, 0.8)

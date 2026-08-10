@@ -135,29 +135,28 @@ export function drawModernTile(
   graphics.setAlpha(opacity)
 
   if (kind.kind === 'ground') {
-    // A quiet inset plate: passable special tiles must still read as floor.
-    graphics.fillStyle(0x16243a, 0.42)
+    // Passable authored terrain remains visibly inset into the earthen floor.
+    graphics.fillStyle(0x594027, 0.28)
     graphics.fillRoundedRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3)
-    graphics.lineStyle(1, 0x3f5878, 0.45)
+    graphics.lineStyle(1, 0xaa8150, 0.48)
     graphics.strokeRoundedRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3)
     return graphics
   }
 
   if (kind.kind === 'wall') {
-    // Raised, cool-blue masonry is deliberately much brighter than the floor.
-    // The top/side bevel makes the collision boundary readable without relying
-    // on a noisy photographic texture.
-    drawPixelRect(graphics, px, py, TILE_SIZE, TILE_SIZE, 0x0a101d)
-    drawPixelRect(graphics, px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 5, 0x263a58)
-    drawPixelRect(graphics, px + 3, py + 3, TILE_SIZE - 6, 4, 0x59749b)
-    drawPixelRect(graphics, px + 3, py + 7, 3, TILE_SIZE - 12, 0x3e587c)
-    drawPixelRect(graphics, px + 6, py + TILE_SIZE - 7, TILE_SIZE - 10, 3, 0x111d31)
-    graphics.lineStyle(1, 0x89a8cf, 0.55)
+    // Warm raised masonry sits over the generated texture. Thick walnut
+    // shadows and an amber top bevel make blocked cells unmistakable.
+    drawPixelRect(graphics, px, py, TILE_SIZE, TILE_SIZE, 0x1d1009, 0.26)
+    drawPixelRect(graphics, px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 5, 0xb66b26, 0.1)
+    drawPixelRect(graphics, px + 3, py + 3, TILE_SIZE - 6, 3, 0xf0b34f, 0.72)
+    drawPixelRect(graphics, px + 3, py + 6, 3, TILE_SIZE - 11, 0xc37a31, 0.48)
+    drawPixelRect(graphics, px + 5, py + TILE_SIZE - 7, TILE_SIZE - 9, 4, 0x2a160c, 0.82)
+    graphics.lineStyle(1, 0x6d3718, 0.94)
     graphics.strokeRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 5)
     const seam = (((px / TILE_SIZE + py / TILE_SIZE) % 2) + 2) % 2
-    drawPixelRect(graphics, px + (seam ? 7 : 18), py + 13, 10, 2, 0x172740, 0.9)
+    drawPixelRect(graphics, px + (seam ? 7 : 18), py + 14, 10, 2, 0x3b2112, 0.72)
     if (((px / TILE_SIZE) * 3 + py / TILE_SIZE) % 7 === 0) {
-      drawPixelRect(graphics, px + 22, py + 8, 4, 2, 0xf59e0b, 0.8)
+      drawPixelRect(graphics, px + 22, py + 9, 4, 2, 0x8c9848, 0.82)
     }
     return graphics
   }
@@ -180,11 +179,11 @@ export function drawModernTile(
 
   if (kind.kind === 'door') {
     const color = DOOR_COLORS[kind.variant]
-    graphics.fillStyle(0x070d18, 0.94)
+    graphics.fillStyle(0x24130b, 0.96)
     graphics.fillRoundedRect(px + 3, py + 1, TILE_SIZE - 6, TILE_SIZE - 2, 5)
     graphics.lineStyle(2, color, 0.95)
     graphics.strokeRoundedRect(px + 4, py + 2, TILE_SIZE - 8, TILE_SIZE - 4, 4)
-    drawPixelRect(graphics, px + 8, py + 6, TILE_SIZE - 16, TILE_SIZE - 11, 0x17253c)
+    drawPixelRect(graphics, px + 8, py + 6, TILE_SIZE - 16, TILE_SIZE - 11, 0x4a2a17)
     drawPixelRect(graphics, px + 14, py + 10, 4, 13, color, 0.92)
     drawPixelRect(graphics, px + 18, py + 10, 2, 13, color, 0.55)
     graphics.fillStyle(color, 0.95)

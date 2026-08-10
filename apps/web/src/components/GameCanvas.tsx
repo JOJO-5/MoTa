@@ -12,6 +12,10 @@ interface Props {
 export function GameCanvas({ onBackToMenu, onRestart }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const gameRef = useRef<ReturnType<typeof createGame> | null>(null)
+  const moveHoldRef = useRef<{
+    delay: ReturnType<typeof setTimeout>
+    repeat: ReturnType<typeof setInterval> | null
+  } | null>(null)
   const [saveNotice, setSaveNotice] = useState<string | null>(null)
   const gameState = useGameState()
 
@@ -22,6 +26,11 @@ export function GameCanvas({ onBackToMenu, onRestart }: Props) {
     gameRef.current = game
 
     return () => {
+      if (moveHoldRef.current) {
+        clearTimeout(moveHoldRef.current.delay)
+        if (moveHoldRef.current.repeat) clearInterval(moveHoldRef.current.repeat)
+        moveHoldRef.current = null
+      }
       game.destroy(true)
     }
   }, [])
@@ -43,6 +52,28 @@ export function GameCanvas({ onBackToMenu, onRestart }: Props) {
     event.stopPropagation()
   }
 
+  const stopMoveHold = () => {
+    const active = moveHoldRef.current
+    if (!active) return
+    clearTimeout(active.delay)
+    if (active.repeat) clearInterval(active.repeat)
+    moveHoldRef.current = null
+  }
+
+  const startMoveHold = (direction: Direction, event: React.PointerEvent<HTMLButtonElement>) => {
+    preventTouchScroll(event)
+    stopMoveHold()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    moveFromTouch(direction)
+    const delay = setTimeout(() => {
+      moveFromTouch(direction)
+      const active = moveHoldRef.current
+      if (!active) return
+      active.repeat = setInterval(() => moveFromTouch(direction), 90)
+    }, 180)
+    moveHoldRef.current = { delay, repeat: null }
+  }
+
   const saveCurrentGame = () => {
     const saved = saveGame(0, gameStore.getState().state)
     setSaveNotice(saved ? '已保存' : '保存失败')
@@ -55,37 +86,37 @@ export function GameCanvas({ onBackToMenu, onRestart }: Props) {
         <div className="mobile-dpad" aria-label="方向控制">
           <button
             aria-label="向上移动"
-            onPointerDown={(event) => {
-              preventTouchScroll(event)
-              moveFromTouch('up')
-            }}
+            onPointerDown={(event) => startMoveHold('up', event)}
+            onPointerUp={stopMoveHold}
+            onPointerCancel={stopMoveHold}
+            onLostPointerCapture={stopMoveHold}
           >
             ▲
           </button>
           <button
             aria-label="向左移动"
-            onPointerDown={(event) => {
-              preventTouchScroll(event)
-              moveFromTouch('left')
-            }}
+            onPointerDown={(event) => startMoveHold('left', event)}
+            onPointerUp={stopMoveHold}
+            onPointerCancel={stopMoveHold}
+            onLostPointerCapture={stopMoveHold}
           >
             ◀
           </button>
           <button
             aria-label="向下移动"
-            onPointerDown={(event) => {
-              preventTouchScroll(event)
-              moveFromTouch('down')
-            }}
+            onPointerDown={(event) => startMoveHold('down', event)}
+            onPointerUp={stopMoveHold}
+            onPointerCancel={stopMoveHold}
+            onLostPointerCapture={stopMoveHold}
           >
             ▼
           </button>
           <button
             aria-label="向右移动"
-            onPointerDown={(event) => {
-              preventTouchScroll(event)
-              moveFromTouch('right')
-            }}
+            onPointerDown={(event) => startMoveHold('right', event)}
+            onPointerUp={stopMoveHold}
+            onPointerCancel={stopMoveHold}
+            onLostPointerCapture={stopMoveHold}
           >
             ▶
           </button>

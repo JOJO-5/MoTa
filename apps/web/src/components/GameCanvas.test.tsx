@@ -13,6 +13,8 @@ vi.mock('@modern-mota/render', () => ({
 afterEach(() => {
   cleanup()
   saveGame.mockClear()
+  vi.useRealTimers()
+  delete (window as unknown as { __gameScene?: unknown }).__gameScene
 })
 
 describe('GameCanvas', () => {
@@ -23,5 +25,30 @@ describe('GameCanvas', () => {
 
     expect(saveGame).toHaveBeenCalledWith(0, gameStore.getState().state)
     expect(screen.getByText('已保存')).toBeVisible()
+  })
+
+  it('repeats mobile movement while a direction button is held', () => {
+    vi.useFakeTimers()
+    const tryMove = vi.fn()
+    ;(window as unknown as { __gameScene?: { tryMove: typeof tryMove } }).__gameScene = {
+      tryMove,
+    }
+    Object.defineProperty(HTMLElement.prototype, 'setPointerCapture', {
+      configurable: true,
+      value: vi.fn(),
+    })
+    render(<GameCanvas onBackToMenu={vi.fn()} onRestart={vi.fn()} />)
+    const right = screen.getByRole('button', { name: '向右移动' })
+
+    fireEvent.pointerDown(right, { pointerId: 1 })
+    expect(tryMove).toHaveBeenCalledTimes(1)
+    vi.advanceTimersByTime(180)
+    expect(tryMove).toHaveBeenCalledTimes(2)
+    vi.advanceTimersByTime(180)
+    expect(tryMove).toHaveBeenCalledTimes(4)
+
+    fireEvent.pointerUp(right, { pointerId: 1 })
+    vi.advanceTimersByTime(500)
+    expect(tryMove).toHaveBeenCalledTimes(4)
   })
 })
