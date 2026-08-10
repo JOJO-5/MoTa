@@ -1,114 +1,129 @@
-# 魔塔 · Modern Rebuild
+# 魔塔 2014 · Rebuilt Edition
 
-用现代前端栈（Phaser 3 + React + TypeScript + Vite）从零复刻经典 20 层魔塔。
+[![CI](https://github.com/JOJO-5/MoTa/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JOJO-5/MoTa/actions/workflows/ci.yml)
+[![在线试玩](https://img.shields.io/badge/在线试玩-GitHub%20Pages-d6ae55)](https://jojo-5.github.io/MoTa/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)](https://www.typescriptlang.org/)
+[![Phaser](https://img.shields.io/badge/Phaser-3-82589f)](https://phaser.io/)
 
-## 状态
+保留《魔塔 2014》的关卡、事件、敌人数值与道具规则，用 React、TypeScript、Phaser 3 和 Vite 重建浏览器运行时、手机操作和现代化界面。
 
-**Phase 6 ✅ 核心可玩** — 构建、类型检查与自动化测试通过。
-已打通核心闭环：移动（WASD/方向键）、拾取道具（钥匙/宝石/药水/装备）、普通与 48 像素怪物战斗（含原版数字特殊能力、奖励与清格）、楼梯换层、原版坐标事件、商店、手动存档/继续游戏，以及 HUD（HP 条/楼层名/状态栏/消息框）。
+> 当前版本已经可以完整体验基础冒险闭环，但仍处于持续完善阶段。玩法数据以原版基线为准，现代化主要发生在界面、可读性、交互反馈和素材表现层。
 
-路线图：
+**[立即在线试玩](https://jojo-5.github.io/MoTa/)** · [查看构建状态](https://github.com/JOJO-5/MoTa/actions/workflows/ci.yml) · [阅读设计文档](docs/superpowers/specs/2026-08-07-modern-mota-design.md)
 
-- [x] Phase 1: 数据层（schema + importer + validator）
-- [x] Phase 2: 游戏逻辑（GameState + 战斗 + 移动 + 事件机 + A* 寻路）
-- [x] Phase 3: 渲染层（Phaser 场景 + Tilemap + Autotile + 精灵 + UI + 摄像机 + 粒子 + 字体 + 存档 + 对话框 + 小地图 + 商店 + 天气 + HUD + 动画 + BGM/SFX）
-- [x] Phase 4: 输入系统（键盘 + 虚拟手柄 + 游戏手柄）
-- [x] Phase 5: Web 应用（React 主界面 + 游戏画布 + 状态桥接 + DevTools）
-- [x] Phase 6: 核心可玩闭环（移动 / 拾取 / 战斗 / 换层 / HUD）
-- [ ] Phase 7: 文档
-- [ ] Phase 8: 演示
-- [ ] Phase 9: 发布准备
+![战斗演出与勇者档案](docs/screenshots/readme-battle.png)
 
-### 已知限制（待办）
+## 当前内容
 
-- 战斗失败（HP=0）会停止移动，但死亡/回城流程仍需完善
-- `showImage`、复杂动画和少数旧版脚本事件仍未接入渲染桥
-- 当前提供一个本地手动存档槽和“继续游戏”；多槽、自动存档及导入导出仍待实现
-- 设置界面已展示，但音量和小地图开关尚未接入实际运行时
-- `data.json` 的 `values`/`flags` 未从原版导入（宝石/药水数值目前在 `tile-interactions.ts` 中硬编码，与原版 `data.js` 一致）
+- **65 个楼层 ID**：MT0–MT26、JX1–JX24、SM1–SM10、Dark1–Dark2，以及 JXZTFG、MTSMFG。
+- **原版数据驱动**：地图、事件、敌人数值、道具效果和换层关系来自恢复后的《魔塔 2014》内容基线。
+- **完整基础闭环**：移动、拾取、开门、战斗、楼层往返、坐标事件、对话、选择、商店、死亡重开和手动存档。
+- **战斗可预判**：无法取胜时说明原因且不扣血；胜利后展示双方属性、伤害、回合数和短时战斗演出。
+- **桌面与手机适配**：支持键盘、触控方向键和 A 键，手机操作区与游戏画布分离。
+- **现代视觉层**：高辨识度地图语义、勇者档案、新版勇者和 16 类常见怪物；未重制的 NPC、道具和罕见怪物安全回退到原版素材。
 
-## 技术栈
+## 操作
 
-- 运行时：Vite + React 18 + TypeScript 5 + Phaser 3
-- 测试：Vitest
-- 数据：Zod schema + JSON
-- 包管理：pnpm 9 monorepo
-- CI/CD：GitHub Actions
+| 场景               | 操作               |
+| ------------------ | ------------------ |
+| 桌面移动           | `WASD` 或方向键    |
+| 对话 / 交互 / 确认 | `Enter` 或 `Space` |
+| 手机移动           | 屏幕方向键         |
+| 手机确认           | `A` 键             |
+| 存档               | 游戏顶部“保存”按钮 |
 
-## 快速开始
+存档写入浏览器 `localStorage`。底层支持 3 个存档槽，当前界面使用槽位 0；清理站点数据会同时清除本地存档。
 
-要求 Node.js 20+ 和 pnpm 9+。
+## 技术架构
 
-```bash
-pnpm install
-pnpm dev          # 启动 Vite dev server (http://localhost:5173)
-pnpm test         # 跑全部测试
-pnpm typecheck    # TS 类型检查
-pnpm build        # 产出 production build
+这是一个 pnpm 9 monorepo，各层职责保持分离：
+
+| 目录                   | 职责                                                   |
+| ---------------------- | ------------------------------------------------------ |
+| `apps/web`             | React 入口、主菜单、设置、游戏容器、手机控制和死亡界面 |
+| `packages/core`        | 状态、移动、战斗、表达式、事件机与运行时地图覆盖       |
+| `packages/data`        | Zod schema、浏览器/Node 内容加载和数据类型             |
+| `packages/render`      | Phaser 场景、地图、精灵、HUD、战斗演出、换层和输入     |
+| `packages/ui`          | 共享 React UI                                          |
+| `packages/persistence` | 持久化边界                                             |
+| `tools/importer`       | mota-js 内容导入工具                                   |
+| `tools/validator`      | schema、引用与数值验证                                 |
+| `content/mota-2014`    | 当前发布的 65 层内容基线                               |
+
+核心运行链路：
+
+```text
+React App
+  → initTower('mota-2014')
+  → data loader / Zod validation
+  → Zustand GameState
+  → Phaser GameScene + runtime map
+  → Canvas、HUD、对话与战斗演出
 ```
 
-## 仓库结构
+## 本地运行
 
-```
-apps/web/                    浏览器入口（React + Vite）
-packages/core/               纯游戏逻辑（无 UI 依赖）
-  src/logic/move.ts         移动逻辑
-  src/logic/battle.ts       战斗逻辑
-  src/logic/battle-utils.ts 伤害计算 + 特殊属性
-  src/logic/expr.ts         AST 表达式求值器
-  src/logic/event-machine.ts 事件机（Generator-based）
-  src/logic/pathfinding.ts   A* 寻路
-  src/state/store.ts         Zustand 状态管理
-packages/data/              数据 schema + 加载器
-  src/schema/               Zod schema 定义
-  src/loader.ts             Node.js 加载器（CLI 工具用）
-  src/loader-browser.ts    浏览器加载器（fetch）
-packages/render/            Phaser 3 渲染层
-  src/boot.ts              BootScene
-  src/game.ts              Phaser.Game 工厂
-  src/scene-transition.ts   GameScene + 楼层切换
-  src/tilemap.ts           瓦片地图渲染
-  src/autotile.ts          自动拼接瓦片
-  src/sprite.ts            角色精灵
-  src/camera.ts            摄像机系统
-  src/particles.ts         粒子特效
-  src/font.ts              字体渲染
-  src/save.ts              存档系统
-  src/dialog.ts            对话框
-  src/minimap.ts           小地图
-  src/hud.ts               HUD 显示
-  src/animation.ts         动画系统
-  src/sound.ts             声音系统
-  src/weather.ts           天气效果
-  src/input/               输入系统（键盘/虚拟手柄/游戏手柄）
-  src/bridge.ts            状态桥接（core ↔ render）
-packages/ui/               React UI 组件
-packages/persistence/       存档 / 录像 / 设置
-content/                    关卡数据（已导入魔塔 2014 MT0-MT20）
-tools/importer/            mota-js → JSON 导入器
-tools/validator/           内容验证器
-docs/                      设计文档
+需要 Node.js 20+、Corepack 和 pnpm 9。
+
+```powershell
+git clone https://github.com/JOJO-5/MoTa.git
+Set-Location MoTa
+corepack enable
+corepack pnpm install
+corepack pnpm dev
 ```
 
-## 导入新关卡
+打开 <http://localhost:5173>。
 
-```bash
-pnpm --filter @modern-mota/importer tsx src/cli.ts \
-  --source "./Magictower2014/魔塔2014/project" \
-  --output "./content/mota-2014" \
-  --floors "MT0,MT1,...,MT20"
+## 验证
+
+```powershell
+corepack pnpm test
+corepack pnpm typecheck
+corepack pnpm build
 ```
 
-## 验证内容
+首次运行浏览器测试时安装 Chromium：
 
-```bash
-pnpm --filter @modern-mota/validator tsx src/cli.ts mota-2014
+```powershell
+corepack pnpm --filter @modern-mota/web exec playwright install chromium
+corepack pnpm test:e2e
 ```
 
-## 设计文档
+CI 会在每次推送和拉取请求中执行：
 
-详见 [docs/superpowers/specs/2026-08-07-modern-mota-design.md](docs/superpowers/specs/2026-08-07-modern-mota-design.md)
+1. 全仓 TypeScript 类型检查；
+2. Vitest 单元与组件测试；
+3. Vite production build；
+4. 桌面 Chromium 与 Pixel 7 视口的 Playwright 冒烟测试；
+5. `main` 分支的 GitHub Pages 部署。
 
-## License
+## 内容基线与修改原则
 
-MIT
+[`content/mota-2014/baseline-manifest.json`](content/mota-2014/baseline-manifest.json) 是当前内容快照：
+
+- `floorCount` 必须与 `data.json.floorIds` 和实际楼层文件数量一致；
+- 修改表现素材时不得悄悄改变地图碰撞、敌人数值或剧情事件；
+- 运行时判断必须使用收集状态和 `tileOverrides` 计算后的地图，不能只读取静态 `floor.map`；
+- 新版素材缺少映射时必须保留原版回退，避免剧情怪物或 NPC 变成空白。
+
+## 已知限制
+
+- 设置页中的 BGM/SFX 音量和小地图开关尚未连接运行状态。
+- `playSound`、`animate`、`setCurtain` 等少数纯表现型旧事件仍等待完整渲染桥支持。
+- 当前 UI 只开放一个手动存档槽，尚无自动存档、导入与导出。
+- 常见勇者和怪物已经统一画风，NPC、道具及罕见怪物仍在逐步优化。
+
+## 路线图
+
+- [x] 恢复 65 个楼层及原版玩法数据
+- [x] 移动、战斗、道具、门、商店、事件和双向换层
+- [x] 桌面 / 手机输入与 GitHub Pages 发布
+- [x] 打不过提示、死亡重开、战斗演出和勇者档案
+- [ ] 接通设置项与剩余视觉 / 音频事件
+- [ ] 多槽、自动存档和存档导入导出
+- [ ] 继续统一 NPC、道具和罕见怪物素材
+
+## 来源与许可
+
+本仓库的 package metadata 声明为 MIT。原版《魔塔 2014》内容、mota-js 及第三方素材仍遵循各自来源目录中的许可与归属说明。
