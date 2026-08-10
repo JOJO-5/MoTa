@@ -14,7 +14,15 @@ const ITEMS: Record<string, RawItem> = {
   redGem: { cls: 'items', name: '红宝石', itemEffect: 'atk += 1' },
   blueGem: { cls: 'items', name: '蓝宝石', itemEffect: 'def += 1' },
   redPotion: { cls: 'items', name: '红药水', itemEffect: 'hp += 25' },
+  I451: { cls: 'items', name: '粉色元气瓶', itemEffect: 'hp += 500' },
+  I457: { cls: 'items', name: '黄色水晶', itemEffect: 'atk += 5; def += 5;' },
   sword1: { cls: 'equips', name: '铁剑', equip: { type: 0, value: { atk: 8 } } },
+  sword2: {
+    cls: 'equips',
+    name: '银光剑',
+    itemEffect: 'atk += 18',
+    equip: { type: 0, value: { atk: 26 } },
+  },
   shield1: { cls: 'equips', name: '小盾牌', equip: { type: 1, value: { def: 19 } } },
 }
 
@@ -106,6 +114,25 @@ describe('tile-interactions', () => {
     expect(hero.def).toBe(29)
     expect(hero.equipment.weapon).toBe('sword1')
     expect(hero.equipment.shield).toBe('shield1')
+  })
+
+  it('replaces an equipped weapon bonus instead of stacking cumulative values', () => {
+    pickUpItem('sword1', ITEMS)
+    pickUpItem('sword2', ITEMS)
+    const hero = gameStore.getState().state.hero
+    expect(hero.atk).toBe(36)
+    expect(hero.equipment.weapon).toBe('sword2')
+  })
+
+  it('applies late-game item effects immediately instead of storing an unusable item', () => {
+    pickUpItem('I451', ITEMS)
+    pickUpItem('I457', ITEMS)
+    const hero = gameStore.getState().state.hero
+    expect(hero.hp).toBe(1500)
+    expect(hero.atk).toBe(15)
+    expect(hero.def).toBe(15)
+    expect(hero.items).not.toContain('I451')
+    expect(hero.items).not.toContain('I457')
   })
 
   it('wins an easy battle and grants rewards, clearing the tile', () => {

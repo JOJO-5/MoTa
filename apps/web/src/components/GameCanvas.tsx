@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
-import { createGame, saveGame } from '@modern-mota/render'
-import { gameStore, type Direction } from '@modern-mota/core'
+import { canSaveGame, createGame, saveGame } from '@modern-mota/render'
+import { eventMachine, gameStore, type Direction } from '@modern-mota/core'
 import { useGameState } from './useGameState'
 
 interface Props {
@@ -75,9 +75,20 @@ export function GameCanvas({ onBackToMenu, onRestart }: Props) {
   }
 
   const saveCurrentGame = () => {
+    if (!canSaveGame(gameState, eventMachine.getState())) {
+      setSaveNotice(gameState.ui.modal ? '请结束当前对话后再保存' : '当前状态无法保存，请稍后再试')
+      return
+    }
     const saved = saveGame(0, gameStore.getState().state)
     setSaveNotice(saved ? '已保存' : '保存失败')
   }
+
+  const saveAllowed = canSaveGame(gameState, eventMachine.getState())
+  const displayedSaveNotice = saveAllowed
+    ? saveNotice
+    : gameState.ui.modal
+      ? '请结束当前对话后再保存'
+      : '当前状态无法保存，请稍后再试'
 
   return (
     <div className="game-screen">
@@ -136,10 +147,16 @@ export function GameCanvas({ onBackToMenu, onRestart }: Props) {
         <button className="back-btn" aria-label="返回主菜单" onClick={onBackToMenu}>
           ←
         </button>
-        <button className="save-btn" aria-label="保存游戏" onClick={saveCurrentGame}>
+        <button
+          className="save-btn"
+          aria-label="保存游戏"
+          onClick={saveCurrentGame}
+          disabled={!saveAllowed}
+          title={saveAllowed ? '保存当前进度' : '请结束当前对话或战斗后再保存'}
+        >
           保存
         </button>
-        {saveNotice && <span className="save-notice">{saveNotice}</span>}
+        {displayedSaveNotice && <span className="save-notice">{displayedSaveNotice}</span>}
       </div>
       {gameState.hero.hp <= 0 && (
         <div

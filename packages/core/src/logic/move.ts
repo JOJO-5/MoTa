@@ -1,6 +1,7 @@
 import { State, dispatch } from '../state/store.js'
 import type { Direction, Position } from '../types.js'
 import type { Floor } from '@modern-mota/data'
+import { resolveStepHazards } from './step-hazards.js'
 
 export type MapBlockInfo = {
   cls: string
@@ -130,7 +131,7 @@ export function findPath(
 
 export function moveHero(
   direction: Direction,
-  floor: Pick<Floor, 'map' | 'cannotMove' | 'changeFloor'>,
+  floor: Pick<Floor, 'map' | 'cannotMove' | 'changeFloor'> & { floorId?: string },
   maps?: Record<string, MapBlockInfo> | null
 ): boolean {
   if (State.hero.hp <= 0) return false
@@ -177,6 +178,37 @@ export function moveHero(
   dispatch({ type: 'SET_DIRECTION', direction })
   if (State.flags.poison) {
     dispatch({ type: 'SET_HERO', hero: { hp: Math.max(0, State.hero.hp - 10) } })
+  }
+  const hazards = resolveStepHazards(
+    nextPos,
+    floorMap,
+    maps ?? undefined,
+    State.enemys,
+    State.hero.hp,
+    State.flags
+  )
+  if (hazards.damage > 0) {
+    dispatch({ type: 'SET_HERO', hero: { hp: Math.max(0, State.hero.hp - hazards.damage) } })
+    dispatch({
+      type: 'SET_UI',
+      ui: { floorMsg: `受到${hazards.types.join('、') || '额外'}${hazards.damage}点伤害` },
+    })
+  }
+  for (const repulse of hazards.repulses) {
+    dispatch({
+      type: 'SET_TILE_OVERRIDE',
+      floorId: floor.floorId ?? State.floorId,
+      x: repulse.from.x,
+      y: repulse.from.y,
+      override: { hidden: true },
+    })
+    dispatch({
+      type: 'SET_TILE_OVERRIDE',
+      floorId: floor.floorId ?? State.floorId,
+      x: repulse.to.x,
+      y: repulse.to.y,
+      override: { map: repulse.map, hidden: false },
+    })
   }
   return true
 }

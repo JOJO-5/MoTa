@@ -8,6 +8,7 @@ const renderMocks = vi.hoisted(() => ({
   initTower: vi.fn(async () => ({})),
   listSaves: vi.fn<[], Array<SaveSlot | null>>(() => [null, null, null]),
   loadGame: vi.fn<[number], SaveSlot | null>(() => null),
+  canSaveGame: vi.fn(() => true),
 }))
 
 vi.mock('@modern-mota/render', () => ({
