@@ -115,7 +115,12 @@ describe('tile-interactions', () => {
     expect(hero.hp).toBeLessThan(1000)
     expect(hero.exp).toBe(2)
     expect(hero.money).toBe(3)
-    expect(gameStore.getState().state.battle).toBeNull()
+    expect(gameStore.getState().state.battle).toMatchObject({
+      enemyId: 'wolf',
+      heroHpBefore: 1000,
+      heroHpAfter: hero.hp,
+      outcome: 'victory',
+    })
   })
 
   it('warns about a hopeless battle without taking HP or clearing the tile', () => {

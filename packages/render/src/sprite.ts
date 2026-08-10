@@ -3,10 +3,10 @@ import { TILE_SIZE } from './constants.js'
 import { HERO_FRAMES, HERO_COLS, ICONS } from './icons.js'
 import type { Direction } from '@modern-mota/core'
 
-// Tight alpha bounds of modern-hero-v2.png. The source is a single portrait,
+// Tight alpha bounds of modern-hero-v3.png. The source is a single portrait,
 // not a sprite sheet; keeping the crop tight prevents the character becoming
 // a tiny cyan shape inside a large transparent canvas on mobile.
-const MODERN_HERO_CROP = { x: 237, y: 196, width: 602, height: 1103 }
+const MODERN_HERO_CROP = { x: 249, y: 218, width: 615, height: 1081 }
 const MODERN_HERO_SIZE = { width: 28, height: 52 }
 const MODERN_HERO_SCALE = {
   x: MODERN_HERO_SIZE.width / MODERN_HERO_CROP.width,

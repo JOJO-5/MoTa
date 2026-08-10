@@ -96,6 +96,7 @@ export function previewBattle(enemy: Enemy, hero: HeroSnapshot = State.hero): Ba
 
 /** Apply a battle result. Callers may preview first when defeat must be blocked. */
 export function startBattle(enemy: Enemy): BattleResult {
+  const heroBefore = State.hero
   const result = previewBattle(enemy)
 
   if (result.outcome !== 'stalemate') {
@@ -103,7 +104,21 @@ export function startBattle(enemy: Enemy): BattleResult {
   }
   dispatch({
     type: 'SET_BATTLE',
-    battle: { enemyId: enemy.id, enemyHp: result.enemyHp, turns: result.turns },
+    battle: {
+      enemyId: enemy.id,
+      enemyHp: result.enemyHp,
+      enemyHpMax: enemy.hp,
+      enemyName: enemy.name,
+      enemyAtk: enemy.atk,
+      enemyDef: enemy.def,
+      heroHpBefore: heroBefore.hp,
+      heroHpAfter: result.heroHp,
+      heroAtk: heroBefore.atk,
+      heroDef: heroBefore.def,
+      damage: result.damage,
+      outcome: result.outcome,
+      turns: result.turns,
+    },
   })
   return result
 }

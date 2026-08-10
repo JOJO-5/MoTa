@@ -237,7 +237,6 @@ export function battleEnemy(
   const battle = startBattle({ ...enemy, id: enemyId } as never)
 
   const { hero } = State
-  dispatch({ type: 'SET_BATTLE', battle: null })
   if (battle.outcome !== 'victory' || hero.hp <= 0) return null
 
   if (hasSpecial(enemy as never, 12)) {

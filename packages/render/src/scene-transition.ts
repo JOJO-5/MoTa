@@ -122,6 +122,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   tryMove(direction: 'up' | 'down' | 'left' | 'right') {
+    if (gameStore.getState().state.battle) return
     if (eventMachine.getState() === 'waiting') {
       eventMachine.moveChoice(direction)
       return
@@ -153,6 +154,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   tryAction() {
+    if (gameStore.getState().state.battle) return
     if (eventMachine.getState() === 'waiting') {
       eventMachine.resume()
       return
@@ -455,10 +457,14 @@ export class GameScene extends Phaser.Scene {
 
   private triggerEventsAtPosition(x: number, y: number): boolean {
     if (!this.currentFloor) return false
+    const key = `${x},${y}`
+    if (gameStore.getState().state.tileOverrides[this.currentFloor.floorId]?.[key]?.hidden) {
+      return false
+    }
     const tileEvents = (
       this.currentFloor.events as
         Record<string, Event[] | { data?: Event[]; enable?: boolean; trigger?: string }> | undefined
-    )?.[`${x},${y}`]
+    )?.[key]
     const events = Array.isArray(tileEvents) ? tileEvents : tileEvents?.data
     const enabled = Array.isArray(tileEvents) || tileEvents?.enable !== false
     if (!tileEvents || !enabled || !events || events.length === 0) return false

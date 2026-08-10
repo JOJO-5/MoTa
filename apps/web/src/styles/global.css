@@ -388,6 +388,293 @@ body {
   text-align: right;
 }
 
+/* ---- Battle record: a short, readable result instead of an instant cut ---- */
+.mota-battle {
+  position: absolute;
+  inset: 0;
+  z-index: 850;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: auto;
+  color: #e8edf2;
+}
+
+.mota-battle__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(65, 87, 111, 0.24), transparent 42%),
+    linear-gradient(145deg, rgba(2, 5, 10, 0.97), rgba(8, 15, 25, 0.94));
+  backdrop-filter: blur(5px);
+}
+
+.mota-battle__veil::after {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.018) 0,
+    rgba(255, 255, 255, 0.018) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+  content: '';
+}
+
+.mota-battle__card {
+  position: relative;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  padding: 24px 22px 18px;
+  border: 1px solid rgba(224, 184, 91, 0.62);
+  background: linear-gradient(180deg, rgba(17, 28, 42, 0.98), rgba(6, 11, 18, 0.98));
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.72),
+    inset 0 0 45px rgba(78, 124, 157, 0.08);
+}
+
+.mota-battle.is-active .mota-battle__card {
+  animation: battle-card-in 1.35s cubic-bezier(0.18, 0.82, 0.24, 1) both;
+}
+
+.mota-battle__kicker {
+  margin-bottom: 14px;
+  color: #72e5df;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+
+.mota-battle__duel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.mota-battle__fighter {
+  min-width: 0;
+  text-align: center;
+}
+
+.mota-battle__portrait-frame {
+  position: relative;
+  width: 104px;
+  height: 112px;
+  margin: 0 auto 8px;
+  overflow: hidden;
+  border: 1px solid rgba(211, 178, 98, 0.52);
+  background:
+    radial-gradient(circle at 50% 75%, rgba(106, 184, 201, 0.18), transparent 48%), #060b12;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.75);
+}
+
+.mota-battle__portrait-frame::before,
+.mota-battle__portrait-frame::after {
+  position: absolute;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  border-color: #e0b85b;
+  content: '';
+}
+
+.mota-battle__portrait-frame::before {
+  top: 5px;
+  left: 5px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+
+.mota-battle__portrait-frame::after {
+  right: 5px;
+  bottom: 5px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+
+.mota-battle__enemy-portrait,
+.mota-battle__hero-portrait {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.mota-battle__enemy-portrait {
+  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.8));
+}
+
+.mota-battle__hero-portrait {
+  background-image: url('../content/mota-2014/materials/modern-hero-v3.png');
+  background-position: 52% 19%;
+  background-size: 170% auto;
+  filter: drop-shadow(0 8px 9px rgba(0, 0, 0, 0.75));
+}
+
+.mota-battle__role {
+  display: block;
+  color: #8b9aa7;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.mota-battle__fighter strong {
+  display: block;
+  min-height: 23px;
+  overflow: hidden;
+  color: #f3d78f;
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 16px;
+  line-height: 23px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mota-battle__statline {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  color: #aeb9c2;
+  font-size: 10px;
+}
+
+.mota-battle__life {
+  height: 6px;
+  margin-top: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #03070c;
+}
+
+.mota-battle__life i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #bd3037, #f0a24e);
+  box-shadow: 0 0 10px rgba(230, 85, 68, 0.56);
+  animation: battle-life-drain 0.8s 0.2s ease-out both;
+}
+
+.mota-battle__fighter--hero .mota-battle__life i {
+  background: linear-gradient(90deg, #2496a3, #78e0d7);
+  box-shadow: 0 0 10px rgba(74, 210, 208, 0.46);
+}
+
+.mota-battle__fighter small {
+  color: #6f7f8c;
+  font-size: 9px;
+}
+
+.mota-battle__impact {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 120px;
+}
+
+.mota-battle__impact::before {
+  position: absolute;
+  width: 3px;
+  height: 128px;
+  transform: rotate(28deg);
+  background: linear-gradient(transparent, #f2c85d, #eb4f55, transparent);
+  box-shadow: 0 0 18px rgba(235, 79, 85, 0.76);
+  content: '';
+}
+
+.mota-battle.is-active .mota-battle__impact::before {
+  animation: battle-slash 0.56s 0.12s ease-out both;
+}
+
+.mota-battle__impact span {
+  z-index: 1;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border: 1px solid rgba(243, 200, 91, 0.52);
+  border-radius: 50%;
+  background: #080d15;
+  color: #f3c85b;
+  font-family: Georgia, serif;
+  font-size: 17px;
+  font-style: italic;
+}
+
+.mota-battle__impact b {
+  position: absolute;
+  z-index: 2;
+  bottom: 1px;
+  color: #ff6068;
+  font-size: 18px;
+  text-shadow: 0 2px 8px #000;
+}
+
+.mota-battle.is-active .mota-battle__impact b {
+  animation: battle-damage-pop 0.66s 0.28s ease-out both;
+}
+
+.mota-battle__result {
+  margin-top: 14px;
+  color: #ffe29a;
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 24px;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(243, 200, 91, 0.36);
+}
+
+.mota-battle[data-outcome='defeat'] .mota-battle__result,
+.mota-battle[data-outcome='stalemate'] .mota-battle__result {
+  color: #ff6d76;
+}
+
+@keyframes battle-card-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  16%,
+  78% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.015) translateY(-4px);
+  }
+}
+
+@keyframes battle-slash {
+  from {
+    opacity: 0;
+    transform: rotate(28deg) scaleY(0.1);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(28deg) scaleY(1);
+  }
+}
+
+@keyframes battle-damage-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(1.6);
+  }
+  45%,
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes battle-life-drain {
+  from {
+    width: 100%;
+  }
+}
+
 /* ---- Side HUD panel (fixed to viewport) ---- */
 .mota-hud {
   position: fixed;
@@ -805,60 +1092,187 @@ input:focus-visible {
 .mota-hud {
   top: 92px;
   right: max(18px, calc((100vw - 920px) / 2));
-  min-width: 190px;
-  padding: 12px;
-  border: 1px solid rgba(243, 200, 91, 0.36);
+  width: 244px;
+  min-width: 244px;
+  padding: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(243, 200, 91, 0.5);
   border-radius: 0;
-  background: var(--panel);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+  background:
+    linear-gradient(145deg, rgba(21, 32, 46, 0.98), rgba(6, 11, 19, 0.98) 72%), var(--panel);
+  box-shadow:
+    0 22px 65px rgba(0, 0, 0, 0.52),
+    inset 0 0 40px rgba(87, 143, 164, 0.05);
   color: #d9e2e5;
+  line-height: 1.35;
+}
+
+.mota-hud__ornament {
+  position: absolute;
+  top: -22px;
+  right: -18px;
+  width: 92px;
+  height: 92px;
+  transform: rotate(28deg);
+  border: 1px solid rgba(101, 227, 211, 0.12);
+  box-shadow: 0 0 28px rgba(101, 227, 211, 0.06);
+}
+
+.mota-hud__header {
+  position: relative;
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(243, 200, 91, 0.28);
+}
+
+.mota-hud__portrait {
+  width: 70px;
+  height: 78px;
+  border: 1px solid rgba(243, 200, 91, 0.52);
+  background:
+    linear-gradient(rgba(2, 8, 14, 0.04), rgba(2, 8, 14, 0.45)),
+    url('../content/mota-2014/materials/modern-hero-v3.png') 52% 19% / 170% auto no-repeat;
+  box-shadow:
+    inset 0 0 22px rgba(0, 0, 0, 0.72),
+    0 8px 20px rgba(0, 0, 0, 0.34);
+  image-rendering: pixelated;
+}
+
+.mota-hud__identity {
+  min-width: 0;
+}
+
+.mota-hud__eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--cyan);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+}
+
+.mota-hud__identity strong {
+  display: block;
+  color: #ffe29a;
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+}
+
+.mota-hud__identity small {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #8493a0;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mota-hud__vitality {
+  padding: 12px 0 10px;
+}
+
+.mota-hud__vitality-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: #8e9ba6;
+  font-size: 9px;
+}
+
+.mota-hud__vitality-label b {
+  color: #f2f5f1;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.mota-hud__hp-track {
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #03070c;
+}
+
+.mota-hud__hp-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #a82f3c, #e86358 62%, #efae61);
+  box-shadow: 0 0 10px rgba(232, 99, 88, 0.38);
+  transition: width 0.3s ease-out;
 }
 
 .mota-hud__stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 7px 12px;
-  padding-bottom: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 0;
+  border: 0;
 }
 
 .mota-hud__stat {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  position: relative;
+  display: grid;
+  min-height: 48px;
+  place-items: center;
+  gap: 0;
+  padding: 5px 3px 4px;
+  border: 1px solid rgba(139, 159, 179, 0.17);
+  background: rgba(4, 9, 16, 0.42);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 8px;
 }
 
 .mota-hud__stat strong {
-  color: #f2f5f1;
-  font-weight: 400;
+  color: #f3d78f;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mota-hud__stat em {
+  color: #52616d;
+  font-size: 6px;
+  font-style: normal;
+  letter-spacing: 0.12em;
 }
 
 .mota-hud__keys,
+.mota-hud__equipment,
 .mota-hud__items {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
-  padding-top: 8px;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 0;
   border-top: 1px solid rgba(156, 171, 189, 0.18);
+  color: #b8c3cb;
+  font-size: 9px;
 }
 
 .mota-hud__section-label {
   flex-basis: 100%;
   color: var(--cyan);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+.mota-hud__section-label i {
+  margin-left: 5px;
+  color: #53636f;
+  font-size: 6px;
+  font-style: normal;
+  letter-spacing: 0.14em;
 }
 
 .mota-hud__key {
   color: var(--gold-bright);
-  font-size: 10px;
-}
-
-.mota-hud__key i {
-  margin-right: 3px;
-  color: var(--muted);
-  font-style: normal;
+  font-size: 9px;
 }
 
 .modal-overlay {

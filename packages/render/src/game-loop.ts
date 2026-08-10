@@ -2,12 +2,14 @@ import { gameStore, dispatch } from '@modern-mota/core'
 import type { GameScene } from './scene-transition.js'
 import { UiLayer } from './ui/layer.js'
 import { Hud } from './hud.js'
+import { BattleOverlay } from './battle-overlay.js'
 
 const FLOOR_MSG_TIMEOUT = 3500
 
 export class GameLoop {
   private uiLayer: UiLayer
   private hud: Hud
+  private battleOverlay: BattleOverlay
   private running: boolean = false
   private lastMsg = ''
   private lastMsgAt = 0
@@ -15,6 +17,7 @@ export class GameLoop {
   constructor(_scene: GameScene, container: HTMLElement) {
     this.uiLayer = new UiLayer(container)
     this.hud = new Hud(container)
+    this.battleOverlay = new BattleOverlay(container)
     this.running = true
     this.tick()
   }
@@ -27,11 +30,12 @@ export class GameLoop {
 
   private update() {
     const { state } = gameStore.getState()
-    const { hero, ui, floorId } = state
+    const { hero, ui, floorId, battle } = state
 
     this.uiLayer.updateHero(hero)
     this.uiLayer.updateStatus(hero)
     this.hud.update(hero)
+    this.battleOverlay.update(battle, hero, battle ? state.enemys[battle.enemyId] : undefined)
 
     // Show current floor name (e.g. 魔塔 0 层 / 第 1 层)
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
@@ -68,5 +72,6 @@ export class GameLoop {
     this.running = false
     this.uiLayer.destroy()
     this.hud.destroy()
+    this.battleOverlay.destroy()
   }
 }

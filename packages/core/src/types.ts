@@ -66,6 +66,16 @@ export interface BattleSnapshot {
   enemyId: string
   enemyHp: number
   turns: number
+  enemyHpMax?: number
+  enemyName?: string
+  enemyAtk?: number
+  enemyDef?: number
+  heroHpBefore?: number
+  heroHpAfter?: number
+  heroAtk?: number
+  heroDef?: number
+  damage?: number | null
+  outcome?: 'victory' | 'defeat' | 'stalemate'
 }
 
 export interface UiSnapshot {

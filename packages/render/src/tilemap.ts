@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { TILE_SIZE } from './constants.js'
 import { drawModernTile, resolveModernTileKind } from './modern-theme.js'
 import { getTileSprite } from './icons.js'
+import { getModernEnemyFrame } from './modern-assets.js'
 
 /** Maps data from maps.json: tileId → { cls, id } */
 type MapsData = Record<string, { cls: string; id: string; canPass?: boolean }>
@@ -145,22 +146,29 @@ export class TileMapLayer {
     // Enemies and NPCs need silhouette detail at a glance. Use the restored
     // authored sprite art, framed by a semantic base that remains readable on
     // the new low-noise board.
-    if (
-      (kind.kind === 'enemy' || kind.kind === 'npc') &&
-      legacy &&
-      this.scene.textures.exists(legacy.sheet)
-    ) {
+    const modernEnemyFrame = kind.kind === 'enemy' ? getModernEnemyFrame(kind.variant) : undefined
+    const hasModernEnemy =
+      modernEnemyFrame !== undefined && this.scene.textures.exists('modern-enemies')
+    const hasLegacyCharacter = Boolean(legacy && this.scene.textures.exists(legacy.sheet))
+    if ((kind.kind === 'enemy' || kind.kind === 'npc') && (hasModernEnemy || hasLegacyCharacter)) {
       const frame = this.scene.add.graphics().setAlpha(opacity).setDepth(2)
       const accent = kind.kind === 'enemy' ? 0xff5d73 : 0x4de1ff
       frame.fillStyle(0x050a12, 0.82)
       frame.fillEllipse(px + 4, py + 22, TILE_SIZE - 8, 9)
       frame.lineStyle(2, accent, 0.82)
       frame.strokeCircle(px + 16, py + 16, 14)
-      const sprite = this.scene.add
-        .image(px + TILE_SIZE / 2, py + TILE_SIZE - 1, legacy.sheet, legacy.frame)
-        .setOrigin(0.5, 1)
-        .setAlpha(opacity)
-        .setDepth(4)
+      const sprite = hasModernEnemy
+        ? this.scene.add
+            .image(px + TILE_SIZE / 2, py + TILE_SIZE + 1, 'modern-enemies', modernEnemyFrame)
+            .setOrigin(0.5, 1)
+            .setDisplaySize(36, 36)
+            .setAlpha(opacity)
+            .setDepth(4)
+        : this.scene.add
+            .image(px + TILE_SIZE / 2, py + TILE_SIZE - 1, legacy!.sheet, legacy!.frame)
+            .setOrigin(0.5, 1)
+            .setAlpha(opacity)
+            .setDepth(4)
       this.scene.tweens.add({
         targets: sprite,
         y: sprite.y - 1.5,
