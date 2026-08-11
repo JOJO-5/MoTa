@@ -155,4 +155,81 @@ describe('usable legacy items', () => {
       effect: { type: 'teleport', position: { x: 2, y: 2 } },
     })
   })
+
+  it('supports stat-based consumables instead of leaving them inert', () => {
+    const state = context([[0]]).state
+    state.hero.hp = 200
+    expect(resolveItemUse('superPotion', { ...context([[0]]), state })).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: { type: 'hero-patch', hero: { hp: 400 } },
+    })
+  })
+
+  it('clears every breakable wall with an earthquake scroll', () => {
+    expect(
+      resolveItemUse(
+        'earthquake',
+        context([
+          [0, 1, 0],
+          [1, 0, 1],
+          [0, 1, 0],
+        ])
+      )
+    ).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: {
+        type: 'clear-tiles',
+        tiles: [
+          { x: 1, y: 0 },
+          { x: 0, y: 1 },
+          { x: 2, y: 1 },
+          { x: 1, y: 2 },
+        ],
+      },
+    })
+  })
+
+  it('jumps two empty cells in the facing direction', () => {
+    expect(
+      resolveItemUse(
+        'jumpShoes',
+        context([
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+        ])
+      )
+    ).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: { type: 'teleport', position: { x: 3, y: 1 } },
+    })
+  })
+
+  it('keeps jump shoes when the landing cell is outside the map', () => {
+    const state = context([[0, 0, 0]]).state
+    state.position = { x: 2, y: 0 }
+    expect(resolveItemUse('jumpShoes', { ...context([[0, 0, 0]]), state })).toMatchObject({
+      ok: false,
+      consume: false,
+    })
+  })
+
+  it('uses the next floor when an up-floor item has a safe matching cell', () => {
+    const state = context([[0, 0, 0]]).state
+    state.position = { x: 1, y: 0 }
+    const result = resolveItemUse('upFly', {
+      ...context([[0, 0, 0]]),
+      state,
+      floorIds: ['MT0', 'MT1'],
+      floors: { MT1: { map: [[0, 0, 0]] } },
+    })
+    expect(result).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: { type: 'change-floor', direction: 'up' },
+    })
+  })
 })

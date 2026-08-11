@@ -1,4 +1,5 @@
 import type { Enemy } from '@modern-mota/data'
+import { getEnemyPortraitStyle } from './modern-assets.js'
 
 export interface EnemyGuideEntry {
   id: string
@@ -69,6 +70,14 @@ export class EnemyGuide {
                   .map(
                     (enemy) => `
                       <article class="mota-enemy-guide__enemy ${enemy.outcome === 'victory' ? '' : 'is-danger'}">
+                        <div class="mota-enemy-guide__portrait-frame">
+                          <div
+                            class="mota-enemy-guide__portrait"
+                            role="img"
+                            aria-label="${escapeHtml(enemy.name)}"
+                            style='${getEnemyPortraitStyle(enemy.id, 88)}'
+                          ></div>
+                        </div>
                         <div class="mota-enemy-guide__enemy-title">
                           <strong>${escapeHtml(enemy.name)}</strong>
                           <span>${battleForecast(enemy)}</span>
