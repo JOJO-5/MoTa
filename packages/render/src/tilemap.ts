@@ -39,11 +39,11 @@ export class TileMapLayer {
     const cols = map[0]?.length ?? 0
     const collected = new Set(collectedTiles)
 
-    // Pass 1: a warm, subdued dungeon floor. The generated texture supplies
-    // hand-made material variation while the code-drawn grid keeps movement
-    // cells obvious at phone size.
+    // Pass 1: a cool slate dungeon floor. The warm wall texture is intentionally
+    // kept as the opposing palette so walkable space and blocked masonry read
+    // as two different materials at a glance, including on small screens.
     const floor = this.scene.add.graphics().setDepth(-5)
-    floor.fillStyle(0x21150e, 1)
+    floor.fillStyle(0x101d2b, 1)
     floor.fillRect(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
     this.sprites.push(floor)
 
@@ -56,7 +56,7 @@ export class TileMapLayer {
           rows * TILE_SIZE,
           'modern-floor-texture'
         )
-        .setAlpha(0.62)
+        .setAlpha(0.86)
         .setDepth(-4)
       this.sprites.push(floorTexture)
     }
@@ -66,12 +66,12 @@ export class TileMapLayer {
       for (let x = 0; x < cols; x++) {
         const px = x * TILE_SIZE
         const py = y * TILE_SIZE
-        grid.fillStyle((x + y) % 2 === 0 ? 0x4b321e : 0x2e2117, 0.12)
+        grid.fillStyle((x + y) % 2 === 0 ? 0x294459 : 0x152a3a, 0.18)
         grid.fillRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
-        grid.lineStyle(1, 0x9a7444, 0.2)
+        grid.lineStyle(1, 0x6d9ab2, 0.28)
         grid.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2)
         if ((x * 5 + y * 3) % 11 === 0) {
-          grid.fillStyle(0x87904c, 0.32)
+          grid.fillStyle(0x79b5a5, 0.28)
           grid.fillRect(px + 5, py + 24, 3, 2)
         }
       }
@@ -127,7 +127,7 @@ export class TileMapLayer {
       const marker = this.scene.add.graphics()
       const px = x * TILE_SIZE
       const py = y * TILE_SIZE
-      marker.fillStyle(0x2f260f, 0.92)
+      marker.fillStyle(0x122334, 0.94)
       marker.fillRoundedRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4, 6)
       marker.lineStyle(2, 0xffd166, 1)
       marker.strokeRoundedRect(px + 3, py + 3, TILE_SIZE - 6, TILE_SIZE - 6, 5)
