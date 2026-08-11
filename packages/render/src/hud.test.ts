@@ -74,7 +74,7 @@ describe('Hud', () => {
     hud.destroy()
   })
 
-  it('labels unsupported active items truthfully instead of calling them passive', () => {
+  it('makes the teleport wand an explicit usable action', () => {
     const host = document.createElement('div')
     const hud = new Hud(host)
     const hero = createInitialState('MT0', 6, 6).hero
@@ -86,9 +86,8 @@ describe('Hud', () => {
       { 'item:fly': 1 }
     )
 
-    expect(host.querySelector('.mota-hud__items')?.textContent).toContain('暂未接入')
-    expect(host.querySelector('.mota-hud__items')?.textContent).not.toContain('被动生效')
-    expect(host.querySelector('[data-item-id="fly"]')).toBeNull()
+    expect(host.querySelector('.mota-hud__items')?.textContent).toContain('使用')
+    expect(host.querySelector('[data-item-id="fly"]')).not.toBeNull()
     hud.destroy()
   })
 })
