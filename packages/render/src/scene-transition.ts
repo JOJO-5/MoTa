@@ -677,6 +677,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     const towerData = (globalThis as Record<string, unknown>)['__towerData'] as {
+      main: { floorIds: string[] }
+      floors: Record<string, Floor>
       maps: Record<
         string,
         { cls: string; id: string; canBreak?: boolean; name?: string; canPass?: boolean }
@@ -697,12 +699,46 @@ export class GameScene extends Phaser.Scene {
       map: runtimeMap,
       maps: towerData.maps,
       enemys: towerData.enemys,
+      items: towerData.items,
+      floorIds: towerData.main.floorIds,
+      floors: Object.fromEntries(
+        Object.entries(towerData.floors).map(([floorId, floor]) => [floorId, { map: floor.map }])
+      ),
     })
     dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
     if (!result.ok || !result.effect) return
 
     if (result.effect.type === 'show-enemy-guide') {
       this.showCurrentFloorEnemies(runtimeMap, towerData.maps, towerData.enemys)
+      return
+    }
+
+    if (result.effect.type === 'hero-patch') {
+      dispatch({ type: 'SET_HERO', hero: result.effect.hero })
+      if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
+      return
+    }
+
+    if (result.effect.type === 'change-floor') {
+      const currentIndex = towerData.main.floorIds.indexOf(state.floorId)
+      const targetIndex = result.effect.direction === 'up' ? currentIndex + 1 : currentIndex - 1
+      const targetFloorId = towerData.main.floorIds[targetIndex]
+      const targetFloor = targetFloorId ? towerData.floors[targetFloorId] : undefined
+      if (!targetFloor) {
+        dispatch({ type: 'SET_UI', ui: { floorMsg: '当前没有可以到达的楼层' } })
+        return
+      }
+
+      const destinationStair = result.effect.direction === 'up' ? 'downFloor' : 'upFloor'
+      const landing = resolveStairLanding(targetFloor, destinationStair, targetFloor.map)
+      const position = landing ? { x: landing[0], y: landing[1] } : state.position
+      if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
+      dispatch({
+        type: 'ENTER_FLOOR',
+        floorId: targetFloorId,
+        position,
+        direction: state.direction,
+      })
       return
     }
 
