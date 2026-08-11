@@ -48,7 +48,8 @@ export function previewBattle(enemy: Enemy, hero: HeroSnapshot = State.hero): Ba
     if (legacy.add) enemyHp += vampireDamage
   }
 
-  const heroDamage = calcHeroDamage(hero, { ...enemy, hp: enemyHp } as Enemy)
+  const doubleSlash = State.flags.skill === 1 || State.flags.skill === true
+  const heroDamage = calcHeroDamage(hero, { ...enemy, hp: enemyHp } as Enemy, doubleSlash)
   const enemyDamage = calcEnemyDamage(hero, enemy)
   if (heroDamage <= 0) {
     if (enemyDamage <= 0) {
@@ -102,6 +103,12 @@ export function startBattle(enemy: Enemy): BattleResult {
   if (result.outcome !== 'stalemate') {
     dispatch({ type: 'SET_HERO', hero: { hp: result.heroHp } })
   }
+  if (result.outcome === 'victory' && heroBefore.mana < heroBefore.manaMax) {
+    dispatch({
+      type: 'SET_HERO',
+      hero: { mana: Math.min(heroBefore.manaMax, heroBefore.mana + 1) },
+    })
+  }
   dispatch({
     type: 'SET_BATTLE',
     battle: {
@@ -113,7 +120,7 @@ export function startBattle(enemy: Enemy): BattleResult {
       enemyDef: enemy.def,
       heroHpBefore: heroBefore.hp,
       heroHpAfter: result.heroHp,
-      heroAtk: heroBefore.atk,
+      heroAtk: heroBefore.atk * (State.flags.skill === 1 || State.flags.skill === true ? 2 : 1),
       heroDef: heroBefore.def,
       damage: result.damage,
       outcome: result.outcome,

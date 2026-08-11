@@ -107,12 +107,15 @@ export class UiLayer {
     this.msgBox.style.display = 'none'
   }
 
-  updateStatus(hero: HeroSnapshot) {
+  updateStatus(hero: HeroSnapshot, flags: Record<string, unknown> = {}) {
+    const doubleSlashActive = flags.skill === 1 || flags.skill === true
     this.statusEl.innerHTML = `
       <span>ATK: ${hero.atk}</span>
       <span>DEF: ${hero.def}</span>
+      <span>MP: ${hero.mana}/${hero.manaMax}</span>
       <span>💰 ${hero.money}</span>
       <span>🔑 ${formatKeyCounts(hero.keys)}</span>
+      ${doubleSlashActive ? '<span class="mota-status__skill">二倍斩 ON</span>' : ''}
     `
   }
 

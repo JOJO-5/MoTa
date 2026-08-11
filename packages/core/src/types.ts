@@ -10,6 +10,8 @@ export interface Position {
 export interface HeroSnapshot {
   hp: number
   hpMax: number
+  mana: number
+  manaMax: number
   atk: number
   def: number
   mdef: number

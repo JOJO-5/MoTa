@@ -33,7 +33,7 @@ export class GameLoop {
     const { hero, ui, floorId, battle } = state
 
     this.uiLayer.updateHero(hero)
-    this.uiLayer.updateStatus(hero)
+    this.uiLayer.updateStatus(hero, state.flags)
     this.battleOverlay.update(battle, hero, battle ? state.enemys[battle.enemyId] : undefined)
 
     // Show current floor name (e.g. 魔塔 0 层 / 第 1 层)
@@ -41,7 +41,7 @@ export class GameLoop {
       floors: Record<string, { name?: string; title?: string }>
       items?: Record<string, { cls?: string; name?: string; text?: string }>
     } | null
-    this.hud.update(hero, towerData?.items, state.values)
+    this.hud.update(hero, towerData?.items, state.values, state.flags)
     const floor = towerData?.floors?.[floorId]
     this.uiLayer.updateFloorName(floor?.name || floorId)
 

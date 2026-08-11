@@ -36,4 +36,22 @@ describe('save persistence boundaries', () => {
     expect(loadGame(0)?.data.ui.modal).toBeNull()
     expect(loadGame(0)?.data.battle).toBeNull()
   })
+
+  it('backfills mana fields when loading a pre-skill save', () => {
+    const state = createInitialState('MT1', 7, 13)
+    const { mana: _mana, manaMax: _manaMax, ...legacyHero } = state.hero
+    localStorage.setItem(
+      'modern-mota-save-0',
+      JSON.stringify({
+        id: 0,
+        timestamp: 1,
+        floorId: 'MT1',
+        heroLevel: 1,
+        data: { ...state, hero: legacyHero },
+      })
+    )
+
+    expect(loadGame(0)?.data.hero.mana).toBe(10)
+    expect(loadGame(0)?.data.hero.manaMax).toBe(10)
+  })
 })

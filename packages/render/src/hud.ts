@@ -77,9 +77,12 @@ export class Hud {
   update(
     hero: HeroSnapshot,
     itemDefinitions: Record<string, ItemDefinition> = {},
-    values: Record<string, number> = {}
+    values: Record<string, number> = {},
+    flags: Record<string, unknown> = {}
   ) {
     const hpPct = Math.max(0, Math.min(100, (hero.hp / Math.max(1, hero.hpMax)) * 100))
+    const manaPct = Math.max(0, Math.min(100, (hero.mana / Math.max(1, hero.manaMax)) * 100))
+    const doubleSlashActive = flags.skill === 1 || flags.skill === true
     this.identityEl.innerHTML = `
       <span class="mota-hud__eyebrow">HERO DOSSIER</span>
       <strong>勇者档案</strong>
@@ -88,6 +91,11 @@ export class Hud {
     this.vitalityEl.innerHTML = `
       <div class="mota-hud__vitality-label"><span>生命值</span><b>${hero.hp} / ${hero.hpMax}</b></div>
       <div class="mota-hud__hp-track"><i class="mota-hud__hp-fill" style="width:${hpPct}%"></i></div>
+      <div class="mota-hud__vitality-label mota-hud__mana-label"><span>魔力</span><b>${hero.mana} / ${hero.manaMax}</b></div>
+      <div class="mota-hud__mana-track"><i class="mota-hud__mana-fill" style="width:${manaPct}%"></i></div>
+      <div class="mota-hud__skill-state ${doubleSlashActive ? 'is-active' : ''}">
+        <span>主动技能 · 二倍斩</span><b>${doubleSlashActive ? '已开启' : '未开启'}</b>
+      </div>
     `
     this.statsEl.innerHTML = `
       <div class="mota-hud__stat"><span>攻击</span><strong>${hero.atk}</strong><em>ATK</em></div>

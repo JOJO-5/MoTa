@@ -51,6 +51,16 @@ describe('startBattle', () => {
     expect(State.battle?.turns).toBe(10)
   })
 
+  it('uses double slash damage and restores one mana after victory', () => {
+    dispatch({ type: 'SET_HERO', hero: { hp: 100, mana: 5, atk: 20, def: 5 } })
+    dispatch({ type: 'SET_FLAG', name: 'skill', value: 1 })
+    const result = startBattle(mockEnemy)
+
+    expect(result.turns).toBe(5)
+    expect(State.hero.hp).toBe(80)
+    expect(State.hero.mana).toBe(6)
+  })
+
   it('handles hero losing battle', () => {
     dispatch({ type: 'SET_HERO', hero: { hp: 10, atk: 5, def: 5 } })
     startBattle(mockEnemy)
