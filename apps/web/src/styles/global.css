@@ -1518,6 +1518,25 @@ button.mota-hud__item:active {
   border-color: rgba(220, 79, 79, 0.36);
 }
 
+.mota-enemy-guide__portrait-frame {
+  display: grid;
+  min-height: 96px;
+  margin: -1px -1px 7px;
+  place-items: center;
+  border-bottom: 1px solid rgba(139, 159, 179, 0.16);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(101, 227, 211, 0.12), transparent 62%),
+    linear-gradient(180deg, rgba(17, 37, 50, 0.72), rgba(3, 10, 17, 0.36));
+}
+
+.mota-enemy-guide__portrait {
+  width: 88px;
+  height: 88px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 7px 7px rgba(0, 0, 0, 0.82));
+}
+
 .mota-enemy-guide__enemy-title {
   display: flex;
   align-items: baseline;

@@ -1,34 +1,8 @@
 import { endBattle, type BattleSnapshot, type HeroSnapshot } from '@modern-mota/core'
 import type { Enemy } from '@modern-mota/data'
-import { ICONS, SHEET_COLS, SHEET_CONFIG, type SpriteSheetKey } from './icons.js'
-import { getModernEnemyPortraitStyle } from './modern-assets.js'
+import { getEnemyPortraitStyle } from './modern-assets.js'
 
 export const BATTLE_PRESENTATION_MS = 1350
-
-function enemyPortraitStyle(enemyId: string): string {
-  const modernStyle = getModernEnemyPortraitStyle(enemyId)
-  if (modernStyle) return modernStyle
-
-  const sheet: Extract<SpriteSheetKey, 'enemys' | 'enemy48'> | null =
-    ICONS.enemys?.[enemyId] !== undefined
-      ? 'enemys'
-      : ICONS.enemy48?.[enemyId] !== undefined
-        ? 'enemy48'
-        : null
-  if (!sheet) return ''
-
-  const row = ICONS[sheet][enemyId]
-  const { frameWidth, frameHeight } = SHEET_CONFIG[sheet]
-  const cols = SHEET_COLS[sheet]
-  const scale = sheet === 'enemy48' ? 2 : 3
-  const x = sheet === 'enemy48' ? 16 : 0
-  const y = -(row * frameHeight * scale)
-  return [
-    `background-image:url("./content/mota-2014/materials/${sheet}.png")`,
-    `background-size:${cols * frameWidth * scale}px auto`,
-    `background-position:${x}px ${y}px`,
-  ].join(';')
-}
 
 export class BattleOverlay {
   private container: HTMLElement
@@ -72,7 +46,7 @@ export class BattleOverlay {
         <div class="mota-battle__duel">
           <section class="mota-battle__fighter mota-battle__fighter--enemy">
             <div class="mota-battle__portrait-frame">
-              <div class="mota-battle__enemy-portrait" style='${enemyPortraitStyle(battle.enemyId)}'></div>
+              <div class="mota-battle__enemy-portrait" style='${getEnemyPortraitStyle(battle.enemyId)}'></div>
             </div>
             <span class="mota-battle__role">怪物</span>
             <strong>${enemyName}</strong>

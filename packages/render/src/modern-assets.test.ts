@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getModernEnemyFrame } from './modern-assets.js'
+import { getEnemyPortraitStyle, getModernEnemyFrame } from './modern-assets.js'
 
 describe('modern generated enemy atlas', () => {
   it('maps the common legacy ids to their fixed 4x4 atlas cells', () => {
@@ -23,5 +23,11 @@ describe('modern generated enemy atlas', () => {
 
   it('keeps uncommon legacy monsters on their authored fallback art', () => {
     expect(getModernEnemyFrame('octopus')).toBeUndefined()
+  })
+
+  it('resolves portraits for generated and legacy enemy art', () => {
+    expect(getEnemyPortraitStyle('greenSlime', 88)).toContain('modern-enemies-v1.png')
+    expect(getEnemyPortraitStyle('octopus', 88)).toContain('enemys.png')
+    expect(getEnemyPortraitStyle('unknownEnemy', 88)).toBe('')
   })
 })
