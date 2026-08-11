@@ -135,11 +135,14 @@ export function drawModernTile(
   graphics.setAlpha(opacity)
 
   if (kind.kind === 'ground') {
-    // Passable authored terrain remains visibly inset into the earthen floor.
-    graphics.fillStyle(0x594027, 0.28)
+    // Passable authored terrain remains visibly inset into the cool slate
+    // floor, while the warm masonry walls stay visually separate.
+    graphics.fillStyle(0x5f8998, 0.34)
     graphics.fillRoundedRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3)
-    graphics.lineStyle(1, 0xaa8150, 0.48)
+    graphics.lineStyle(1, 0xa8d2d0, 0.62)
     graphics.strokeRoundedRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3)
+    drawPixelRect(graphics, px + 7, py + 7, TILE_SIZE - 14, 2, 0xc3e4dd, 0.22)
+    drawPixelRect(graphics, px + 7, py + TILE_SIZE - 9, TILE_SIZE - 14, 2, 0x193647, 0.34)
     return graphics
   }
 
@@ -178,6 +181,41 @@ export function drawModernTile(
   }
 
   if (kind.kind === 'door') {
+    if (kind.variant === 'steel') {
+      // Steel doors read as ancient dungeon machinery: cool metal values
+      // belong to the slate floor, while tiny rust-orange rivets echo the
+      // warm masonry without turning the door into another brown tile.
+      drawPixelRect(graphics, px + 2, py + 1, TILE_SIZE - 4, TILE_SIZE - 2, 0x07131f, 0.98)
+      drawPixelRect(graphics, px + 4, py + 3, TILE_SIZE - 8, TILE_SIZE - 6, 0x1b3444, 0.96)
+      drawPixelRect(graphics, px + 5, py + 5, TILE_SIZE - 10, TILE_SIZE - 10, 0x0b1d2a, 0.96)
+
+      // A stepped silver-blue frame gives the door a readable silhouette at
+      // 32px while the lower edge remains visibly recessed.
+      drawPixelRect(graphics, px + 4, py + 3, TILE_SIZE - 8, 2, 0xb8d3d7, 0.82)
+      drawPixelRect(graphics, px + 4, py + 5, 2, TILE_SIZE - 10, 0x6f9aaa, 0.74)
+      drawPixelRect(graphics, px + 6, py + TILE_SIZE - 6, TILE_SIZE - 12, 2, 0x030b12, 0.94)
+      drawPixelRect(graphics, px + TILE_SIZE - 6, py + 5, 2, TILE_SIZE - 10, 0x2f5262, 0.84)
+
+      // Portcullis bars: each has a dark offset and a narrow highlight so the
+      // metal remains legible without looking like a flat grey sticker.
+      for (const barX of [10, 16, 22]) {
+        drawPixelRect(graphics, px + barX + 1, py + 8, 3, 17, 0x02080d, 0.92)
+        drawPixelRect(graphics, px + barX, py + 7, 2, 17, 0x91b7c1, 0.92)
+        drawPixelRect(graphics, px + barX, py + 8, 1, 15, 0xd1e1e0, 0.46)
+      }
+      drawPixelRect(graphics, px + 7, py + 12, TILE_SIZE - 14, 2, 0x5b8190, 0.88)
+      drawPixelRect(graphics, px + 7, py + 20, TILE_SIZE - 14, 2, 0x496d7c, 0.82)
+
+      // Small rust-orange rivets are the only warm accent on the mechanism.
+      graphics.fillStyle(0xe28a43, 0.92)
+      graphics.fillRect(px + 6, py + 6, 2, 2)
+      graphics.fillRect(px + 24, py + 6, 2, 2)
+      graphics.fillStyle(0x6a3420, 0.88)
+      graphics.fillRect(px + 6, py + 24, 2, 2)
+      graphics.fillRect(px + 24, py + 24, 2, 2)
+      return graphics
+    }
+
     const color = DOOR_COLORS[kind.variant]
     graphics.fillStyle(0x24130b, 0.96)
     graphics.fillRoundedRect(px + 3, py + 1, TILE_SIZE - 6, TILE_SIZE - 2, 5)
