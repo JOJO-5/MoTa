@@ -164,6 +164,10 @@ function createStore() {
               break
             case 'LOAD_STATE':
               Object.assign(s.state, action.state)
+              if (typeof s.state.hero.mana !== 'number') s.state.hero.mana = 10
+              if (typeof s.state.hero.manaMax !== 'number' || s.state.hero.manaMax <= 0) {
+                s.state.hero.manaMax = 10
+              }
               s.state.visitedFloors = Array.isArray(action.state.visitedFloors)
                 ? action.state.visitedFloors
                 : []

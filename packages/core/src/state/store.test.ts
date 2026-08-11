@@ -170,6 +170,8 @@ describe('GameState', () => {
 
   it('migrates old loaded states with new runtime fields', () => {
     const legacyState = createInitialState('MT0', 6, 6) as Partial<GameState>
+    delete legacyState.hero?.mana
+    delete legacyState.hero?.manaMax
     delete legacyState.visitedFloors
     delete legacyState.tileOverrides
 
@@ -177,5 +179,7 @@ describe('GameState', () => {
 
     expect(gameStore.getState().state.visitedFloors).toEqual([])
     expect(gameStore.getState().state.tileOverrides).toEqual({})
+    expect(gameStore.getState().state.hero.mana).toBe(10)
+    expect(gameStore.getState().state.hero.manaMax).toBe(10)
   })
 })
