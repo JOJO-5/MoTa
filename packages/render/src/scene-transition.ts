@@ -688,6 +688,27 @@ export class GameScene extends Phaser.Scene {
     } | null
     if (!towerData) return
 
+    let targetFloorId: string | undefined
+    if (itemId === 'fly') {
+      const choices = towerData.main.floorIds.filter(
+        (floorId) => floorId !== state.floorId && state.visitedFloors.includes(floorId)
+      )
+      if (choices.length === 0) {
+        dispatch({ type: 'SET_UI', ui: { floorMsg: '还没有探索过其他楼层' } })
+        return
+      }
+      const input =
+        typeof window !== 'undefined'
+          ? window.prompt(`输入目标楼层（可选：${choices.join('、')}）`, choices[0])
+          : null
+      if (input === null) return
+      targetFloorId = input.trim()
+      if (!choices.includes(targetFloorId)) {
+        dispatch({ type: 'SET_UI', ui: { floorMsg: '目标楼层不可达，请输入已探索的楼层编号' } })
+        return
+      }
+    }
+
     const runtimeMap = getRuntimeMap(
       this.currentFloor.floorId,
       this.currentFloor.map,
@@ -704,6 +725,7 @@ export class GameScene extends Phaser.Scene {
       floors: Object.fromEntries(
         Object.entries(towerData.floors).map(([floorId, floor]) => [floorId, { map: floor.map }])
       ),
+      targetFloorId,
     })
     dispatch({ type: 'SET_UI', ui: { floorMsg: result.message } })
     if (!result.ok || !result.effect) return
@@ -715,23 +737,53 @@ export class GameScene extends Phaser.Scene {
 
     if (result.effect.type === 'hero-patch') {
       dispatch({ type: 'SET_HERO', hero: result.effect.hero })
+      for (const [name, value] of Object.entries(result.effect.flags ?? {})) {
+        dispatch({ type: 'SET_FLAG', name, value })
+      }
+      for (const removeItemId of result.effect.removeItems ?? []) {
+        dispatch({ type: 'REMOVE_ITEM', itemId: removeItemId })
+      }
       if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
       return
     }
 
     if (result.effect.type === 'change-floor') {
       const currentIndex = towerData.main.floorIds.indexOf(state.floorId)
-      const targetIndex = result.effect.direction === 'up' ? currentIndex + 1 : currentIndex - 1
-      const targetFloorId = towerData.main.floorIds[targetIndex]
+      const targetIndex = result.effect.direction
+        ? result.effect.direction === 'up'
+          ? currentIndex + 1
+          : currentIndex - 1
+        : -1
+      const targetFloorId = result.effect.floorId ?? towerData.main.floorIds[targetIndex]
       const targetFloor = targetFloorId ? towerData.floors[targetFloorId] : undefined
       if (!targetFloor) {
         dispatch({ type: 'SET_UI', ui: { floorMsg: '当前没有可以到达的楼层' } })
         return
       }
 
-      const destinationStair = result.effect.direction === 'up' ? 'downFloor' : 'upFloor'
+      const destinationStair = result.effect.direction
+        ? result.effect.direction === 'up'
+          ? 'downFloor'
+          : 'upFloor'
+        : undefined
       const landing = resolveStairLanding(targetFloor, destinationStair, targetFloor.map)
-      const position = landing ? { x: landing[0], y: landing[1] } : state.position
+      const samePositionIsEmpty = targetFloor.map[state.position.y]?.[state.position.x] === 0
+      const fallback: { x: number; y: number } | undefined = samePositionIsEmpty
+        ? state.position
+        : targetFloor.map.reduce<{ x: number; y: number } | undefined>((found, row, y) => {
+            if (found) return found
+            const x = row.findIndex((tile) => tile === 0)
+            return x >= 0 ? { x, y } : undefined
+          }, undefined)
+      const position: { x: number; y: number } | undefined = landing
+        ? { x: landing[0], y: landing[1] }
+        : fallback
+          ? fallback
+          : undefined
+      if (!position) {
+        dispatch({ type: 'SET_UI', ui: { floorMsg: '目标楼层没有安全落脚点' } })
+        return
+      }
       if (result.consume) dispatch({ type: 'REMOVE_ITEM', itemId })
       dispatch({
         type: 'ENTER_FLOOR',

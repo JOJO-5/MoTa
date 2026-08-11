@@ -22,6 +22,7 @@ export interface ItemUseContext {
   items?: Record<string, ItemDefinition>
   floorIds?: string[]
   floors?: Record<string, { map: RuntimeTileValue[][] }>
+  targetFloorId?: string
 }
 
 export type ItemUseEffect =
@@ -29,8 +30,13 @@ export type ItemUseEffect =
   | { type: 'clear-tiles'; tiles: Position[] }
   | { type: 'clear-flags'; flags: string[] }
   | { type: 'teleport'; position: Position }
-  | { type: 'hero-patch'; hero: Partial<Pick<HeroSnapshot, 'hp' | 'atk' | 'def' | 'mdef'>> }
-  | { type: 'change-floor'; direction: 'up' | 'down' }
+  | {
+      type: 'hero-patch'
+      hero: Partial<Pick<HeroSnapshot, 'hp' | 'atk' | 'def' | 'mdef' | 'equipment'>>
+      flags?: Record<string, unknown>
+      removeItems?: string[]
+    }
+  | { type: 'change-floor'; direction?: 'up' | 'down'; floorId?: string }
 
 export interface ItemUseResult {
   ok: boolean
@@ -56,6 +62,10 @@ export const SUPPORTED_USABLE_ITEMS = new Set([
   'curseWine',
   'superWine',
   'centerFly',
+  'fly',
+  'lifeWand',
+  'I359',
+  'I360',
   'redPotion',
   'bluePotion',
   'yellowPotion',
@@ -118,6 +128,7 @@ function heroPatchForItem(
     yellowPotion: { hp: current.hp + 100 },
     greenPotion: { hp: current.hp + 250 },
     superPotion: { hp: current.hp * 2 },
+    lifeWand: { hp: Math.min(current.hpMax, current.hp + 100) },
     redGem: { atk: current.atk + 1 },
     blueGem: { def: current.def + 1 },
     greenGem: { mdef: current.mdef + 2 },
@@ -289,6 +300,26 @@ export function resolveItemUse(itemId: string, context: ItemUseContext): ItemUse
     }
   }
 
+  if (itemId === 'fly') {
+    const targetFloorId = context.targetFloorId
+    const currentIndex = context.floorIds?.indexOf(context.state.floorId) ?? -1
+    if (
+      !targetFloorId ||
+      targetFloorId === context.state.floorId ||
+      currentIndex < 0 ||
+      !context.floorIds?.includes(targetFloorId) ||
+      !context.floors?.[targetFloorId]
+    ) {
+      return { ok: false, consume: false, message: '请选择已经探索过的其他楼层' }
+    }
+    return {
+      ok: true,
+      consume: true,
+      message: `${itemName(context, itemId)}使用成功`,
+      effect: { type: 'change-floor', floorId: targetFloorId },
+    }
+  }
+
   if (itemId === 'jumpShoes') {
     const vector = DIRECTION_VECTORS[context.state.direction]
     const target = {
@@ -323,6 +354,44 @@ export function resolveItemUse(itemId: string, context: ItemUseContext): ItemUse
       consume: true,
       message: `${itemName(context, itemId)}使用成功`,
       effect: { type: 'change-floor', direction },
+    }
+  }
+
+  if (itemId === 'I359' || itemId === 'I360') {
+    const equipped = context.state.hero.equipment.accessory
+    const equipment = { ...context.state.hero.equipment }
+    const removeItems: string[] = []
+    const hero =
+      itemId === 'I359'
+        ? { atk: Math.floor(context.state.hero.atk * 1.2) }
+        : { def: Math.floor(context.state.hero.def * 1.5) }
+
+    if (itemId === 'I359' && equipped === 'I357')
+      hero.atk = Math.floor(context.state.hero.atk * 1.5)
+    if (itemId === 'I359' && equipped === 'I358') {
+      equipment.accessory = undefined
+      removeItems.push('I358')
+    }
+    if (itemId === 'I360' && equipped === 'I358') {
+      hero.atk = Math.floor(context.state.hero.atk * 1.2)
+      hero.def = Math.floor(context.state.hero.def * 1.8)
+    }
+    if (itemId === 'I360' && equipped === 'I357') {
+      equipment.accessory = undefined
+      removeItems.push('I357')
+    }
+
+    return {
+      ok: true,
+      consume: true,
+      message: `${itemName(context, itemId)}使用成功`,
+      effect: {
+        type: 'hero-patch',
+        hero: { ...hero, equipment },
+        flags:
+          itemId === 'I359' ? { 寒冰杖路线: 0, 赤炎杖路线: 1 } : { 寒冰杖路线: 1, 赤炎杖路线: 0 },
+        removeItems,
+      },
     }
   }
 

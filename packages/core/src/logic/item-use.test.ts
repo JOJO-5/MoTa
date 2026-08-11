@@ -166,6 +166,50 @@ describe('usable legacy items', () => {
     })
   })
 
+  it('uses one life wand charge to restore health without exceeding max HP', () => {
+    const state = context([[0]]).state
+    state.hero.hp = 950
+    state.hero.hpMax = 1000
+    expect(resolveItemUse('lifeWand', { ...context([[0]]), state })).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: { type: 'hero-patch', hero: { hp: 1000 } },
+    })
+  })
+
+  it('applies the fire wand route and removes a sacrificed defense wand', () => {
+    const state = context([[0]]).state
+    state.hero.atk = 100
+    state.hero.equipment.accessory = 'I358'
+    expect(resolveItemUse('I359', { ...context([[0]]), state })).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: {
+        type: 'hero-patch',
+        hero: { atk: 120, equipment: { accessory: undefined } },
+        flags: { 寒冰杖路线: 0, 赤炎杖路线: 1 },
+        removeItems: ['I358'],
+      },
+    })
+  })
+
+  it('selects a visited floor for the teleport wand', () => {
+    const state = context([[0]]).state
+    expect(
+      resolveItemUse('fly', {
+        ...context([[0]]),
+        state,
+        floorIds: ['MT0', 'MT1'],
+        floors: { MT1: { map: [[0]] } },
+        targetFloorId: 'MT1',
+      })
+    ).toMatchObject({
+      ok: true,
+      consume: true,
+      effect: { type: 'change-floor', floorId: 'MT1' },
+    })
+  })
+
   it('clears every breakable wall with an earthquake scroll', () => {
     expect(
       resolveItemUse(

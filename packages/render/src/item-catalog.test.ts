@@ -43,7 +43,7 @@ describe('inventory presentation', () => {
     ])
   })
 
-  it('distinguishes usable, passive and not-yet-supported active items', () => {
+  it('distinguishes usable and passive inventory items', () => {
     const hero = createInitialState('MT0', 6, 6).hero
     hero.items.push('book', 'amulet', 'fly')
 
@@ -60,7 +60,7 @@ describe('inventory presentation', () => {
     expect(view.items.map(({ id, availability }) => ({ id, availability }))).toEqual([
       { id: 'book', availability: 'usable' },
       { id: 'amulet', availability: 'passive' },
-      { id: 'fly', availability: 'unavailable' },
+      { id: 'fly', availability: 'usable' },
     ])
   })
 })
