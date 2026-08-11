@@ -177,6 +177,39 @@ describe('usable legacy items', () => {
     })
   })
 
+  it('toggles double slash and spends five mana only when enabling it', () => {
+    const state = context([[0]]).state
+    state.hero.mana = 5
+    const enabled = resolveItemUse('skill1', { ...context([[0]]), state })
+    expect(enabled).toMatchObject({
+      ok: true,
+      consume: false,
+      effect: {
+        type: 'hero-patch',
+        hero: { mana: 0 },
+        flags: { skill: 1, skillName: '二倍斩' },
+      },
+    })
+
+    state.flags.skill = 1
+    const disabled = resolveItemUse('skill1', { ...context([[0]]), state })
+    expect(disabled).toMatchObject({
+      ok: true,
+      consume: false,
+      effect: { type: 'hero-patch', flags: { skill: 0, skillName: '无' } },
+    })
+  })
+
+  it('refuses to enable double slash when mana is below five', () => {
+    const state = context([[0]]).state
+    state.hero.mana = 4
+    expect(resolveItemUse('skill1', { ...context([[0]]), state })).toMatchObject({
+      ok: false,
+      consume: false,
+      message: '魔力不足，无法开启二倍斩',
+    })
+  })
+
   it('applies the fire wand route and removes a sacrificed defense wand', () => {
     const state = context([[0]]).state
     state.hero.atk = 100

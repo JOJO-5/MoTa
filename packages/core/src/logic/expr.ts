@@ -4,6 +4,8 @@ import { State } from '../state/store.js'
 export type ExpressionContext = {
   hero: {
     hp: number
+    mana: number
+    manaMax: number
     atk: number
     def: number
     mdef: number
@@ -40,6 +42,8 @@ export function getContext(): ExpressionContext {
   return {
     hero: {
       hp: hero.hp,
+      mana: hero.mana,
+      manaMax: hero.manaMax,
       atk: hero.atk,
       def: hero.def,
       mdef: hero.mdef,

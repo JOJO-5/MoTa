@@ -1079,6 +1079,8 @@ input:focus-visible {
   bottom: 0;
   left: 32px;
   right: 32px;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   justify-content: space-around;
   padding: 6px 0;
   border-top: 1px solid rgba(243, 200, 91, 0.36);
@@ -1086,6 +1088,11 @@ input:focus-visible {
   color: #d8e1e3;
   font-size: 10px;
   letter-spacing: 0.08em;
+}
+
+.mota-status__skill {
+  color: #ffe49a;
+  text-shadow: 0 0 8px rgba(243, 200, 91, 0.45);
 }
 
 .mota-msg-box {
@@ -1228,6 +1235,45 @@ input:focus-visible {
   background: linear-gradient(90deg, #a82f3c, #e86358 62%, #efae61);
   box-shadow: 0 0 10px rgba(232, 99, 88, 0.38);
   transition: width 0.3s ease-out;
+}
+
+.mota-hud__mana-label {
+  margin-top: 9px;
+}
+
+.mota-hud__mana-track {
+  height: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(101, 227, 211, 0.18);
+  background: #03070c;
+}
+
+.mota-hud__mana-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #247e9e, #65e3d3);
+  box-shadow: 0 0 10px rgba(101, 227, 211, 0.38);
+  transition: width 0.3s ease-out;
+}
+
+.mota-hud__skill-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+  color: #6f7f8c;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.mota-hud__skill-state b {
+  color: #83919c;
+  font-weight: 500;
+}
+
+.mota-hud__skill-state.is-active b {
+  color: var(--gold-bright);
+  text-shadow: 0 0 8px rgba(243, 200, 91, 0.45);
 }
 
 .mota-hud__stats {

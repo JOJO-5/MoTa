@@ -43,6 +43,8 @@ describe('Hud', () => {
     expect((host.querySelector('.mota-hud__hp-fill') as HTMLElement | null)?.style.width).toBe(
       '75%'
     )
+    expect(host.querySelector('.mota-hud__mana-track')).not.toBeNull()
+    expect(host.querySelector('.mota-hud__skill-state')?.textContent).toContain('未开启')
     expect(host.querySelector('.mota-hud__equipment')?.textContent).toContain('铁剑')
     expect(host.querySelector('.mota-hud__equipment')?.textContent).not.toContain('sword1')
     expect(host.querySelector('.mota-hud__items')?.textContent).toContain('心镜')

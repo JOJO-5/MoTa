@@ -32,7 +32,12 @@ export type ItemUseEffect =
   | { type: 'teleport'; position: Position }
   | {
       type: 'hero-patch'
-      hero: Partial<Pick<HeroSnapshot, 'hp' | 'atk' | 'def' | 'mdef' | 'equipment'>>
+      hero: Partial<
+        Pick<
+          HeroSnapshot,
+          'hp' | 'hpMax' | 'mana' | 'manaMax' | 'atk' | 'def' | 'mdef' | 'equipment'
+        >
+      >
       flags?: Record<string, unknown>
       removeItems?: string[]
     }
@@ -64,6 +69,7 @@ export const SUPPORTED_USABLE_ITEMS = new Set([
   'centerFly',
   'fly',
   'lifeWand',
+  'skill1',
   'I359',
   'I360',
   'redPotion',
@@ -173,6 +179,35 @@ export function resolveItemUse(itemId: string, context: ItemUseContext): ItemUse
       consume: false,
       message: '打开心镜',
       effect: { type: 'show-enemy-guide' },
+    }
+  }
+
+  if (itemId === 'skill1') {
+    const active = context.state.flags.skill === 1 || context.state.flags.skill === true
+    if (active) {
+      return {
+        ok: true,
+        consume: false,
+        message: '二倍斩已关闭',
+        effect: {
+          type: 'hero-patch',
+          hero: {},
+          flags: { skill: 0, skillName: '无' },
+        },
+      }
+    }
+    if (context.state.hero.mana < 5) {
+      return { ok: false, consume: false, message: '魔力不足，无法开启二倍斩' }
+    }
+    return {
+      ok: true,
+      consume: false,
+      message: '二倍斩已开启，消耗5点魔力',
+      effect: {
+        type: 'hero-patch',
+        hero: { mana: context.state.hero.mana - 5 },
+        flags: { skill: 1, skillName: '二倍斩' },
+      },
     }
   }
 

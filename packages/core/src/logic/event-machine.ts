@@ -110,7 +110,11 @@ function writeLegacyValue(name: string, value: unknown) {
   }
   if (name.startsWith('status:')) {
     const key = name.slice(7) as keyof HeroSnapshot
-    if (['hp', 'hpMax', 'atk', 'def', 'mdef', 'money', 'exp', 'level'].includes(key)) {
+    if (
+      ['hp', 'hpMax', 'mana', 'manaMax', 'atk', 'def', 'mdef', 'money', 'exp', 'level'].includes(
+        key
+      )
+    ) {
       dispatch({ type: 'SET_HERO', hero: { [key]: Number(value) || 0 } })
       return
     }

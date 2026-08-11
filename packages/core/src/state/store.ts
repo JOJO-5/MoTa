@@ -5,6 +5,8 @@ import type { GameState, GameAction, HeroSnapshot, Direction } from '../types.js
 const INITIAL_HERO: HeroSnapshot = {
   hp: 1000,
   hpMax: 1000,
+  mana: 10,
+  manaMax: 10,
   atk: 10,
   def: 10,
   mdef: 0,

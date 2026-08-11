@@ -35,11 +35,12 @@ export function resolveEnemyStats(hero: HeroSnapshot, enemy: Enemy): LegacyEnemy
   return resolved
 }
 
-export function calcHeroDamage(hero: HeroSnapshot, enemy: Enemy): number {
+export function calcHeroDamage(hero: HeroSnapshot, enemy: Enemy, doubleSlash = false): number {
   const resolved = resolveEnemyStats(hero, enemy)
   const damage = Math.max(0, hero.atk - resolved.def)
   const raw = Array.isArray(enemy.special) ? enemy.special : [enemy.special]
-  return raw.includes('magical' as never) ? damage * 2 : damage
+  const magicalDamage = raw.includes('magical' as never) ? damage * 2 : damage
+  return doubleSlash ? magicalDamage * 2 : magicalDamage
 }
 
 export function calcEnemyDamage(hero: HeroSnapshot, enemy: Enemy): number {
