@@ -342,4 +342,67 @@ describe('eventMachine', () => {
     expect(State.hero.money).toBe(10)
     expect(State.hero.atk).toBe(13)
   })
+
+  it('labels a legacy shop and lets the player leave without purchasing', () => {
+    dispatch({ type: 'SET_HERO', hero: { money: 30, atk: 10 } })
+    ;(globalThis as Record<string, unknown>).__towerData = {
+      shops: [
+        {
+          id: 'shop-exit',
+          text: '选择要购买的能力：',
+          choices: [
+            {
+              text: '攻击力3点（20金币）',
+              need: 'status:money>=20',
+              action: [{ type: 'setValue', name: 'status:atk', operator: '+=', value: '3' }],
+            },
+          ],
+        },
+      ],
+    }
+
+    eventMachine.start([{ type: 'openShop', id: 'shop-exit' }] as Event[], {
+      floorId: 'MT0',
+      x: 6,
+      y: 6,
+      eventIndex: 0,
+      eventCount: 1,
+    })
+
+    expect(State.ui.modal).toContain('【商店】')
+    expect(State.ui.modal).toContain('当前金币：30')
+    expect(State.ui.modal).toContain('离开商店（不购买）')
+
+    eventMachine.moveChoice('down')
+    eventMachine.resume()
+
+    expect(State.hero.money).toBe(30)
+    expect(State.hero.atk).toBe(10)
+    expect(State.ui.modal).toBeNull()
+  })
+
+  it('keeps an exit option when every shop item is unaffordable', () => {
+    dispatch({ type: 'SET_HERO', hero: { money: 0 } })
+    ;(globalThis as Record<string, unknown>).__towerData = {
+      shops: [
+        {
+          id: 'shop-empty',
+          text: '资源不足时也可以离开：',
+          choices: [{ text: '攻击力3点（20金币）', need: 'status:money>=20', action: [] }],
+        },
+      ],
+    }
+
+    eventMachine.start([{ type: 'openShop', id: 'shop-empty' }] as Event[], {
+      floorId: 'MT0',
+      x: 6,
+      y: 6,
+      eventIndex: 0,
+      eventCount: 1,
+    })
+
+    expect(State.ui.modal).toContain('暂无可购买项目（资源不足）')
+    eventMachine.resume()
+    expect(State.ui.modal).toBeNull()
+  })
 })
