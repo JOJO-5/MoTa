@@ -8,6 +8,9 @@ describe('modern gameplay skin mapping', () => {
     '20': { cls: 'animates', id: 'yellowDoor' },
     '21': { cls: 'animates', id: 'blueDoor' },
     '22': { cls: 'animates', id: 'steelDoor' },
+    '23': { cls: 'animates', id: 'A459' },
+    '24': { cls: 'animates', id: 'A460' },
+    '25': { cls: 'terrains', id: 'blueShopLeft' },
     '100': { cls: 'items', id: 'yellowKey' },
     '101': { cls: 'items', id: 'redPotion' },
     '200': { cls: 'enemys', id: 'bat' },
@@ -22,6 +25,9 @@ describe('modern gameplay skin mapping', () => {
     expect(resolveModernTileKind(20, maps)).toEqual({ kind: 'door', variant: 'yellow' })
     expect(resolveModernTileKind(21, maps)).toEqual({ kind: 'door', variant: 'blue' })
     expect(resolveModernTileKind(22, maps)).toEqual({ kind: 'door', variant: 'steel' })
+    expect(resolveModernTileKind(23, maps)).toEqual({ kind: 'shop', variant: 'vending' })
+    expect(resolveModernTileKind(24, maps)).toEqual({ kind: 'shop', variant: 'trade' })
+    expect(resolveModernTileKind(25, maps)).toEqual({ kind: 'shop', variant: 'counter' })
     expect(resolveModernTileKind(100, maps)).toEqual({ kind: 'item', variant: 'yellow-key' })
     expect(resolveModernTileKind(101, maps)).toEqual({ kind: 'item', variant: 'potion' })
     expect(resolveModernTileKind(200, maps)).toEqual({ kind: 'enemy', variant: 'bat' })

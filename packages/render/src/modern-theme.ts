@@ -21,6 +21,7 @@ export type ModernTileKind =
     }
   | { kind: 'enemy'; variant: string }
   | { kind: 'npc'; variant: 'sage' | 'trader' | 'fairy' | 'royal' | 'npc' }
+  | { kind: 'shop'; variant: 'vending' | 'trade' | 'counter' }
   | { kind: 'unknown'; variant: 'rune' }
 
 type MapsData = Record<string, { cls: string; id: string; canPass?: boolean }>
@@ -51,7 +52,17 @@ export function resolveModernTileKind(tileId: number, maps: MapsData): ModernTil
   if (entry.cls === 'terrains') {
     if (entry.id === 'upFloor') return { kind: 'stair', variant: 'up' }
     if (entry.id === 'downFloor') return { kind: 'stair', variant: 'down' }
+    if (entry.id === 'blueShopLeft' || entry.id === 'blueShopRight') {
+      return { kind: 'shop', variant: 'counter' }
+    }
+    if (entry.id === 'pinkShopLeft' || entry.id === 'pinkShopRight') {
+      return { kind: 'shop', variant: 'counter' }
+    }
     return { kind: 'ground', variant: 'stone' }
+  }
+  if (entry.cls === 'animates') {
+    if (entry.id === 'A460' || entry.id === 'A461') return { kind: 'shop', variant: 'trade' }
+    if (entry.id === 'A365' || entry.id === 'A459') return { kind: 'shop', variant: 'vending' }
   }
   if (entry.cls === 'animates' && DOOR_VARIANTS[entry.id]) return DOOR_VARIANTS[entry.id]
   if (entry.cls === 'items') {
@@ -289,6 +300,28 @@ export function drawModernTile(
     drawPixelRect(graphics, px + 12, py + 8, 3, 3, 0xf8fafc)
     drawPixelRect(graphics, px + 18, py + 8, 3, 3, 0xf8fafc)
     drawRune(graphics, px, py, kind.variant === 'sage' ? 0xf5c84b : 0x67e8f9)
+    return graphics
+  }
+
+  if (kind.kind === 'shop') {
+    const accent = kind.variant === 'trade' ? 0xd889ff : 0xf3c85b
+    const trim = kind.variant === 'trade' ? 0x7546a4 : 0xa65d23
+    graphics.fillStyle(0x0a1522, 0.96)
+    graphics.fillRoundedRect(px + 2, py + 3, TILE_SIZE - 4, TILE_SIZE - 5, 4)
+    graphics.lineStyle(2, accent, 0.95)
+    graphics.strokeRoundedRect(px + 3, py + 4, TILE_SIZE - 6, TILE_SIZE - 7, 3)
+    graphics.fillStyle(trim, 0.95)
+    graphics.fillRect(px + 5, py + 7, TILE_SIZE - 10, 5)
+    graphics.fillStyle(accent, 0.9)
+    for (const x of [7, 13, 19]) graphics.fillRect(px + x, py + 7, 3, 5)
+    graphics.fillStyle(0x183448, 1)
+    graphics.fillRect(px + 7, py + 15, TILE_SIZE - 14, 10)
+    graphics.lineStyle(1, 0x8eb7bd, 0.8)
+    graphics.strokeRect(px + 7, py + 15, TILE_SIZE - 14, 10)
+    graphics.fillStyle(accent, 0.95)
+    graphics.fillCircle(px + 16, py + 20, 3)
+    graphics.fillStyle(0x071018, 0.9)
+    graphics.fillRect(px + 15, py + 18, 2, 5)
     return graphics
   }
 

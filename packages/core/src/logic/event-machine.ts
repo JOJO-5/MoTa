@@ -37,7 +37,7 @@ export type LegacyEventContainer = {
 }
 
 type PendingChoice = {
-  choices: Array<{ text: string; action: Event[] }>
+  choices: Array<{ text: string; action: Event[]; cancel?: boolean }>
   index: number
 }
 
@@ -233,7 +233,7 @@ function moveLegacyBlock(raw: LegacyEvent, context: EventContext) {
 
 function formatChoices(text: string, choices: PendingChoice['choices'], index: number) {
   const title = text ? `${text}\n\n` : ''
-  return `${title}${choices.map((choice, i) => `${i === index ? '▶' : ' '} ${i + 1}. ${choice.text}`).join('\n')}`
+  return `${title}${choices.map((choice, i) => `${i === index ? '▶' : ' '} ${choice.cancel ? '0' : i + 1}. ${choice.text}`).join('\n')}`
 }
 
 type LegacyShop = {
@@ -350,6 +350,7 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
               .map((choice) => ({
                 text: String((choice as Record<string, unknown>).text ?? ''),
                 action: (choice as Record<string, unknown>).action as Event[],
+                cancel: (choice as Record<string, unknown>).cancel === true,
               }))
           : []
         if (choices.length === 0) break
@@ -364,6 +365,7 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
             Math.max(0, Math.min(pendingChoice.choices.length - 1, Number(selectedIndex) || 0))
           ]
         pendingChoice = null
+        if (choice?.cancel) return
         if (choice) yield* processEvents(choice.action, context)
         break
       }
@@ -450,21 +452,20 @@ function* processEvents(events: Event[], context: EventContext): Generator<unkno
           dispatch({ type: 'SET_UI', ui: { floorMsg: `商店 ${String(raw.id ?? '')} 尚未配置` } })
           break
         }
-        const choices = (shop.choices ?? [])
+        const purchaseChoices = (shop.choices ?? [])
           .filter((choice) => !choice.need || Boolean(evaluate(choice.need)))
           .map((choice) => ({
             text: renderLegacyText(choice.text),
             action: Array.isArray(choice.action) ? choice.action : [],
           }))
-        if (choices.length === 0) {
-          dispatch({ type: 'SET_UI', ui: { floorMsg: '当前资源不足，无法购买' } })
-          break
-        }
+        const choices = purchaseChoices.length
+          ? [...purchaseChoices, { text: '离开商店（不购买）', action: [], cancel: true }]
+          : [{ text: '暂无可购买项目（资源不足）', action: [], cancel: true }]
         yield* processEvents(
           [
             {
               type: 'choices',
-              text: renderLegacyText(shop.text),
+              text: `【商店】\n${renderLegacyText(shop.text)}\n当前金币：${State.hero.money}`,
               choices,
             } as Event,
           ],
